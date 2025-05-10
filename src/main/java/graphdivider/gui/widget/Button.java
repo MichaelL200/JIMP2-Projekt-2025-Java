@@ -5,12 +5,17 @@ import javax.swing.border.EmptyBorder; // for paddling
 import javax.swing.plaf.basic.BasicHTML; // for HTML content
 import javax.swing.text.View; // for preferred size
 import java.awt.*; // fonts, colors, layout
+import java.awt.event.ComponentAdapter; // for dynamic font size
+import java.awt.event.ComponentEvent;  //
 
 /**
  * A custom JButton with application-wide styling.
  */
 public class Button extends JButton
 {
+    // Define font size constants
+    private static final int MIN_FONT = 20, MAX_FONT = 28;
+
     // Define color constants
     private static final Color PRIMARY_COLOR = new Color(30, 140, 255); // blue
     private static final Color HOVER_COLOR = new Color(24, 116, 205); // slightly darker blue on hover
@@ -20,22 +25,32 @@ public class Button extends JButton
     {
         super("<html><div style='text-align: center;'>" + text + "</div></html>");
         initStyle();
+
+        /** Adjusts font size dynamically */
+        addComponentListener(new ComponentAdapter()
+        {
+            @Override
+            public void componentResized(ComponentEvent e)
+            {
+                int width = getWidth();
+                if (width <= 0) return;
+
+                int fontSize = Math.max(MIN_FONT, width / 10);
+                fontSize = Math.min(fontSize, MAX_FONT);
+                setFont(new Font("Segoe UI", Font.BOLD, fontSize));
+                setForeground(TEXT_COLOR);
+                revalidate();
+                repaint();
+            }
+        });
     }
 
     /** Applies the style. */
     private void initStyle()
     {
-        applyFontAndTextColor();
         applyBackgroundAndOpacity();
         applyBorderAndPadding();
         attachHoverEffect();
-    }
-
-     /** Sets font and text color. */
-    private void applyFontAndTextColor()
-    {
-        setFont(new Font("Segoe UI", Font.BOLD, 18));
-        setForeground(TEXT_COLOR);
     }
 
     /** Configures background color and opacity settings. */
