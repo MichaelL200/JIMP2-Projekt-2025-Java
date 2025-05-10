@@ -2,6 +2,8 @@ package graphdivider.gui.widget;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder; // for paddling
+import javax.swing.plaf.basic.BasicHTML; // for HTML content
+import javax.swing.text.View; // for preferred size
 import java.awt.*; // fonts, colors, layout
 
 /**
@@ -16,7 +18,7 @@ public class Button extends JButton
 
     public Button(String text)
     {
-        super(text);
+        super("<html><div style='text-align: center;'>" + text + "</div></html>");
         initStyle();
     }
 
@@ -68,5 +70,19 @@ public class Button extends JButton
                 setBackground(PRIMARY_COLOR);
             }
         });
+    }
+
+    /** Defines the preferred size based on the text length */
+    @Override
+    public Dimension getPreferredSize()
+    {
+        int maxWidth = 200; // Maksymalna szerokość przycisku
+        String htmlText = "<html><div style='width: " + maxWidth + "px; text-align: center;'>" + getText() + "</div></html>";
+        JLabel tempLabel = new JLabel(htmlText);
+        tempLabel.setFont(getFont());
+        tempLabel.setBorder(getBorder());
+        Dimension size = tempLabel.getPreferredSize();
+        Insets insets = getInsets();
+        return new Dimension(size.width + insets.left + insets.right, size.height + insets.top + insets.bottom);
     }
 }

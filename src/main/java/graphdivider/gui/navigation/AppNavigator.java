@@ -18,23 +18,37 @@ public class AppNavigator implements Navigator
     private final JPanel container;
 
     /**
-     * Constructs the AppNavigator:
-     * 1. Creates the main JFrame and configures it for full-screen display.
-     * 2. Initializes a CardLayout and wraps it in a JPanel.
-     * 3. Sets the container as the content pane of the frame.
-     */
+    * Constructs the AppNavigator:
+    * <ol>
+    *   <li>Creates the main application window (JFrame) and sets its default size.</li>
+    *   <li>Maximizes the window to occupy the full screen.</li>
+    *   <li>Initializes a CardLayout for managing multiple screens.</li>
+    *   <li>Sets the CardLayout container as the content pane of the frame.</li>
+    * </ol>
+    */
     public AppNavigator()
     {
-        // 1) Create and configure the application window
+        // 1) Create the main application window with a title
         frame = new JFrame("GraphDivider");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // Set the default size to 50% of the screen dimensions
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int width = screenSize.width / 2;
+        int height = screenSize.height / 2;
+        frame.setSize(width, height);
+
+        // Set the minimum size to prevent window from becoming too small
+        frame.setMinimumSize(new Dimension(600, 400));
+
+        // 2) Maximize the window to occupy the full screen
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        // 2) Set up CardLayout for screen navigation
+        // 3) Initialize CardLayout for screen navigation
         cardLayout = new CardLayout();
         container = new JPanel(cardLayout);
 
-        // 3) Place the container in the frame
+        // 4) Set the container as the content pane of the frame
         frame.setContentPane(container);
     }
 

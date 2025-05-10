@@ -36,8 +36,9 @@ public class StartScreen extends Screen
         // - weightx: share extra horizontal space equally
         GridBagConstraints c = new GridBagConstraints();
         c.insets = new Insets(20, 50, 20, 50);
-        c.fill   = GridBagConstraints.BOTH;
-        c.weightx = 1.0;
+        c.fill = GridBagConstraints.HORIZONTAL; // Allow horizontal resizing
+        c.weightx = 0.5; // Distribute extra horizontal space equally
+        c.anchor = GridBagConstraints.CENTER; // Center the component
 
         // Create and add the "Wczytaj graf" button in column 0
         button1 = new Button("Wczytaj graf");
