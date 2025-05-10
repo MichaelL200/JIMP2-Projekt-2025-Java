@@ -1,0 +1,35 @@
+plugins
+{
+    id 'java'
+}
+
+java
+{
+    toolchain
+    {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+
+tasks.jar
+{
+    manifest.attributes["Main-Class"] = "Main"
+}
+
+repositories
+{
+    mavenCentral()
+}
+
+dependencies
+{
+
+}
+
+tasks.register('runJar', JavaExec)
+{
+	mainClass = 'Main'
+	classpath = sourceSets.main.runtimeClasspath
+	group = 'run'
+}

@@ -1,24 +1,53 @@
-# Compiled class file
-*.class
+# Gradle
+.gradle/
+build/
 
-# Log file
-*.log
+# Keep the Gradle wrapper JAR
+!gradle/wrapper/gradle-wrapper.jar
 
-# BlueJ files
-*.ctxt
+# Ignore per-module build output, but allow source outputs if ever needed
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+# IntelliJ IDEA
+## IDE project files
+.idea/
+## Module configurations and libraries
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
+## Workspace settings
+*.iws
+*.iml
+*.ipr
+## IntelliJ output directory
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
 
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
+# Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+## Eclipse build output
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
