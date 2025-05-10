@@ -1,8 +1,14 @@
 package graphdivider.gui.navigation;
 
-// Navigation between Screens
+/**
+ * The Navigator interface defines a contract for switching between registered screens in the application.
+ */
 public interface Navigator
 {
-    // Switch to the screen by screen id
+    /**
+     * Switches the currently displayed screen to the one associated with the given screenId.
+     *
+     * @param screenId a unique identifier for the target screen
+     */
     void show(String screenId);
 }
