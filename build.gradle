@@ -14,7 +14,7 @@ java
 
 tasks.jar
 {
-    manifest.attributes["Main-Class"] = "Main"
+    manifest.attributes["Main-Class"] = "graphdivider.Main"
 }
 
 repositories
@@ -29,7 +29,7 @@ dependencies
 
 tasks.register('runJar', JavaExec)
 {
-	mainClass = 'Main'
+	mainClass = 'graphdivider.Main'
 	classpath = sourceSets.main.runtimeClasspath
 	group = 'run'
 }
