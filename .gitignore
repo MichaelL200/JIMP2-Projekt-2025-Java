@@ -51,3 +51,6 @@ bin/
 
 # macOS
 .DS_Store
+
+# C Documentation
+/docs/dokumentacja_C/
