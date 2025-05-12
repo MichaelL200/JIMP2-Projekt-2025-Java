@@ -4,7 +4,6 @@ import graphdivider.gui.navigation.Navigator;
 import graphdivider.gui.widget.Button;
 import graphdivider.gui.widget.Screen;
 
-import javax.swing.*;
 import java.awt.*;
 
 /**

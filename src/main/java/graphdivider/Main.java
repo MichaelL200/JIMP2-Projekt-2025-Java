@@ -21,8 +21,7 @@ public class Main
         // Create the Navigator that will manage screen transitions
         Navigator nav = new AppNavigator();
 
-        // Register the StartScreen under the key "START"
-        // So the Navigator knows which panel to display
+        // Register the StartScreen under the key "START", so the Navigator knows which panel to display
         ((AppNavigator) nav).register("START", new StartScreen(nav));
 
         // Show the initial screen; this will also make the window visible

@@ -13,10 +13,10 @@ import java.awt.event.ComponentEvent;  //
  */
 public class Button extends JButton
 {
-    // Define font size constants
+    /** Minimum and maximum font sizes for dynamic resizing */
     private static final int MIN_FONT = 20, MAX_FONT = 28;
 
-    // Define color constants
+    /** Default colors for button background and text */
     private static final Color PRIMARY_COLOR = new Color(30, 140, 255); // blue
     private static final Color HOVER_COLOR = new Color(24, 116, 205); // slightly darker blue on hover
     private static final Color TEXT_COLOR = Color.WHITE;
