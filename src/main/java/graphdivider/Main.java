@@ -1,30 +1,23 @@
 package graphdivider;
 
-import graphdivider.gui.navigation.AppNavigator;
-import graphdivider.gui.navigation.Navigator;
-import graphdivider.gui.screen.StartScreen;
+import graphdivider.view.Frame;
 
-/**
- * Entry point for the GraphDivider application.
- * <p>
- * Sets up navigation and displays the initial screen.
- */
+import javax.swing.SwingUtilities;
+
 public class Main
 {
-    /**
-     * The main method initializes navigation, registers screens and shows the starting view.
-     *
-     * @param args command-line arguments (not used)
-     */
     public static void main(String[] args)
     {
-        // Create the Navigator that will manage screen transitions
-        Navigator nav = new AppNavigator();
-
-        // Register the StartScreen under the key "START", so the Navigator knows which panel to display
-        ((AppNavigator) nav).register("START", new StartScreen(nav));
-
-        // Show the initial screen; this will also make the window visible
-        nav.show("START");
+        // Swing components must be created on the Event Dispatch Thread
+        SwingUtilities.invokeLater(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                // Instantiate and display our custom Frame
+                Frame frame = new Frame();
+                frame.setVisible(true);
+            }
+        });
     }
 }
