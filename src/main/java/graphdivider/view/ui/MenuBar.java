@@ -46,6 +46,10 @@ public class MenuBar extends JMenuBar
         saveMenu.add(saveBinaryItem);
         this.add(saveMenu);
 
+        // Disable Save File buttons until graph is partitioned
+        savePartitionedTextItem.setEnabled(false);
+        saveBinaryItem.setEnabled(false);
+
         // --- Theme menu
         JMenu themeMenu = new JMenu("Theme");
         autoThemeItem = new JMenuItem("Auto");

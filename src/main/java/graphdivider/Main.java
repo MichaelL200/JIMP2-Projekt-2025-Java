@@ -1,6 +1,7 @@
 package graphdivider;
 
 import graphdivider.view.Frame;
+import graphdivider.view.ui.Theme;
 
 import javax.swing.SwingUtilities;
 
@@ -17,6 +18,7 @@ public class Main
                 // Instantiate and display our custom Frame
                 Frame frame = new Frame();
                 frame.setVisible(true);
+                Theme.initTheme(0); // 0 = Auto, or 1 = Light, 2 = Dark
             }
         });
     }

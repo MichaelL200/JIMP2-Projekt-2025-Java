@@ -21,6 +21,12 @@ repositories
     mavenCentral()
 }
 
+dependencies
+{
+    // FlatLaf Swing Look & Feel (Light + Dark)
+    implementation "com.formdev:flatlaf:3.6"
+}
+
 tasks.register('runJar', JavaExec)
 {
 	mainClass = 'graphdivider.Main'
