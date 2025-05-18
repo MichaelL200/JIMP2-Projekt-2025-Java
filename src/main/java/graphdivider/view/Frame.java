@@ -2,6 +2,7 @@ package graphdivider.view;
 
 import graphdivider.view.ui.MenuBar;
 import graphdivider.view.ui.Theme;
+import graphdivider.view.ui.ToolPanel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -9,16 +10,18 @@ import java.awt.*;
 import java.io.IOException;
 
 /**
- * A custom JFrame that starts at 50% of screen size (and enforces it as minimum),
- * then immediately maximizes to full screen and updates its icon with the theme.
+ * A custom JFrame that starts at 50% of screen size (and enforces it as minimum), then immediately maximizes to full screen and updates its icon with the theme.
  */
-public class Frame
-    extends JFrame
+public class Frame extends JFrame
 {
     public Frame()
     {
         // Set the window title
         this.setTitle("Graph Divider");
+
+        // Initialize icon to match current theme
+        boolean initialDark = Theme.isDarkPreferred();
+        updateWindowIcon(initialDark);
 
         // Size logic
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -33,28 +36,36 @@ public class Frame
         MenuBar menuBar = new MenuBar();
         setJMenuBar(menuBar);
 
+        // Create the tool panel
+        ToolPanel toolPanel = new ToolPanel();
+
+        // Set layout and add components
+        getContentPane().setLayout(new BorderLayout());
+        getContentPane().add(toolPanel, BorderLayout.WEST);
+
+        // TODO: Add your GraphCanvas or main display component
+        // getContentPane().add(graphCanvas, BorderLayout.CENTER);
+
         // Theme operations
-        menuBar.addLightThemeListener(e ->
-        {
-            Theme.applyLightTheme();
-        });
-
-        menuBar.addDarkThemeListener(e ->
-        {
-            Theme.applyDarkTheme();
-        });
-
+        menuBar.addLightThemeListener(e -> Theme.applyLightTheme());
+        menuBar.addDarkThemeListener(e -> Theme.applyDarkTheme());
         menuBar.addAutoThemeListener(e ->
-    {
-        Theme.applyAutoTheme(() -> {
-            boolean dark = Theme.isDarkPreferred();
-            updateWindowIcon(dark);
+        {
+            Theme.applyAutoTheme(() ->
+            {
+                boolean dark = Theme.isDarkPreferred();
+                updateWindowIcon(dark);
+            });
         });
-    });
 
-        // Initialize icon to match current theme
-        boolean initialDark = Theme.isDarkPreferred();
-        updateWindowIcon(initialDark);
+        // Register change listener to react when user updates settings
+        toolPanel.addChangeListener(e ->
+        {
+            int parts  = toolPanel.getPartitions();
+            int margin = toolPanel.getMargin();
+            // TODO: pass these values to the controller
+            System.out.println("Partitions: " + parts + ", Margin: " + margin + "%");
+        });
     }
 
     /**
@@ -70,9 +81,7 @@ public class Frame
 
         try
         {
-            Image icon = ImageIO.read(
-                getClass().getResourceAsStream(resource)
-            );
+            Image icon = ImageIO.read(getClass().getResourceAsStream(resource));
             setIconImage(icon);
         }
         catch (IOException | IllegalArgumentException e)
