@@ -3,6 +3,7 @@ package graphdivider.view;
 import graphdivider.view.ui.MenuBar;
 import graphdivider.view.ui.Theme;
 import graphdivider.view.ui.ToolPanel;
+import graphdivider.view.ui.Graph;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -43,12 +44,19 @@ public class Frame extends JFrame
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(toolPanel, BorderLayout.WEST);
 
-        // TODO: Add your GraphCanvas or main display component
-        // getContentPane().add(graphCanvas, BorderLayout.CENTER);
+        // Create and add the Graph panel so its vertices are visible
+        Graph graphPanel = new Graph();
+        getContentPane().add(graphPanel, BorderLayout.CENTER);
 
         // Theme operations
-        menuBar.addLightThemeListener(e -> Theme.applyLightTheme());
-        menuBar.addDarkThemeListener(e -> Theme.applyDarkTheme());
+        menuBar.addLightThemeListener(e ->
+        {
+            Theme.applyLightTheme();
+        });
+        menuBar.addDarkThemeListener(e ->
+        {
+            Theme.applyDarkTheme();
+        });
         menuBar.addAutoThemeListener(e ->
         {
             Theme.applyAutoTheme(() ->
