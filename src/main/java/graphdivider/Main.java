@@ -15,10 +15,10 @@ public class Main
             @Override
             public void run()
             {
+                Theme.initTheme(0); // 0 = Auto, or 1 = Light, 2 = Dark
                 // Instantiate and display our custom Frame
                 Frame frame = new Frame();
                 frame.setVisible(true);
-                Theme.initTheme(0); // 0 = Auto, or 1 = Light, 2 = Dark
             }
         });
     }

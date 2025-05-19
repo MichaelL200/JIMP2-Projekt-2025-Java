@@ -24,6 +24,29 @@ public class Frame extends JFrame
         boolean initialDark = Theme.isDarkPreferred();
         updateWindowIcon(initialDark);
 
+        // Listen for Windows theme changes and update icon accordingly
+        Toolkit.getDefaultToolkit().addPropertyChangeListener("win.menu.dark", evt -> {
+            SwingUtilities.invokeLater(() -> updateWindowIcon(Theme.isDarkPreferred()));
+        });
+
+        // Listen for WSL theme changes (by polling, since property change events are not available)
+        String os = System.getProperty("os.name").toLowerCase();
+        boolean isWSL = os.contains("linux") && System.getenv("WSL_DISTRO_NAME") != null;
+        if (isWSL) {
+            // Poll for theme changes every 2 seconds and update icon if needed
+            Timer wslThemeTimer = new Timer(2000, null);
+            wslThemeTimer.addActionListener(e -> {
+                boolean dark = Theme.isDarkPreferred();
+                if ((getIconImage() == null && dark) ||
+                    (getIconImage() != null && ((dark && !getIconImage().toString().contains("dark")) ||
+                                               (!dark && !getIconImage().toString().contains("light"))))) {
+                    updateWindowIcon(dark);
+                }
+            });
+            wslThemeTimer.setRepeats(true);
+            wslThemeTimer.start();
+        }
+
         // Size logic
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int halfWidth  = screenSize.width  / 2;
@@ -31,7 +54,23 @@ public class Frame extends JFrame
         this.setMinimumSize(new Dimension(halfWidth, halfHeight));
         this.setSize(halfWidth, halfHeight);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+
+        if (isWSL) {
+            // On WSL, delay maximization to avoid white screen
+            SwingUtilities.invokeLater(() -> {
+                if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0) {
+                    new javax.swing.Timer(100, e -> {
+                        setExtendedState(JFrame.MAXIMIZED_BOTH);
+                        revalidate();
+                        repaint();
+                        ((javax.swing.Timer) e.getSource()).stop();
+                    }).start();
+                }
+            });
+        } else {
+            // On Windows/Linux/Mac, maximize immediately for faster startup
+            this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        }
 
         // Menu bar
         MenuBar menuBar = new MenuBar();
@@ -97,3 +136,4 @@ public class Frame extends JFrame
         }
     }
 }
+
