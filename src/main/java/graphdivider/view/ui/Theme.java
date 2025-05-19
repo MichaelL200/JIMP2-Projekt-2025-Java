@@ -9,29 +9,59 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.*;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
 public final class Theme
 {
     private Theme() {}
 
+    // --- Add theme change listeners support ---
+    private static final List<Runnable> themeListeners = new CopyOnWriteArrayList<>();
+
+    public static void addThemeChangeListener(Runnable listener) {
+        themeListeners.add(listener);
+    }
+
+    public static void removeThemeChangeListener(Runnable listener) {
+        themeListeners.remove(listener);
+    }
+
+    private static void notifyThemeChangeListeners() {
+        for (Runnable r : themeListeners) r.run();
+        updateAllEdgesColor(); // Notify all Edge components to update color
+    }
+
+    // --- New: Notify all Edge components to update their color ---
+    public static void updateAllEdgesColor() {
+        graphdivider.view.ui.graph.Edge.updateAllEdgesColor();
+    }
+
     public static void applyAutoTheme(Runnable onThemeChanged)
     {
         if (isDarkPreferred()) applyDarkTheme();
         else applyLightTheme();
         if (onThemeChanged != null) onThemeChanged.run();
+        notifyThemeChangeListeners(); // Notify listeners and update edges
+        refreshAllWindows(); // Ensure all windows/components are updated
     }
-    public static void applyAutoTheme() { applyAutoTheme(null); }
+    public static void applyAutoTheme()
+    {
+        applyAutoTheme(null);
+    }
 
     public static void applyLightTheme()
     {
         FlatLightLaf.setup();
+        notifyThemeChangeListeners(); // Notify listeners and update edges
         refreshAllWindows();
     }
 
     public static void applyDarkTheme()
     {
         FlatDarkLaf.setup();
+        notifyThemeChangeListeners(); // Notify listeners and update edges
         refreshAllWindows();
     }
 
@@ -67,8 +97,8 @@ public final class Theme
                     "/v", "AppsUseLightTheme"
                 });
                 process.waitFor();
-                try (BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(process.getInputStream()))) {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream())))
+                {
                     String line;
                     while ((line = reader.readLine()) != null) {
                         if (line.contains("AppsUseLightTheme")) {
@@ -78,7 +108,8 @@ public final class Theme
                         }
                     }
                 }
-            } catch (Exception ignored) {}
+            }
+            catch (Exception ignored) {}
             return "true".equalsIgnoreCase(System.getProperty("ide.win.menu.dark"));
         }
         return isGnomeDark() || isKdeDark();
@@ -179,7 +210,8 @@ public final class Theme
     {
         String themedPath = basePath.replace(".png", isDarkPreferred() ? "_dark.png" : "_light.png");
         java.net.URL url = Theme.class.getResource(themedPath);
-        if (url == null) {
+        if (url == null)
+        {
             System.err.println("Warning: Icon resource not found: " + themedPath);
             return null;
         }

@@ -19,6 +19,7 @@ import java.io.IOException;
 public class Frame extends JFrame implements PropertyChangeListener
 {
     private boolean lastDarkMode;
+    private Graph graphPanel; // Add reference
 
     public Frame()
     {
@@ -45,13 +46,21 @@ public class Frame extends JFrame implements PropertyChangeListener
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(toolPanel, BorderLayout.WEST);
 
-        Graph graphPanel = new Graph();
+        graphPanel = new Graph();
         getContentPane().add(graphPanel, BorderLayout.CENTER);
 
         // Observer pattern for theme switching
         menuBar.addLightThemeListener(e -> switchTheme(false));
         menuBar.addDarkThemeListener(e -> switchTheme(true));
-        menuBar.addAutoThemeListener(e -> Theme.applyAutoTheme(() -> updateWindowIcon(Theme.isDarkPreferred())));
+        menuBar.addAutoThemeListener(e -> {
+            Theme.applyAutoTheme(() -> {
+                updateWindowIcon(Theme.isDarkPreferred());
+                if (graphPanel != null) {
+                    SwingUtilities.updateComponentTreeUI(graphPanel);
+                    graphPanel.repaint();
+                }
+            });
+        });
 
         // Observer pattern for tool panel changes
         toolPanel.addChangeListener(e -> {
@@ -66,6 +75,10 @@ public class Frame extends JFrame implements PropertyChangeListener
         if (dark) Theme.applyDarkTheme();
         else Theme.applyLightTheme();
         updateWindowIcon(Theme.isDarkPreferred());
+        if (graphPanel != null) {
+            SwingUtilities.updateComponentTreeUI(graphPanel);
+            graphPanel.repaint(); // Ensures edge color updates
+        }
     }
 
     private boolean isRunningUnderWSL() {
@@ -142,3 +155,4 @@ public class Frame extends JFrame implements PropertyChangeListener
         }
     }
 }
+
