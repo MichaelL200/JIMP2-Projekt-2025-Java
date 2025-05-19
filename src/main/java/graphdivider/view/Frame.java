@@ -8,55 +8,81 @@ import graphdivider.view.ui.Graph;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
 /**
- * A custom JFrame that starts at 50% of screen size (and enforces it as minimum), then immediately maximizes to full screen and updates its icon with the theme.
+ * Main application window for the Graph Divider tool.
+ * Applies Observer and Command patterns for theme and UI logic.
  */
-public class Frame extends JFrame
+public class Frame extends JFrame implements PropertyChangeListener
 {
+    private boolean lastDarkMode;
+
     public Frame()
     {
-        // Set the window title
-        this.setTitle("Graph Divider");
+        setTitle("Graph Divider");
+        lastDarkMode = Theme.isDarkPreferred();
+        updateWindowIcon(lastDarkMode);
 
-        // Initialize icon to match current theme
-        boolean initialDark = Theme.isDarkPreferred();
-        updateWindowIcon(initialDark);
+        // Register as observer for theme changes
+        Toolkit.getDefaultToolkit().addPropertyChangeListener("win.menu.dark", this);
 
-        // Listen for Windows theme changes and update icon accordingly
-        Toolkit.getDefaultToolkit().addPropertyChangeListener("win.menu.dark", evt -> {
-            SwingUtilities.invokeLater(() -> updateWindowIcon(Theme.isDarkPreferred()));
+        // WSL theme polling
+        boolean isWSL = isRunningUnderWSL();
+        if (isWSL)
+            startWSLThemePolling();
+
+        setInitialWindowSize();
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        maximizeWindow(isWSL);
+
+        MenuBar menuBar = new MenuBar();
+        setJMenuBar(menuBar);
+
+        ToolPanel toolPanel = new ToolPanel();
+        getContentPane().setLayout(new BorderLayout());
+        getContentPane().add(toolPanel, BorderLayout.WEST);
+
+        Graph graphPanel = new Graph();
+        getContentPane().add(graphPanel, BorderLayout.CENTER);
+
+        // Observer pattern for theme switching
+        menuBar.addLightThemeListener(e -> switchTheme(false));
+        menuBar.addDarkThemeListener(e -> switchTheme(true));
+        menuBar.addAutoThemeListener(e -> Theme.applyAutoTheme(() -> updateWindowIcon(Theme.isDarkPreferred())));
+
+        // Observer pattern for tool panel changes
+        toolPanel.addChangeListener(e -> {
+            int parts = toolPanel.getPartitions();
+            int margin = toolPanel.getMargin();
+            // TODO: Pass these values to the controller for further processing
+            System.out.println("Partitions: " + parts + ", Margin: " + margin + "%");
         });
+    }
 
-        // Listen for WSL theme changes (by polling, since property change events are not available)
+    private void switchTheme(boolean dark) {
+        if (dark) Theme.applyDarkTheme();
+        else Theme.applyLightTheme();
+        updateWindowIcon(Theme.isDarkPreferred());
+    }
+
+    private boolean isRunningUnderWSL() {
         String os = System.getProperty("os.name").toLowerCase();
-        boolean isWSL = os.contains("linux") && System.getenv("WSL_DISTRO_NAME") != null;
-        if (isWSL) {
-            // Poll for theme changes every 2 seconds and update icon if needed
-            Timer wslThemeTimer = new Timer(2000, null);
-            wslThemeTimer.addActionListener(e -> {
-                boolean dark = Theme.isDarkPreferred();
-                if ((getIconImage() == null && dark) ||
-                    (getIconImage() != null && ((dark && !getIconImage().toString().contains("dark")) ||
-                                               (!dark && !getIconImage().toString().contains("light"))))) {
-                    updateWindowIcon(dark);
-                }
-            });
-            wslThemeTimer.setRepeats(true);
-            wslThemeTimer.start();
-        }
+        return os.contains("linux") && System.getenv("WSL_DISTRO_NAME") != null;
+    }
 
-        // Size logic
+    private void setInitialWindowSize() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        int halfWidth  = screenSize.width  / 2;
-        int halfHeight = (int)(screenSize.height / 1.5);
-        this.setMinimumSize(new Dimension(halfWidth, halfHeight));
-        this.setSize(halfWidth, halfHeight);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        int halfWidth  = screenSize.width / 2;
+        int halfHeight = (int) (screenSize.height / 1.5);
+        setMinimumSize(new Dimension(halfWidth, halfHeight));
+        setSize(halfWidth, halfHeight);
+    }
 
+    private void maximizeWindow(boolean isWSL) {
         if (isWSL) {
-            // On WSL, delay maximization to avoid white screen
             SwingUtilities.invokeLater(() -> {
                 if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0) {
                     new javax.swing.Timer(100, e -> {
@@ -68,63 +94,43 @@ public class Frame extends JFrame
                 }
             });
         } else {
-            // On Windows/Linux/Mac, maximize immediately for faster startup
-            this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            setExtendedState(JFrame.MAXIMIZED_BOTH);
         }
+    }
 
-        // Menu bar
-        MenuBar menuBar = new MenuBar();
-        setJMenuBar(menuBar);
-
-        // Create the tool panel
-        ToolPanel toolPanel = new ToolPanel();
-
-        // Set layout and add components
-        getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(toolPanel, BorderLayout.WEST);
-
-        // Create and add the Graph panel so its vertices are visible
-        Graph graphPanel = new Graph();
-        getContentPane().add(graphPanel, BorderLayout.CENTER);
-
-        // Theme operations
-        menuBar.addLightThemeListener(e ->
-        {
-            Theme.applyLightTheme();
-            updateWindowIcon(Theme.isDarkPreferred());
+    private void startWSLThemePolling() {
+        Timer wslThemeTimer = new Timer(2000, null);
+        wslThemeTimer.addActionListener(e -> {
+            boolean dark = Theme.isDarkPreferred();
+            if (dark != lastDarkMode) {
+                updateWindowIcon(dark);
+                lastDarkMode = dark;
+            }
         });
-        menuBar.addDarkThemeListener(e ->
-        {
-            Theme.applyDarkTheme();
-            updateWindowIcon(Theme.isDarkPreferred());
-        });
-        menuBar.addAutoThemeListener(e ->
-        {
-            Theme.applyAutoTheme(() ->
-            {
-                updateWindowIcon(Theme.isDarkPreferred());
-            });
-        });
-
-        // Register change listener to react when user updates settings
-        toolPanel.addChangeListener(e ->
-        {
-            int parts  = toolPanel.getPartitions();
-            int margin = toolPanel.getMargin();
-            // TODO: pass these values to the controller
-            System.out.println("Partitions: " + parts + ", Margin: " + margin + "%");
-        });
+        wslThemeTimer.setRepeats(true);
+        wslThemeTimer.start();
     }
 
     /**
-     * Sets the window icon depending on darkMode.
+     * Observer update for theme changes.
+     */
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        boolean dark = Theme.isDarkPreferred();
+        if (dark != lastDarkMode) {
+            updateWindowIcon(dark);
+            lastDarkMode = dark;
+        }
+    }
+
+    /**
+     * Updates the window icon depending on the theme.
      *
-     * @param darkMode true ⇒ use icon_dark.png; false ⇒ use icon_light.png
+     * @param darkMode true to use icon_dark.png, false to use icon_light.png
      */
     public void updateWindowIcon(boolean darkMode)
     {
         String resource = darkMode ? "/icon_dark.png" : "/icon_light.png";
-
         try
         {
             Image icon = ImageIO.read(getClass().getResourceAsStream(resource));
@@ -132,8 +138,7 @@ public class Frame extends JFrame
         }
         catch (IOException | IllegalArgumentException e)
         {
-            System.err.println("Warning: Unable to load window icon '"  + resource + "': " + e.getMessage());
+            System.err.println("Warning: Unable to load window icon '" + resource + "': " + e.getMessage());
         }
     }
 }
-

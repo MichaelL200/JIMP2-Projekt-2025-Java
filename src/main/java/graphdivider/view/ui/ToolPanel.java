@@ -6,6 +6,7 @@ import java.awt.*;
 
 /**
  * Panel with controls to define number of partitions and percentage margin.
+ * Uses the Builder pattern for construction.
  */
 public class ToolPanel extends JPanel
 {
@@ -14,56 +15,64 @@ public class ToolPanel extends JPanel
 
     public ToolPanel()
     {
-        setLayout(new GridBagLayout());
+        ToolPanelBuilder builder = new ToolPanelBuilder();
+        builder.addLabel("Number of parts:", 0, 0)
+               .addSpinner(partitionsSpinner = new JSpinner(new SpinnerNumberModel(2, 2, 100, 1)), 1, 0)
+               .addLabel("Margin %:", 0, 1)
+               .addSpinner(marginSpinner = new JSpinner(new SpinnerNumberModel(10, 10, 999, 1)), 1, 1);
+        builder.applyTo(this);
         setBorder(BorderFactory.createTitledBorder("Partition Settings"));
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-        gbc.anchor = GridBagConstraints.WEST;
-
-        // Number of partitions label
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        add(new JLabel("Number of parts:"), gbc);
-
-        // Number of partitions spinner
-        partitionsSpinner = new JSpinner(new SpinnerNumberModel(2, 2, 100, 1));
-        gbc.gridx = 1;
-        add(partitionsSpinner, gbc);
-
-        // Margin percentage label
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        add(new JLabel("Margin %:"), gbc);
-
-        // Margin percentage spinner
-        marginSpinner = new JSpinner(new SpinnerNumberModel(10, 10, 999, 1));
-        gbc.gridx = 1;
-        add(marginSpinner, gbc);
     }
 
-    /**
-     * Register listener for changes in both controls
-     */
     public void addChangeListener(ChangeListener listener)
     {
         partitionsSpinner.addChangeListener(listener);
         marginSpinner.addChangeListener(listener);
     }
 
-    /**
-     * Get current number of partitions
-     */
     public int getPartitions()
     {
         return (Integer) partitionsSpinner.getValue();
     }
 
-    /**
-     * Get current margin percentage
-     */
     public int getMargin()
     {
         return (Integer) marginSpinner.getValue();
+    }
+
+    /**
+     * Builder for ToolPanel layout.
+     */
+    private static class ToolPanelBuilder {
+        private final GridBagLayout layout = new GridBagLayout();
+        private final GridBagConstraints gbc = new GridBagConstraints();
+        private final JPanel panel = new JPanel();
+
+        ToolPanelBuilder() {
+            panel.setLayout(layout);
+            gbc.insets = new Insets(5, 5, 5, 5);
+            gbc.anchor = GridBagConstraints.WEST;
+        }
+
+        ToolPanelBuilder addLabel(String text, int x, int y) {
+            gbc.gridx = x;
+            gbc.gridy = y;
+            panel.add(new JLabel(text), gbc);
+            return this;
+        }
+
+        ToolPanelBuilder addSpinner(JSpinner spinner, int x, int y) {
+            gbc.gridx = x;
+            gbc.gridy = y;
+            panel.add(spinner, gbc);
+            return this;
+        }
+
+        void applyTo(JPanel target) {
+            target.setLayout(layout);
+            for (Component c : panel.getComponents()) {
+                target.add(c, ((GridBagLayout) panel.getLayout()).getConstraints(c));
+            }
+        }
     }
 }
