@@ -73,8 +73,12 @@ public final class Theme
     {
         // Listen for Windows dark-mode toggle
         Toolkit.getDefaultToolkit().addPropertyChangeListener(
-            "win.menu.dark",
-            evt -> applyAutoTheme()
+                "win.menu.dark",
+                evt ->
+                {
+                    applyAutoTheme();
+                    // Removed problematic updateWindowIcon call here
+                }
         );
 
         // Listen for macOS appearance change
@@ -109,6 +113,33 @@ public final class Theme
         }
         if (os.contains("win"))
         {
+            // Try to read Windows registry for AppsUseLightTheme
+            try {
+                Process process = Runtime.getRuntime().exec(
+                    new String[] {
+                        "reg", "query",
+                        "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+                        "/v", "AppsUseLightTheme"
+                    }
+                );
+                process.waitFor();
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(process.getInputStream()))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        if (line.contains("AppsUseLightTheme")) {
+                            // Example:    AppsUseLightTheme    REG_DWORD    0x0
+                            String[] parts = line.trim().split("\\s+");
+                            String valueHex = parts[parts.length - 1];
+                            int value = Integer.decode(valueHex);
+                            return value == 0; // 0 = dark, 1 = light
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // fallback below
+            }
+            // fallback: try system property (for IDEs)
             String theme = System.getProperty("ide.win.menu.dark");
             return "true".equalsIgnoreCase(theme);
         }

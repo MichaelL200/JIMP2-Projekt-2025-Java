@@ -52,17 +52,18 @@ public class Frame extends JFrame
         menuBar.addLightThemeListener(e ->
         {
             Theme.applyLightTheme();
+            updateWindowIcon(Theme.isDarkPreferred());
         });
         menuBar.addDarkThemeListener(e ->
         {
             Theme.applyDarkTheme();
+            updateWindowIcon(Theme.isDarkPreferred());
         });
         menuBar.addAutoThemeListener(e ->
         {
             Theme.applyAutoTheme(() ->
             {
-                boolean dark = Theme.isDarkPreferred();
-                updateWindowIcon(dark);
+                updateWindowIcon(Theme.isDarkPreferred());
             });
         });
 
@@ -81,11 +82,9 @@ public class Frame extends JFrame
      *
      * @param darkMode true ⇒ use icon_dark.png; false ⇒ use icon_light.png
      */
-    private void updateWindowIcon(boolean darkMode)
+    public void updateWindowIcon(boolean darkMode)
     {
-        String resource = darkMode
-            ? "/icon_dark.png"
-            : "/icon_light.png";
+        String resource = darkMode ? "/icon_dark.png" : "/icon_light.png";
 
         try
         {
@@ -94,8 +93,7 @@ public class Frame extends JFrame
         }
         catch (IOException | IllegalArgumentException e)
         {
-            System.err.println("Warning: Unable to load window icon '"
-                + resource + "': " + e.getMessage());
+            System.err.println("Warning: Unable to load window icon '"  + resource + "': " + e.getMessage());
         }
     }
 }
