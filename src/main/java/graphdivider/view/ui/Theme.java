@@ -17,20 +17,25 @@ public final class Theme
 {
     private Theme() {}
 
+    public enum ThemeMode { AUTO, LIGHT, DARK }
+    private static ThemeMode currentTheme = ThemeMode.AUTO;
+
     // --- Add theme change listeners support ---
     private static final List<Runnable> themeListeners = new CopyOnWriteArrayList<>();
 
-    public static void addThemeChangeListener(Runnable listener) {
+    public static void addThemeChangeListener(Runnable listener)
+    {
         themeListeners.add(listener);
     }
 
-    public static void removeThemeChangeListener(Runnable listener) {
+    public static void removeThemeChangeListener(Runnable listener)
+    {
         themeListeners.remove(listener);
     }
 
-    private static void notifyThemeChangeListeners() {
+    private static void notifyThemeChangeListeners()
+    {
         for (Runnable r : themeListeners) r.run();
-        updateAllEdgesColor(); // Notify all Edge components to update color
     }
 
     // --- New: Notify all Edge components to update their color ---
@@ -40,11 +45,10 @@ public final class Theme
 
     public static void applyAutoTheme(Runnable onThemeChanged)
     {
-        if (isDarkPreferred()) applyDarkTheme();
+        currentTheme = ThemeMode.AUTO;
+        if (isSystemDark()) applyDarkTheme();
         else applyLightTheme();
         if (onThemeChanged != null) onThemeChanged.run();
-        notifyThemeChangeListeners(); // Notify listeners and update edges
-        refreshAllWindows(); // Ensure all windows/components are updated
     }
     public static void applyAutoTheme()
     {
@@ -53,16 +57,18 @@ public final class Theme
 
     public static void applyLightTheme()
     {
+        currentTheme = ThemeMode.LIGHT;
         FlatLightLaf.setup();
-        notifyThemeChangeListeners(); // Notify listeners and update edges
         refreshAllWindows();
+        notifyThemeChangeListeners();
     }
 
     public static void applyDarkTheme()
     {
+        currentTheme = ThemeMode.DARK;
         FlatDarkLaf.setup();
-        notifyThemeChangeListeners(); // Notify listeners and update edges
         refreshAllWindows();
+        notifyThemeChangeListeners();
     }
 
     public static void initTheme(int mode)
@@ -81,7 +87,8 @@ public final class Theme
         }
     }
 
-    public static boolean isDarkPreferred()
+    // Nowa metoda pomocnicza do sprawdzania systemowego motywu
+    private static boolean isSystemDark()
     {
         String os = System.getProperty("os.name").toLowerCase();
         boolean isWSL = os.contains("linux") && System.getenv("WSL_DISTRO_NAME") != null;
@@ -89,9 +96,11 @@ public final class Theme
             return System.getProperty("apple.awt.application.appearance", "").contains("dark");
         if (os.contains("win") || isWSL)
         {
-            try {
+            try
+            {
                 String regExe = isWSL ? "/mnt/c/Windows/System32/reg.exe" : "reg";
-                Process process = Runtime.getRuntime().exec(new String[] {
+                Process process = Runtime.getRuntime().exec(new String[]
+                {
                     regExe, "query",
                     "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
                     "/v", "AppsUseLightTheme"
@@ -100,7 +109,8 @@ public final class Theme
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream())))
                 {
                     String line;
-                    while ((line = reader.readLine()) != null) {
+                    while ((line = reader.readLine()) != null)
+                    {
                         if (line.contains("AppsUseLightTheme")) {
                             String[] parts = line.trim().split("\\s+");
                             int value = Integer.decode(parts[parts.length - 1]);
@@ -113,6 +123,15 @@ public final class Theme
             return "true".equalsIgnoreCase(System.getProperty("ide.win.menu.dark"));
         }
         return isGnomeDark() || isKdeDark();
+    }
+
+    public static boolean isDarkPreferred()
+    {
+        // Najpierw sprawdzamy wybrany motyw
+        if (currentTheme == ThemeMode.DARK) return true;
+        if (currentTheme == ThemeMode.LIGHT) return false;
+        // AUTO: sprawdzamy system
+        return isSystemDark();
     }
 
     private static void refreshAllWindows()
@@ -132,15 +151,17 @@ public final class Theme
     {
         try
         {
-            Process p = new ProcessBuilder(
+            Process p = new ProcessBuilder
+            (
                 "gsettings", "get",
                 "org.gnome.desktop.interface",
                 "color-scheme"
             ).start();
             p.waitFor();
-            try (BufferedReader r = new BufferedReader(
+            try (BufferedReader r = new BufferedReader
+            (
                      new InputStreamReader(p.getInputStream())
-                 ))
+            ))
             {
                 String line = r.readLine();
                 return line != null && line.contains("prefer-dark");
@@ -190,7 +211,9 @@ public final class Theme
                         for (WatchEvent<?> ev : key.pollEvents())
                         {
                             if ("kdeglobals".equals(ev.context().toString()))
+                            {
                                 applyAutoTheme();
+                            }
                         }
                         key.reset();
                     }

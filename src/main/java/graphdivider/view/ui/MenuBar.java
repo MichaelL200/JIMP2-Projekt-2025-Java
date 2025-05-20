@@ -7,11 +7,10 @@ import java.awt.event.ActionListener;
  * Custom menu bar for the application.
  * Provides file loading/saving and theme selection options.
  */
-public class MenuBar extends JMenuBar
+public final class MenuBar extends JMenuBar
 {
     // Menu items for loading different types of graphs
     private final JMenuItem loadTextGraphItem = new JMenuItem("Graph (Text)…");
-    private final JMenuItem loadBinaryGraphItem = new JMenuItem("Graph (Binary)…");
     private final JMenuItem loadPartitionedTextItem = new JMenuItem("Partitioned Graph (Text)…");
     private final JMenuItem loadPartitionedBinaryItem = new JMenuItem("Partitioned Graph (Binary)…");
 
@@ -32,7 +31,6 @@ public class MenuBar extends JMenuBar
         // Create and populate the "Load File" menu
         JMenu loadMenu = new JMenu("Load File");
         loadMenu.add(loadTextGraphItem);
-        loadMenu.add(loadBinaryGraphItem);
         loadMenu.addSeparator();
         loadMenu.add(loadPartitionedTextItem);
         loadMenu.add(loadPartitionedBinaryItem);
@@ -65,15 +63,6 @@ public class MenuBar extends JMenuBar
     public void addLoadTextGraphListener(ActionListener l)
     {
         loadTextGraphItem.addActionListener(l);
-    }
-
-    /**
-     * Registers a listener for loading a binary graph.
-     * @param l the ActionListener to add
-     */
-    public void addLoadBinaryGraphListener(ActionListener l)
-    {
-        loadBinaryGraphItem.addActionListener(l);
     }
 
     /**

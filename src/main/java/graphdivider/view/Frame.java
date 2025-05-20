@@ -14,12 +14,12 @@ import java.io.IOException;
 
 /**
  * Main application window for the Graph Divider tool.
- * Applies Observer and Command patterns for theme and UI logic.
+ * Applies the Observer and Command patterns for theme and UI logic.
  */
 public class Frame extends JFrame implements PropertyChangeListener
 {
     private boolean lastDarkMode;
-    private Graph graphPanel; // Add reference
+    private final Graph graphPanel;
 
     public Frame()
     {
@@ -27,13 +27,15 @@ public class Frame extends JFrame implements PropertyChangeListener
         lastDarkMode = Theme.isDarkPreferred();
         updateWindowIcon(lastDarkMode);
 
-        // Register as observer for theme changes
+        // Register as observer for theme changes (Windows 11+)
         Toolkit.getDefaultToolkit().addPropertyChangeListener("win.menu.dark", this);
 
-        // WSL theme polling
+        // Detect if running under WSL and start theme polling if so
         boolean isWSL = isRunningUnderWSL();
         if (isWSL)
+        {
             startWSLThemePolling();
+        }
 
         setInitialWindowSize();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -49,44 +51,67 @@ public class Frame extends JFrame implements PropertyChangeListener
         graphPanel = new Graph();
         getContentPane().add(graphPanel, BorderLayout.CENTER);
 
-        // Observer pattern for theme switching
+        // Theme switching via menu bar listeners
         menuBar.addLightThemeListener(e -> switchTheme(false));
         menuBar.addDarkThemeListener(e -> switchTheme(true));
-        menuBar.addAutoThemeListener(e -> {
-            Theme.applyAutoTheme(() -> {
-                updateWindowIcon(Theme.isDarkPreferred());
-                if (graphPanel != null) {
-                    SwingUtilities.updateComponentTreeUI(graphPanel);
-                    graphPanel.repaint();
-                }
-            });
-        });
+        menuBar.addAutoThemeListener(e -> Theme.applyAutoTheme(() ->
+        {
+            updateWindowIcon(Theme.isDarkPreferred());
+            SwingUtilities.updateComponentTreeUI(graphPanel);
+            graphPanel.repaint();
+        }));
 
-        // Observer pattern for tool panel changes
-        toolPanel.addChangeListener(e -> {
+        // Listen for changes in tool panel spinners
+        toolPanel.addChangeListener(e ->
+        {
             int parts = toolPanel.getPartitions();
             int margin = toolPanel.getMargin();
             // TODO: Pass these values to the controller for further processing
             System.out.println("Partitions: " + parts + ", Margin: " + margin + "%");
         });
+
+        // Listen for Divide Graph button press
+        toolPanel.addDivideButtonListener(e -> 
+        {
+            // TODO: Implement graph division logic here
+            System.out.println("Divide Graph button pressed.");
+        });
     }
 
-    private void switchTheme(boolean dark) {
-        if (dark) Theme.applyDarkTheme();
-        else Theme.applyLightTheme();
-        updateWindowIcon(Theme.isDarkPreferred());
-        if (graphPanel != null) {
-            SwingUtilities.updateComponentTreeUI(graphPanel);
-            graphPanel.repaint(); // Ensures edge color updates
+    /**
+     * Switches the application theme and updates the icon.
+     * @param dark true for dark theme, false for light theme
+     */
+    private void switchTheme(boolean dark)
+    {
+        if (dark)
+        {
+            Theme.applyDarkTheme();
         }
+        else
+        {
+            Theme.applyLightTheme();
+        }
+        updateWindowIcon(Theme.isDarkPreferred());
+        SwingUtilities.updateComponentTreeUI(graphPanel);
+        graphPanel.repaint(); // Ensures edge color updates
     }
 
-    private boolean isRunningUnderWSL() {
+    /**
+     * Checks if the application is running under Windows Subsystem for Linux.
+     * @return true if running under WSL, false otherwise
+     */
+    private boolean isRunningUnderWSL()
+    {
         String os = System.getProperty("os.name").toLowerCase();
         return os.contains("linux") && System.getenv("WSL_DISTRO_NAME") != null;
     }
 
-    private void setInitialWindowSize() {
+    /**
+     * Sets the initial window size to half the screen width and 2/3 height.
+     */
+    private void setInitialWindowSize()
+    {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int halfWidth  = screenSize.width / 2;
         int halfHeight = (int) (screenSize.height / 1.5);
@@ -94,11 +119,20 @@ public class Frame extends JFrame implements PropertyChangeListener
         setSize(halfWidth, halfHeight);
     }
 
-    private void maximizeWindow(boolean isWSL) {
-        if (isWSL) {
-            SwingUtilities.invokeLater(() -> {
-                if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0) {
-                    new javax.swing.Timer(100, e -> {
+    /**
+     * Maximizes the window, with a workaround for WSL.
+     * @param isWSL true if running under WSL
+     */
+    private void maximizeWindow(boolean isWSL)
+    {
+        if (isWSL)
+        {
+            SwingUtilities.invokeLater(() ->
+            {
+                if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0)
+                {
+                    new javax.swing.Timer(100, e ->
+                    {
                         setExtendedState(JFrame.MAXIMIZED_BOTH);
                         revalidate();
                         repaint();
@@ -106,16 +140,24 @@ public class Frame extends JFrame implements PropertyChangeListener
                     }).start();
                 }
             });
-        } else {
+        }
+        else
+        {
             setExtendedState(JFrame.MAXIMIZED_BOTH);
         }
     }
 
-    private void startWSLThemePolling() {
+    /**
+     * Starts polling for theme changes under WSL.
+     */
+    private void startWSLThemePolling()
+    {
         Timer wslThemeTimer = new Timer(2000, null);
-        wslThemeTimer.addActionListener(e -> {
+        wslThemeTimer.addActionListener(e ->
+        {
             boolean dark = Theme.isDarkPreferred();
-            if (dark != lastDarkMode) {
+            if (dark != lastDarkMode)
+            {
                 updateWindowIcon(dark);
                 lastDarkMode = dark;
             }
@@ -128,9 +170,11 @@ public class Frame extends JFrame implements PropertyChangeListener
      * Observer update for theme changes.
      */
     @Override
-    public void propertyChange(PropertyChangeEvent evt) {
+    public void propertyChange(PropertyChangeEvent evt)
+    {
         boolean dark = Theme.isDarkPreferred();
-        if (dark != lastDarkMode) {
+        if (dark != lastDarkMode)
+        {
             updateWindowIcon(dark);
             lastDarkMode = dark;
         }
@@ -146,7 +190,12 @@ public class Frame extends JFrame implements PropertyChangeListener
         String resource = darkMode ? "/icon_dark.png" : "/icon_light.png";
         try
         {
-            Image icon = ImageIO.read(getClass().getResourceAsStream(resource));
+            java.io.InputStream iconStream = getClass().getResourceAsStream(resource);
+            if (iconStream == null)
+            {
+                throw new IllegalArgumentException("Resource not found: " + resource);
+            }
+            Image icon = ImageIO.read(iconStream);
             setIconImage(icon);
         }
         catch (IOException | IllegalArgumentException e)
@@ -155,4 +204,3 @@ public class Frame extends JFrame implements PropertyChangeListener
         }
     }
 }
-

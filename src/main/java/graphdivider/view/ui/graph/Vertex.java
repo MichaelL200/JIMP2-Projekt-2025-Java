@@ -1,7 +1,5 @@
 package graphdivider.view.ui.graph;
 
-import graphdivider.view.ui.Theme;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -9,7 +7,7 @@ import java.awt.*;
  * Represents a single vertex (node) in a graph visualization.
  * Displays as a colored circle with an ID label centered inside.
  */
-public class Vertex extends JComponent
+public final class Vertex extends JComponent
 {
     /**
      * Default blue light color for vertices.
