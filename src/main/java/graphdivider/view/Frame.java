@@ -61,6 +61,54 @@ public class Frame extends JFrame implements PropertyChangeListener
             graphPanel.repaint();
         }));
 
+        // Add file chooser for loading text graphs
+        menuBar.addLoadTextGraphListener(e ->
+        {
+            JFileChooser fileChooser = new JFileChooser("src/main/resources/graphs/");
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            fileChooser.setAcceptAllFileFilterUsed(false);
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSR Graph files (*.csrrg)", "csrrg"));
+            int result = fileChooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION)
+            {
+                java.io.File selectedFile = fileChooser.getSelectedFile();
+                // TODO: Load and process the selected .csrrg file
+                System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+            }
+        });
+
+        // Add file chooser for loading text divided graphs
+        menuBar.addLoadPartitionedTextListener(e ->
+        {
+            JFileChooser fileChooser = new JFileChooser("src/main/resources/divided_graphs/");
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            fileChooser.setAcceptAllFileFilterUsed(false);
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSR (Partitioned) Graph files (*.csrrg)", "csrrg"));
+            int result = fileChooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION)
+            {
+                java.io.File selectedFile = fileChooser.getSelectedFile();
+                // TODO: Load and process the selected .csrrg file
+                System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+            }
+        });
+
+        // Add file chooser for loading binary divided graphs
+        menuBar.addLoadPartitionedBinaryListener(e ->
+        {
+            JFileChooser fileChooser = new JFileChooser("src/main/resources/divided_graphs/");
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            fileChooser.setAcceptAllFileFilterUsed(false);
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSR (Partitioned) Graph Binary files (*.bin)", "bin"));
+            int result = fileChooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION)
+            {
+                java.io.File selectedFile = fileChooser.getSelectedFile();
+                // TODO: Load and process the selected .csrrg file
+                System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+            }
+        });
+
         // Listen for changes in tool panel spinners
         toolPanel.addChangeListener(e ->
         {
