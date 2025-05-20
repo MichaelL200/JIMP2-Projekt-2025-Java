@@ -1,9 +1,12 @@
 package graphdivider.view;
 
+import graphdivider.model.CSRmatrix;
 import graphdivider.view.ui.MenuBar;
 import graphdivider.view.ui.Theme;
 import graphdivider.view.ui.ToolPanel;
 import graphdivider.view.ui.Graph;
+import graphdivider.model.GraphLoader;
+import graphdivider.model.GraphModel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -72,8 +75,17 @@ public class Frame extends JFrame implements PropertyChangeListener
             if (result == JFileChooser.APPROVE_OPTION)
             {
                 java.io.File selectedFile = fileChooser.getSelectedFile();
-                // TODO: Load and process the selected .csrrg file
-                System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+                try
+                {
+                    GraphModel model = GraphLoader.loadFromFile(selectedFile);
+                    CSRmatrix adjacencyMatrix = GraphLoader.toCSRmatrix(model);
+                    // TODO: Pass model to graphPanel for visualization
+                }
+                catch (IOException ex)
+                {
+                    JOptionPane.showMessageDialog(this, "Failed to load graph: " + ex.getMessage(),
+                            "Load Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
