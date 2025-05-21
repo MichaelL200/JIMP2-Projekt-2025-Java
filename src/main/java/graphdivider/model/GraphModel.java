@@ -30,6 +30,15 @@ public final class GraphModel
      */
     private final int[] adjacencyPointers;
 
+    /**
+     * Constructs a GraphModel with all required CSR arrays.
+     *
+     * @param maxVerticesPerRow Maximum number of vertices in any row
+     * @param rowPositions      Identifiers for each row
+     * @param rowStartIndices   Start indices in adjacencyList for each row
+     * @param adjacencyList     Flattened adjacency list for all vertices
+     * @param adjacencyPointers For each vertex, index in adjacencyList where its neighbors start
+     */
     GraphModel
     (
         int maxVerticesPerRow,
@@ -45,30 +54,36 @@ public final class GraphModel
         this.adjacencyPointers  = adjacencyPointers;
     }
 
-    // Getters
+    // --- Getters for all fields ---
 
+    /** @return Maximum number of vertices present in any row. */
     public int getMaxVerticesPerRow()
     {
         return maxVerticesPerRow;
     }
 
+    /** @return Identifiers for each row in the graph. */
     public int[] getRowPositions()
     {
         return rowPositions;
     }
 
+    /** @return For each row, the starting index in adjacencyList for its neighbors. */
     public int[] getRowStartIndices()
     {
         return rowStartIndices;
     }
 
+    /** @return Flattened list of all neighbor vertex indices for the graph. */
     public int[] getAdjacencyList()
     {
         return adjacencyList;
     }
 
+    /** @return For each vertex (ordered by row), the index in adjacencyList where its neighbor list begins. */
     public int[] getAdjacencyPointers()
     {
         return adjacencyPointers;
     }
 }
+

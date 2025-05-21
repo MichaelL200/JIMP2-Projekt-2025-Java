@@ -1,12 +1,10 @@
 package graphdivider.view;
 
-import graphdivider.model.CSRmatrix;
+import graphdivider.controller.GraphController;
+import graphdivider.view.ui.Graph;
 import graphdivider.view.ui.MenuBar;
 import graphdivider.view.ui.Theme;
 import graphdivider.view.ui.ToolPanel;
-import graphdivider.view.ui.Graph;
-import graphdivider.model.GraphLoader;
-import graphdivider.model.GraphModel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -17,23 +15,34 @@ import java.io.IOException;
 
 /**
  * Main application window for the Graph Divider tool.
- * Applies the Observer and Command patterns for theme and UI logic.
+ *
+ * Responsibilities:
+ * - Hosts the main UI components (menu, tool panel, graph visualization).
+ * - Handles theme switching and adapts to OS theme changes (Observer pattern).
+ * - Delegates business logic (file loading, partitioning) to the controller.
  */
 public class Frame extends JFrame implements PropertyChangeListener
 {
-    private boolean lastDarkMode;
+    // The main panel responsible for graph visualization.
     private final Graph graphPanel;
+    // Controller for handling graph-related logic.
+    private final GraphController controller = new GraphController();
+    // Tracks the last known dark mode state to detect theme changes.
+    private boolean lastDarkMode;
 
+    /**
+     * Constructs the main application window and initializes all UI components and listeners.
+     */
     public Frame()
     {
         setTitle("Graph Divider");
         lastDarkMode = Theme.isDarkPreferred();
         updateWindowIcon(lastDarkMode);
 
-        // Register as observer for theme changes (Windows 11+)
+        // Register as observer for Windows theme changes (Windows 11+).
         Toolkit.getDefaultToolkit().addPropertyChangeListener("win.menu.dark", this);
 
-        // Detect if running under WSL and start theme polling if so
+        // Detect if running under WSL (Windows Subsystem for Linux) and start polling for theme changes if so.
         boolean isWSL = isRunningUnderWSL();
         if (isWSL)
         {
@@ -44,102 +53,121 @@ public class Frame extends JFrame implements PropertyChangeListener
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         maximizeWindow(isWSL);
 
+        // Set up the menu bar with theme and file loading actions.
         MenuBar menuBar = new MenuBar();
         setJMenuBar(menuBar);
 
+        // Set up the tool panel for partition settings and graph division controls.
         ToolPanel toolPanel = new ToolPanel();
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(toolPanel, BorderLayout.WEST);
 
+        // Set up the main graph visualization panel.
         graphPanel = new Graph();
         getContentPane().add(graphPanel, BorderLayout.CENTER);
 
-        // Theme switching via menu bar listeners
+        // Register listeners for theme switching via the menu bar.
         menuBar.addLightThemeListener(e -> switchTheme(false));
         menuBar.addDarkThemeListener(e -> switchTheme(true));
         menuBar.addAutoThemeListener(e -> Theme.applyAutoTheme(() ->
         {
+            // Callback to update icon and UI when auto theme changes.
             updateWindowIcon(Theme.isDarkPreferred());
             SwingUtilities.updateComponentTreeUI(graphPanel);
             graphPanel.repaint();
         }));
 
-        // Add file chooser for loading text graphs
-        menuBar.addLoadTextGraphListener(e ->
-        {
-            JFileChooser fileChooser = new JFileChooser("src/main/resources/graphs/");
-            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            fileChooser.setAcceptAllFileFilterUsed(false);
-            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSR Graph files (*.csrrg)", "csrrg"));
-            int result = fileChooser.showOpenDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION)
-            {
-                java.io.File selectedFile = fileChooser.getSelectedFile();
-                try
-                {
-                    GraphModel model = GraphLoader.loadFromFile(selectedFile);
-                    CSRmatrix adjacencyMatrix = GraphLoader.toCSRmatrix(model);
-                    // TODO: Pass model to graphPanel for visualization
-                }
-                catch (IOException ex)
-                {
-                    JOptionPane.showMessageDialog(this, "Failed to load graph: " + ex.getMessage(),
-                            "Load Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
+        // Register listener for loading a text-based graph file.
+        menuBar.addLoadTextGraphListener(e -> handleLoadTextGraph());
 
-        // Add file chooser for loading text divided graphs
-        menuBar.addLoadPartitionedTextListener(e ->
-        {
-            JFileChooser fileChooser = new JFileChooser("src/main/resources/divided_graphs/");
-            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            fileChooser.setAcceptAllFileFilterUsed(false);
-            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSR (Partitioned) Graph files (*.csrrg)", "csrrg"));
-            int result = fileChooser.showOpenDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION)
-            {
-                java.io.File selectedFile = fileChooser.getSelectedFile();
-                // TODO: Load and process the selected .csrrg file
-                System.out.println("Selected file: " + selectedFile.getAbsolutePath());
-            }
-        });
+        // Register listener for loading a partitioned text graph file.
+        menuBar.addLoadPartitionedTextListener(e -> handleLoadPartitionedTextGraph());
 
-        // Add file chooser for loading binary divided graphs
-        menuBar.addLoadPartitionedBinaryListener(e ->
-        {
-            JFileChooser fileChooser = new JFileChooser("src/main/resources/divided_graphs/");
-            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            fileChooser.setAcceptAllFileFilterUsed(false);
-            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSR (Partitioned) Graph Binary files (*.bin)", "bin"));
-            int result = fileChooser.showOpenDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION)
-            {
-                java.io.File selectedFile = fileChooser.getSelectedFile();
-                // TODO: Load and process the selected .csrrg file
-                System.out.println("Selected file: " + selectedFile.getAbsolutePath());
-            }
-        });
+        // Register listener for loading a partitioned binary graph file.
+        menuBar.addLoadPartitionedBinaryListener(e -> handleLoadPartitionedBinaryGraph());
 
-        // Listen for changes in tool panel spinners
+        // Listen for changes in the tool panel's spinners (number of partitions and margin).
         toolPanel.addChangeListener(e ->
         {
             int parts = toolPanel.getPartitions();
             int margin = toolPanel.getMargin();
-            // TODO: Pass these values to the controller for further processing
+            // Delegate to controller if business logic is needed
+            // controller.handlePartitionSettings(parts, margin);
             System.out.println("Partitions: " + parts + ", Margin: " + margin + "%");
         });
 
-        // Listen for Divide Graph button press
-        toolPanel.addDivideButtonListener(e -> 
+        // Listen for Divide Graph button press to trigger graph partitioning.
+        toolPanel.addDivideButtonListener(e ->
         {
-            // TODO: Implement graph division logic here
+            // Delegate to controller for partitioning logic
+            // controller.divideGraph(...);
             System.out.println("Divide Graph button pressed.");
         });
     }
 
     /**
-     * Switches the application theme and updates the icon.
+     * Handles loading a text-based graph file using the controller.
+     */
+    private void handleLoadTextGraph()
+    {
+        JFileChooser fileChooser = new JFileChooser("src/main/resources/graphs/");
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setAcceptAllFileFilterUsed(false);
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSR Graph files (*.csrrg)", "csrrg"));
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION)
+        {
+            java.io.File selectedFile = fileChooser.getSelectedFile();
+            GraphController.LoadedGraph loaded = controller.loadGraphFromFile(this, selectedFile);
+            if (loaded != null)
+            {
+                // TODO: Pass loaded.model or loaded.matrix to graphPanel for visualization.
+            }
+        }
+    }
+
+    /**
+     * Handles loading a partitioned text graph file.
+     * Extend the controller to support this if needed.
+     */
+    private void handleLoadPartitionedTextGraph()
+    {
+        JFileChooser fileChooser = new JFileChooser("src/main/resources/divided_graphs/");
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setAcceptAllFileFilterUsed(false);
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSR (Partitioned) Graph files (*.csrrg)", "csrrg"));
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION)
+        {
+            java.io.File selectedFile = fileChooser.getSelectedFile();
+            // Example: controller.loadPartitionedGraphFromFile(this, selectedFile);
+            System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+        }
+    }
+
+    /**
+     * Handles loading a partitioned binary graph file.
+     * Extend the controller to support this if needed.
+     */
+    private void handleLoadPartitionedBinaryGraph()
+    {
+        JFileChooser fileChooser = new JFileChooser("src/main/resources/divided_graphs/");
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setAcceptAllFileFilterUsed(false);
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSR (Partitioned) Graph Binary files (*.bin)", "bin"));
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION)
+        {
+            java.io.File selectedFile = fileChooser.getSelectedFile();
+            // Example: controller.loadPartitionedBinaryGraphFromFile(this, selectedFile);
+            System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+        }
+    }
+
+    /**
+     * Switches the application theme between light and dark modes.
+     * Updates the window icon and repaints the graph panel to reflect the new theme.
+     *
      * @param dark true for dark theme, false for light theme
      */
     private void switchTheme(boolean dark)
@@ -158,7 +186,9 @@ public class Frame extends JFrame implements PropertyChangeListener
     }
 
     /**
-     * Checks if the application is running under Windows Subsystem for Linux.
+     * Checks if the application is running under Windows Subsystem for Linux (WSL).
+     * Used to determine if theme polling is necessary.
+     *
      * @return true if running under WSL, false otherwise
      */
     private boolean isRunningUnderWSL()
@@ -168,7 +198,8 @@ public class Frame extends JFrame implements PropertyChangeListener
     }
 
     /**
-     * Sets the initial window size to half the screen width and 2/3 height.
+     * Sets the initial window size to half the screen width and two-thirds of the screen height.
+     * Ensures the window is large enough for comfortable use.
      */
     private void setInitialWindowSize()
     {
@@ -180,13 +211,15 @@ public class Frame extends JFrame implements PropertyChangeListener
     }
 
     /**
-     * Maximizes the window, with a workaround for WSL.
-     * @param isWSL true if running under WSL
+     * Maximizes the window, with a workaround for WSL where maximizing must be delayed.
+     *
+     * @param isWSL true if running under WSL, false otherwise
      */
     private void maximizeWindow(boolean isWSL)
     {
         if (isWSL)
         {
+            // In WSL, maximize after a short delay to ensure proper sizing.
             SwingUtilities.invokeLater(() ->
             {
                 if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0)
@@ -208,10 +241,12 @@ public class Frame extends JFrame implements PropertyChangeListener
     }
 
     /**
-     * Starts polling for theme changes under WSL.
+     * Starts a timer to poll for theme changes under WSL, since native theme events are not available.
+     * Updates the window icon if the theme changes.
      */
     private void startWSLThemePolling()
     {
+        // Timer checks every 2 seconds for theme changes.
         Timer wslThemeTimer = new Timer(2000, null);
         wslThemeTimer.addActionListener(e ->
         {
@@ -228,6 +263,8 @@ public class Frame extends JFrame implements PropertyChangeListener
 
     /**
      * Observer update for theme changes.
+     * Called when the OS theme changes (Windows 11+).
+     * Updates the window icon if the theme has changed.
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt)
@@ -241,13 +278,14 @@ public class Frame extends JFrame implements PropertyChangeListener
     }
 
     /**
-     * Updates the window icon depending on the theme.
+     * Updates the window icon depending on the current theme.
+     * Loads either the dark or light icon resource.
      *
      * @param darkMode true to use icon_dark.png, false to use icon_light.png
      */
     public void updateWindowIcon(boolean darkMode)
     {
-        String resource = darkMode ? "/icon_dark.png" : "/icon_light.png";
+        String resource = darkMode ? "/icon/icon_dark.png" : "/icon/icon_light.png";
         try
         {
             java.io.InputStream iconStream = getClass().getResourceAsStream(resource);

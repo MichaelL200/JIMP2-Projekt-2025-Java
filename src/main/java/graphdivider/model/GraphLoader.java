@@ -11,12 +11,15 @@ import java.io.IOException;
  */
 public final class GraphLoader
 {
+    // Private constructor to prevent instantiation of utility class
     private GraphLoader() {}
 
     /**
      * Loads a GraphModel from a .csrrg file.
-     * @param file the input file
-     * @return the loaded GraphModel
+     * The file must have exactly 5 lines, each representing a different part of the graph structure.
+     *
+     * @param file the input .csrrg file
+     * @return the loaded GraphModel instance
      * @throws IOException if file cannot be read or is malformed
      */
     public static GraphModel loadFromFile(File file) throws IOException
@@ -24,6 +27,7 @@ public final class GraphLoader
         try (BufferedReader reader = new BufferedReader(new FileReader(file)))
         {
             String[] lines = new String[5];
+            // Read exactly 5 lines from the file, each line is required
             for (int i = 0; i < 5; i++)
             {
                 lines[i] = reader.readLine();
@@ -32,18 +36,21 @@ public final class GraphLoader
                     throw new IOException("File has fewer than 5 lines: " + file.getName());
                 }
             }
+            // Parse each line into the appropriate data structure
             int maxVerticesPerRow = Integer.parseInt(lines[0].trim());
             int[] rowPositions = parseIntArray(lines[1]);
             int[] rowStartIndices = parseIntArray(lines[2]);
             int[] adjacencyList = parseIntArray(lines[3]);
             int[] adjacencyPointers = parseIntArray(lines[4]);
 
+            // Print debug information about the loaded graph
             System.out.println("Loaded graph: maxVerticesPerRow=" + maxVerticesPerRow);
             System.out.println("Row positions: " + java.util.Arrays.toString(rowPositions));
             System.out.println("Row start indices: " + java.util.Arrays.toString(rowStartIndices));
             System.out.println("Adjacency list: " + java.util.Arrays.toString(adjacencyList));
             System.out.println("Adjacency pointers: " + java.util.Arrays.toString(adjacencyPointers));
 
+            // Construct and return the GraphModel
             return new GraphModel(
                 maxVerticesPerRow,
                 rowPositions,
@@ -57,7 +64,10 @@ public final class GraphLoader
     /**
      * Converts a GraphModel to a CSRmatrix.
      * The adjacencyPointers array contains indices in adjacencyList where each vertex's adjacency starts.
-     * The adjacencyList contains, for each vertex, the vertex index followed by its neighbors.
+     * The adjacencyList contains, for each vertex, the vertex index itself followed by its neighbors.
+     *
+     * @param model the GraphModel to convert
+     * @return a CSRmatrix representing the same graph
      */
     public static CSRmatrix toCSRmatrix(GraphModel model)
     {
@@ -66,8 +76,9 @@ public final class GraphLoader
         int size = adjacencyPointers.length;
 
         int[] rowPtr = new int[size + 1];
-        // First, count the number of neighbors for each vertex
+        // nnz: number of non-zero values (edges) in the matrix
         int nnz = 0;
+        // Calculate row pointers and count neighbors for each vertex
         for (int i = 0; i < size; i++)
         {
             int start = adjacencyPointers[i];
@@ -82,6 +93,7 @@ public final class GraphLoader
         int[] values = new int[nnz];
 
         int idx = 0;
+        // Fill colInd and values arrays for CSR format
         for (int i = 0; i < size; i++)
         {
             int start = adjacencyPointers[i];
@@ -90,11 +102,12 @@ public final class GraphLoader
             for (int j = start + 1; j < end; j++)
             {
                 colInd[idx] = adjacencyList[j];
-                values[idx] = 1; // Assuming unweighted graph, use 1.0 for each edge
+                values[idx] = 1; // Assuming unweighted graph, use 1 for each edge
                 idx++;
             }
         }
 
+        // Print debug information about the CSR matrix
         System.out.println("Loaded graph as CSR matrix: " + size + " rows, " + nnz + " non-zero values");
         System.out.println("Row pointers: " + java.util.Arrays.toString(rowPtr));
         System.out.println("Column indices: " + java.util.Arrays.toString(colInd));
@@ -103,6 +116,12 @@ public final class GraphLoader
         return new CSRmatrix(rowPtr, colInd, values, size);
     }
 
+    /**
+     * Parses a semicolon-separated string of integers into an int array.
+     *
+     * @param line the input string (e.g., "1;2;3")
+     * @return an array of integers
+     */
     private static int[] parseIntArray(String line)
     {
         String[] tokens = line.trim().split(";");
@@ -114,3 +133,4 @@ public final class GraphLoader
         return arr;
     }
 }
+

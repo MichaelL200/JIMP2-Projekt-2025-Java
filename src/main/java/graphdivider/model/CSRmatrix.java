@@ -1,46 +1,27 @@
 package graphdivider.model;
 
-public class CSRmatrix
+/**
+ * Represents a sparse matrix in Compressed Sparse Row (CSR) format.
+ * <p>
+ * Fields:
+ * - rowPtr:   Array of length (size + 1), where rowPtr[i] is the index in colInd/values where row i starts.
+ * - colInd:   Column indices for each non-zero value.
+ * - values:   Non-zero values of the matrix.
+ * - size:     Number of rows (and columns, if square).
+ */
+public record CSRmatrix(int[] rowPtr, int[] colInd, int[] values, int size)
 {
-    private final int[] rowPtr;
-    private final int[] colInd;
-    private final int[] values;
-    private final int size;
-
-    public CSRmatrix(int[] rowPtr, int[] colInd, int[] values, int size)
-    {
-        this.rowPtr = rowPtr;
-        this.colInd = colInd;
-        this.values = values;
-        this.size = size;
-    }
-
-    public int getSize()
-    {
-        return size;
-    }
-
-    public int[] getRowPtr()
-    {
-        return rowPtr;
-    }
-
-    public int[] getColInd()
-    {
-        return colInd;
-    }
-
-    public int[] getValues()
-    {
-        return values;
-    }
-
     /**
      * Returns the value at the specified row and column.
-     * If the value is not explicitly stored, returns 0.0.
+     * If the value is not explicitly stored (i.e., is zero in the sparse matrix), returns 0.
+     *
+     * @param row Row index (0-based)
+     * @param col Column index (0-based)
+     * @return Value at (row, col), or 0 if not present
      */
     public int getValue(int row, int col)
     {
+        // Iterate over the non-zero values in the given row
         for (int idx = rowPtr[row]; idx < rowPtr[row + 1]; idx++)
         {
             if (colInd[idx] == col)
@@ -48,6 +29,7 @@ public class CSRmatrix
                 return values[idx];
             }
         }
+        // If not found, the value is zero in the sparse representation
         return 0;
     }
 }

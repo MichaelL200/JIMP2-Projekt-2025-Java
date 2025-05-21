@@ -6,40 +6,46 @@ import java.awt.event.ActionListener;
 /**
  * Custom menu bar for the application.
  * Provides file loading/saving and theme selection options.
+ *
+ * Structure:
+ * - "Load File" menu: for loading various graph formats.
+ * - "Save File" menu: for saving partitioned graphs.
+ * - "Theme" menu: for switching between light, dark, and auto themes.
  */
 public final class MenuBar extends JMenuBar
 {
     // Menu items for loading different types of graphs
-    private final JMenuItem loadTextGraphItem = new JMenuItem("Graph (Text)…");
-    private final JMenuItem loadPartitionedTextItem = new JMenuItem("Partitioned Graph (Text)…");
-    private final JMenuItem loadPartitionedBinaryItem = new JMenuItem("Partitioned Graph (Binary)…");
+    private final JMenuItem loadTextGraphItem = new JMenuItem("Graph (Text)…"); // Load a plain text graph file
+    private final JMenuItem loadPartitionedTextItem = new JMenuItem("Partitioned Graph (Text)…"); // Load a partitioned graph in text format
+    private final JMenuItem loadPartitionedBinaryItem = new JMenuItem("Partitioned Graph (Binary)…"); // Load a partitioned graph in binary format
 
     // Menu items for saving partitioned graphs
-    private final JMenuItem savePartitionedTextItem = new JMenuItem("Partitioned Graph (Text)…");
-    private final JMenuItem saveBinaryItem = new JMenuItem("Partitioned Graph (Binary)…");
+    private final JMenuItem savePartitionedTextItem = new JMenuItem("Partitioned Graph (Text)…"); // Save partitioned graph as text
+    private final JMenuItem saveBinaryItem = new JMenuItem("Partitioned Graph (Binary)…"); // Save partitioned graph as binary
 
     // Menu items for theme selection
-    private final JMenuItem autoThemeItem = new JMenuItem("Auto");
-    private final JMenuItem lightThemeItem = new JMenuItem("Light");
-    private final JMenuItem darkThemeItem  = new JMenuItem("Dark");
+    private final JMenuItem autoThemeItem = new JMenuItem("Auto");   // Use system theme
+    private final JMenuItem lightThemeItem = new JMenuItem("Light"); // Force light theme
+    private final JMenuItem darkThemeItem = new JMenuItem("Dark");  // Force dark theme
 
     /**
      * Constructs the menu bar, sets up menus and menu items.
+     * Organizes menus for loading, saving, and theme selection.
      */
     public MenuBar()
     {
         // Create and populate the "Load File" menu
         JMenu loadMenu = new JMenu("Load File");
-        loadMenu.add(loadTextGraphItem);
+        loadMenu.add(loadTextGraphItem);           // Option to load a plain text graph
         loadMenu.addSeparator();
-        loadMenu.add(loadPartitionedTextItem);
-        loadMenu.add(loadPartitionedBinaryItem);
+        loadMenu.add(loadPartitionedTextItem);     // Option to load a partitioned text graph
+        loadMenu.add(loadPartitionedBinaryItem);   // Option to load a partitioned binary graph
         add(loadMenu);
 
         // Create and populate the "Save File" menu
         JMenu saveMenu = new JMenu("Save File");
-        saveMenu.add(savePartitionedTextItem);
-        saveMenu.add(saveBinaryItem);
+        saveMenu.add(savePartitionedTextItem);     // Option to save partitioned graph as text
+        saveMenu.add(saveBinaryItem);              // Option to save partitioned graph as binary
         add(saveMenu);
 
         // Disable save options by default (enabled after loading a graph)
@@ -48,9 +54,9 @@ public final class MenuBar extends JMenuBar
 
         // Create and populate the "Theme" menu
         JMenu themeMenu = new JMenu("Theme");
-        themeMenu.add(autoThemeItem);
-        themeMenu.add(lightThemeItem);
-        themeMenu.add(darkThemeItem);
+        themeMenu.add(autoThemeItem);              // Option to use system theme
+        themeMenu.add(lightThemeItem);             // Option to force light theme
+        themeMenu.add(darkThemeItem);              // Option to force dark theme
         add(themeMenu);
     }
 
@@ -128,3 +134,4 @@ public final class MenuBar extends JMenuBar
         darkThemeItem.addActionListener(l);
     }
 }
+
