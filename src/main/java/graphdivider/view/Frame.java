@@ -21,7 +21,7 @@ import java.io.IOException;
  * - Handles theme switching and adapts to OS theme changes (Observer pattern).
  * - Delegates business logic (file loading, partitioning) to the controller.
  */
-public class Frame extends JFrame implements PropertyChangeListener
+public final class Frame extends JFrame implements PropertyChangeListener
 {
     // The main panel responsible for graph visualization.
     private final Graph graphPanel;
@@ -122,6 +122,7 @@ public class Frame extends JFrame implements PropertyChangeListener
             if (loaded != null)
             {
                 // TODO: Pass loaded.model or loaded.matrix to graphPanel for visualization.
+                graphPanel.displayGraph(loaded.model);
             }
         }
     }
@@ -302,3 +303,4 @@ public class Frame extends JFrame implements PropertyChangeListener
         }
     }
 }
+

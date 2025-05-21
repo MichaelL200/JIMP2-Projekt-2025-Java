@@ -10,7 +10,7 @@ import javax.swing.*;
  * Initializes the look and feel, then launches the main window.
  * Uses the Command pattern to encapsulate the startup logic for thread safety and clarity.
  */
-public class Main
+public final class Main
 {
     /**
      * The main method is the starting point of the application.

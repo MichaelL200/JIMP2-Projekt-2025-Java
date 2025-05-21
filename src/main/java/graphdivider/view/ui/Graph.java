@@ -1,5 +1,6 @@
 package graphdivider.view.ui;
 
+import graphdivider.model.GraphModel;
 import graphdivider.view.ui.graph.Edge;
 import graphdivider.view.ui.graph.Vertex;
 
@@ -23,56 +24,114 @@ public final class Graph extends JPanel
     private final List<Edge> edges = new ArrayList<>();
 
     /**
-     * Constructs a sample graph with three vertices and three edges.
+     * Constructs the graph panel.
      * Registers a theme change listener to update edge colors when the theme changes.
-     *
-     * This constructor is currently for demonstration and testing purposes.
-     * In a full application, vertices and edges would be loaded dynamically.
      */
     public Graph()
     {
         setLayout(null);      // Use absolute positioning for vertices
         setOpaque(false);     // Allow background to show through
 
-        // Create three sample vertices with default color and size
-        Vertex v1 = new Vertex(0, Vertex.DEFAULT_BLUE, 50);
-        Vertex v2 = new Vertex(1, Vertex.DEFAULT_BLUE, 50);
-        Vertex v3 = new Vertex(2, Vertex.DEFAULT_BLUE, 50);
-
-        // Position the vertices on the panel (x, y, width, height)
-        v1.setBounds(100, 100, v1.getDiameter(), v1.getDiameter());
-        v2.setBounds(200, 150, v2.getDiameter(), v2.getDiameter());
-        v3.setBounds(150, 250, v3.getDiameter(), v3.getDiameter());
-
-        // Add vertices to the panel and internal list for management
-        add(v1);
-        add(v2);
-        add(v3);
-        vertices.add(v1);
-        vertices.add(v2);
-        vertices.add(v3);
-
-        // Create edges connecting the vertices (undirected for demonstration)
-        Edge e1 = new Edge(v1, v2);
-        Edge e2 = new Edge(v2, v3);
-        Edge e3 = new Edge(v3, v1);
-
-        // Add edges to the internal list for drawing
-        edges.add(e1);
-        edges.add(e2);
-        edges.add(e3);
-
         // Register a listener to update edge colors when the theme changes
         Theme.addThemeChangeListener(() ->
         {
-            // Update the color of each edge to match the new theme
             for (Edge edge : edges)
             {
                 edge.updateEdgeColor();
             }
-            // Repaint the panel to reflect color changes
             repaint();
         });
+    }
+
+    /**
+     * Displays the graph from the given GraphModel.
+     * Clears any previous vertices.
+     *
+     * @param model the GraphModel containing the vertices
+     */
+    public void displayGraph(GraphModel model)
+    {
+        // Remove old vertices
+        for (Vertex v : vertices)
+        {
+            remove(v);
+        }
+        vertices.clear();
+
+        int vertexCount = model.getRowPositions().length;
+        int[] rowStartIndices = model.getRowStartIndices();
+        int[] rowPositions = model.getRowPositions();
+
+        if (vertexCount == 0)
+        {
+            repaint();
+            return;
+        }
+
+        int vertexDiameter = 40;
+        int spacing = 20;
+        int margin = 10; // left margin
+        int rowSpacing = 60; // vertical space between rows
+
+        // Determine which rows are actually used (contain at least one vertex)
+        java.util.Set<Integer> usedRows = new java.util.HashSet<>();
+        for (int i = 0; i < vertexCount; i++)
+        {
+            // Find the row this vertex belongs to
+            int row = 0;
+            for (int r = 0; r < rowStartIndices.length; r++)
+            {
+                int start = rowStartIndices[r];
+                int end = (r + 1 < rowStartIndices.length) ? rowStartIndices[r + 1] : vertexCount;
+                if (i >= start && i < end)
+                {
+                    row = r;
+                    break;
+                }
+            }
+            usedRows.add(row);
+        }
+
+        // Map actual row indices to visual row indices (skip empty rows)
+        java.util.Map<Integer, Integer> rowToVisualRow = new java.util.HashMap<>();
+        int visualRow = 0;
+        for (int r = 0; r < rowStartIndices.length; r++)
+        {
+            if (usedRows.contains(r))
+            {
+                rowToVisualRow.put(r, visualRow++);
+            }
+        }
+
+        // For each vertex, determine its row and column, using only non-empty rows
+        for (int i = 0; i < vertexCount; i++)
+        {
+            // Find the row this vertex belongs to
+            int row = 0;
+            for (int r = 0; r < rowStartIndices.length; r++)
+            {
+                int start = rowStartIndices[r];
+                int end = (r + 1 < rowStartIndices.length) ? rowStartIndices[r + 1] : vertexCount;
+                if (i >= start && i < end)
+                {
+                    row = r;
+                    break;
+                }
+            }
+            int col = rowPositions[i];
+            int visualRowIdx = rowToVisualRow.get(row);
+
+            int x = margin + col * (vertexDiameter + spacing);
+            int y = 20 + visualRowIdx * rowSpacing;
+
+            Vertex vertex = new Vertex(i, Vertex.DEFAULT_BLUE, vertexDiameter);
+            vertex.setBounds(x, y, vertexDiameter, vertexDiameter);
+            vertices.add(vertex);
+            add(vertex);
+        }
+
+        revalidate();
+        repaint();
     }
 
     /**

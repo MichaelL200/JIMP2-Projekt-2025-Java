@@ -13,7 +13,7 @@ import java.io.IOException;
  * Decouples file loading and graph operations from the view (Frame).
  * Extend this class to add partitioning, saving, and other business logic.
  */
-public class GraphController
+public final class GraphController
 {
     /**
      * Loads a graph from the given file and returns the model and matrix.
