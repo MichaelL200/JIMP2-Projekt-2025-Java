@@ -22,6 +22,8 @@ public final class Graph extends JPanel
     private final List<Vertex> vertices = new ArrayList<>();
     // List of edges in the graph (drawn manually)
     private final List<Edge> edges = new ArrayList<>();
+    // Store mapping for use between setupVertices and setupEdges
+    private java.util.Map<Integer, Vertex> vertexIndexToComponent;
 
     /**
      * Constructs the graph panel.
@@ -45,9 +47,9 @@ public final class Graph extends JPanel
 
     /**
      * Displays the graph from the given GraphModel.
-     * Clears any previous vertices.
+     * Clears any previous vertices and edges.
      *
-     * @param model the GraphModel containing the vertices
+     * @param model the GraphModel containing the vertices and edges
      */
     public void displayGraph(GraphModel model)
     {
@@ -58,13 +60,32 @@ public final class Graph extends JPanel
         }
         vertices.clear();
 
+        // Remove old edges
+        for (Edge e : edges)
+        {
+            e.dispose();
+        }
+        edges.clear();
+
+        setupVertices(model);
+        setupEdges(model);
+
+        revalidate();
+        repaint();
+    }
+
+    /**
+     * Sets up vertices from the given GraphModel.
+     * Clears and adds new Vertex components.
+     */
+    private void setupVertices(GraphModel model)
+    {
         int vertexCount = model.getRowPositions().length;
         int[] rowStartIndices = model.getRowStartIndices();
         int[] rowPositions = model.getRowPositions();
 
         if (vertexCount == 0)
         {
-            repaint();
             return;
         }
 
@@ -103,6 +124,9 @@ public final class Graph extends JPanel
             }
         }
 
+        // Map: vertex index -> Vertex component
+        java.util.Map<Integer, Vertex> vertexIndexToComponent = new java.util.HashMap<>();
+
         // For each vertex, determine its row and column, using only non-empty rows
         for (int i = 0; i < vertexCount; i++)
         {
@@ -128,10 +152,49 @@ public final class Graph extends JPanel
             vertex.setBounds(x, y, vertexDiameter, vertexDiameter);
             vertices.add(vertex);
             add(vertex);
+            vertexIndexToComponent.put(i, vertex);
         }
 
-        revalidate();
-        repaint();
+        // Store the mapping for use in setupEdges
+        this.vertexIndexToComponent = vertexIndexToComponent;
+    }
+
+    /**
+     * Sets up edges from the given GraphModel.
+     * Uses the mapping from vertex indices to Vertex components.
+     */
+    private void setupEdges(GraphModel model)
+    {
+        if (this.vertexIndexToComponent == null) return;
+
+        int vertexCount = model.getRowPositions().length;
+        int[] adjacencyList = model.getAdjacencyList();
+        int[] adjacencyPointers = model.getAdjacencyPointers();
+
+        // To avoid duplicate edges (for undirected graphs), use a set of pairs (min, max)
+        java.util.Set<String> edgeSet = new java.util.HashSet<>();
+        for (int i = 0; i < adjacencyPointers.length; i++)
+        {
+            int start = adjacencyPointers[i];
+            int end = (i + 1 < adjacencyPointers.length) ? adjacencyPointers[i + 1] : adjacencyList.length;
+            int vertexIdx = adjacencyList[start];
+            for (int j = start + 1; j < end; j++)
+            {
+                int neighborIdx = adjacencyList[j];
+                if (neighborIdx < 0 || neighborIdx >= vertexCount) continue;
+                int v1 = Math.min(vertexIdx, neighborIdx);
+                int v2 = Math.max(vertexIdx, neighborIdx);
+                String key = v1 + "-" + v2;
+                if (!edgeSet.contains(key) && v1 != v2
+                        && vertexIndexToComponent.containsKey(v1)
+                        && vertexIndexToComponent.containsKey(v2))
+                {
+                    edgeSet.add(key);
+                    Edge edge = new Edge(vertexIndexToComponent.get(v1), vertexIndexToComponent.get(v2));
+                    edges.add(edge);
+                }
+            }
+        }
     }
 
     /**
@@ -153,4 +216,3 @@ public final class Graph extends JPanel
         g2.dispose();
     }
 }
-

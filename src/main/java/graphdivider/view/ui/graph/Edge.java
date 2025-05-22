@@ -63,7 +63,7 @@ public final class Edge
         int y2 = v2.getY() + v2.getDiameter() / 2;
 
         g.setColor(edgeColor);
-        g.setStroke(new BasicStroke(2));
+        g.setStroke(new BasicStroke(1.3f));
         g.drawLine(x1, y1, x2, y2);
     }
 

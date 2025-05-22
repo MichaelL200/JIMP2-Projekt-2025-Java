@@ -50,6 +50,20 @@ public final class GraphLoader
             System.out.println("Adjacency list: " + java.util.Arrays.toString(adjacencyList));
             System.out.println("Adjacency pointers: " + java.util.Arrays.toString(adjacencyPointers));
 
+            // Print adjacency info for each vertex for debugging
+            for (int i = 0; i < adjacencyPointers.length; i++)
+            {
+                int start = adjacencyPointers[i];
+                int end = (i + 1 < adjacencyPointers.length) ? adjacencyPointers[i + 1] : adjacencyList.length;
+                int vertexIdx = adjacencyList[start];
+                System.out.print("Vertex " + vertexIdx + " neighbors: ");
+                for (int j = start + 1; j < end; j++)
+                {
+                    System.out.print(adjacencyList[j] + " ");
+                }
+                System.out.println();
+            }
+
             // Construct and return the GraphModel
             return new GraphModel(
                 maxVerticesPerRow,
@@ -133,4 +147,3 @@ public final class GraphLoader
         return arr;
     }
 }
-
