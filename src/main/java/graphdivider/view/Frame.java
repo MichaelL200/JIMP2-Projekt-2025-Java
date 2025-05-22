@@ -1,10 +1,8 @@
 package graphdivider.view;
 
 import graphdivider.controller.GraphController;
-import graphdivider.view.ui.Graph;
+import graphdivider.view.ui.*;
 import graphdivider.view.ui.MenuBar;
-import graphdivider.view.ui.Theme;
-import graphdivider.view.ui.ToolPanel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -63,7 +61,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
         getContentPane().add(toolPanel, BorderLayout.WEST);
 
         // Set up the main graph visualization panel.
-        graphPanel = new Graph();
+        graphPanel = new Graph(toolPanel);
         getContentPane().add(graphPanel, BorderLayout.CENTER);
 
         // Register listeners for theme switching via the menu bar.
@@ -107,6 +105,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
 
     /**
      * Handles loading a text-based graph file using the controller.
+     * Shows a progress bar while displaying the graph.
      */
     private void handleLoadTextGraph()
     {
@@ -118,12 +117,58 @@ public final class Frame extends JFrame implements PropertyChangeListener
         if (result == JFileChooser.APPROVE_OPTION)
         {
             java.io.File selectedFile = fileChooser.getSelectedFile();
-            GraphController.LoadedGraph loaded = controller.loadGraphFromFile(this, selectedFile);
-            if (loaded != null)
+
+            // Load the graph model in background
+            SwingWorker<GraphController.LoadedGraph, Void> loader = new SwingWorker<>()
             {
-                // TODO: Pass loaded.model or loaded.matrix to graphPanel for visualization.
-                graphPanel.displayGraph(loaded.model);
-            }
+                @Override
+                protected GraphController.LoadedGraph doInBackground()
+                {
+                    return controller.loadGraphFromFile(Frame.this, selectedFile);
+                }
+
+                @Override
+                protected void done()
+                {
+                    try
+                    {
+                        GraphController.LoadedGraph loaded = get();
+                        if (loaded != null)
+                        {
+                            // Use ProgressDialog for displaying phase
+                            ProgressDialog progressDialog = new ProgressDialog(Frame.this, "Displaying Graph...", "Displaying graph, please wait...");
+                            SwingWorker<Void, Void> displayer = new SwingWorker<>()
+                            {
+                                @Override
+                                protected Void doInBackground()
+                                {
+                                    graphPanel.displayGraph(loaded.model);
+                                    return null;
+                                }
+
+                                @Override
+                                protected void done()
+                                {
+                                    progressDialog.dispose();
+                                }
+                            };
+
+                            displayer.execute();
+                            progressDialog.setVisible(true);
+                        } else
+                        {
+                            JOptionPane.showMessageDialog(Frame.this, "Failed to load graph.",
+                                    "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (Exception ex)
+                    {
+                        JOptionPane.showMessageDialog(Frame.this, "Failed to load graph: " + ex.getMessage(),
+                                "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            };
+
+            loader.execute();
         }
     }
 
@@ -303,4 +348,3 @@ public final class Frame extends JFrame implements PropertyChangeListener
         }
     }
 }
-

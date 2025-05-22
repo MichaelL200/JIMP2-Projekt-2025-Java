@@ -82,6 +82,16 @@ public final class ToolPanel extends JPanel
     }
 
     /**
+     * Enables or disables the divide button.
+     *
+     * @param enabled true to enable, false to disable
+     */
+    public void setDivideButtonEnabled(boolean enabled)
+    {
+        divideButton.setEnabled(enabled);
+    }
+
+    /**
      * ToolPanelBuilder helps construct the ToolPanel layout using GridBagLayout.
      * It encapsulates repetitive layout code for clarity and maintainability.
      */
@@ -164,4 +174,3 @@ public final class ToolPanel extends JPanel
         }
     }
 }
-

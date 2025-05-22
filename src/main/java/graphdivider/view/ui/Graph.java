@@ -24,13 +24,16 @@ public final class Graph extends JPanel
     private final List<Edge> edges = new ArrayList<>();
     // Store mapping for use between setupVertices and setupEdges
     private java.util.Map<Integer, Vertex> vertexIndexToComponent;
+    // Reference to the ToolPanel instance
+    private final ToolPanel toolPanel;
 
     /**
      * Constructs the graph panel.
      * Registers a theme change listener to update edge colors when the theme changes.
      */
-    public Graph()
+    public Graph(ToolPanel toolPanel)
     {
+        this.toolPanel = toolPanel;
         setLayout(null);      // Use absolute positioning for vertices
         setOpaque(false);     // Allow background to show through
 
@@ -72,6 +75,43 @@ public final class Graph extends JPanel
 
         revalidate();
         repaint();
+
+        // Enable the divide button after the graph is displayed
+        toolPanel.setDivideButtonEnabled(true);
+    }
+
+    /**
+     * Helper method to find the row index for a given vertex index.
+     */
+    private int findRowForVertex(int vertexIndex, int[] rowStartIndices, int vertexCount)
+    {
+        for (int r = 0; r < rowStartIndices.length; r++)
+        {
+            int start = rowStartIndices[r];
+            int end = (r + 1 < rowStartIndices.length) ? rowStartIndices[r + 1] : vertexCount;
+            if (vertexIndex >= start && vertexIndex < end)
+            {
+                return r;
+            }
+        }
+        return -1; // Not found
+    }
+
+    /**
+     * Helper method to build a mapping from actual row indices to visual row indices (skipping empty rows).
+     */
+    private java.util.Map<Integer, Integer> buildRowToVisualRow(java.util.Set<Integer> usedRows, int[] rowStartIndices)
+    {
+        java.util.Map<Integer, Integer> rowToVisualRow = new java.util.HashMap<>();
+        int visualRow = 0;
+        for (int r = 0; r < rowStartIndices.length; r++)
+        {
+            if (usedRows.contains(r))
+            {
+                rowToVisualRow.put(r, visualRow++);
+            }
+        }
+        return rowToVisualRow;
     }
 
     /**
@@ -99,30 +139,12 @@ public final class Graph extends JPanel
         for (int i = 0; i < vertexCount; i++)
         {
             // Find the row this vertex belongs to
-            int row = 0;
-            for (int r = 0; r < rowStartIndices.length; r++)
-            {
-                int start = rowStartIndices[r];
-                int end = (r + 1 < rowStartIndices.length) ? rowStartIndices[r + 1] : vertexCount;
-                if (i >= start && i < end)
-                {
-                    row = r;
-                    break;
-                }
-            }
+            int row = findRowForVertex(i, rowStartIndices, vertexCount);
             usedRows.add(row);
         }
 
         // Map actual row indices to visual row indices (skip empty rows)
-        java.util.Map<Integer, Integer> rowToVisualRow = new java.util.HashMap<>();
-        int visualRow = 0;
-        for (int r = 0; r < rowStartIndices.length; r++)
-        {
-            if (usedRows.contains(r))
-            {
-                rowToVisualRow.put(r, visualRow++);
-            }
-        }
+        java.util.Map<Integer, Integer> rowToVisualRow = buildRowToVisualRow(usedRows, rowStartIndices);
 
         // Map: vertex index -> Vertex component
         java.util.Map<Integer, Vertex> vertexIndexToComponent = new java.util.HashMap<>();
@@ -131,17 +153,7 @@ public final class Graph extends JPanel
         for (int i = 0; i < vertexCount; i++)
         {
             // Find the row this vertex belongs to
-            int row = 0;
-            for (int r = 0; r < rowStartIndices.length; r++)
-            {
-                int start = rowStartIndices[r];
-                int end = (r + 1 < rowStartIndices.length) ? rowStartIndices[r + 1] : vertexCount;
-                if (i >= start && i < end)
-                {
-                    row = r;
-                    break;
-                }
-            }
+            int row = findRowForVertex(i, rowStartIndices, vertexCount);
             int col = rowPositions[i];
             int visualRowIdx = rowToVisualRow.get(row);
 
@@ -170,6 +182,7 @@ public final class Graph extends JPanel
         int vertexCount = model.getRowPositions().length;
         int[] adjacencyList = model.getAdjacencyList();
         int[] adjacencyPointers = model.getAdjacencyPointers();
+        int[] rowStartIndices = model.getRowStartIndices();
 
         // To avoid duplicate edges (for undirected graphs), use a set of pairs (min, max)
         java.util.Set<String> edgeSet = new java.util.HashSet<>();
