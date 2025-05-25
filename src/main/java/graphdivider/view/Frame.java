@@ -51,6 +51,22 @@ public final class Frame extends JFrame implements PropertyChangeListener
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         maximizeWindow(isWSL);
 
+        // Workaround: Force size to usable screen area when maximized (for laptops with maximization issues)
+        this.addWindowStateListener(e -> {
+            if ((e.getNewState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH) {
+                GraphicsConfiguration gc = getGraphicsConfiguration();
+                Rectangle bounds = gc.getBounds();
+                Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(gc);
+                int x = bounds.x + insets.left;
+                int y = bounds.y + insets.top;
+                int width = bounds.width - insets.left - insets.right;
+                int height = bounds.height - insets.top - insets.bottom;
+                setBounds(x, y, width, height); // Only fill usable area, not covering taskbar
+                revalidate();
+                repaint();
+            }
+        });
+
         // Set up the menu bar with theme and file loading actions.
         MenuBar menuBar = new MenuBar();
         setJMenuBar(menuBar);

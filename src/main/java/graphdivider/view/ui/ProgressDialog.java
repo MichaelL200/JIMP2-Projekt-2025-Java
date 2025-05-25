@@ -26,5 +26,6 @@ public class ProgressDialog extends JDialog
         setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
         setSize(300, 100);
         setLocationRelativeTo(parent);
+        setAlwaysOnTop(true); // Ensure the dialog stays above the main window
     }
 }
