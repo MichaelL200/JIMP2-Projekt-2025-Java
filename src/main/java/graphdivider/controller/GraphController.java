@@ -11,29 +11,27 @@ import java.io.IOException;
 /**
  * Controller for handling graph-related actions and business logic.
  * Decouples file loading and graph operations from the view (Frame).
- * Extend this class to add partitioning, saving, and other business logic.
  */
 public final class GraphController
 {
     /**
      * Loads a graph from the given file and returns the model, matrix, and Laplacian matrix.
      * Handles error dialogs and returns null if loading fails.
-     *
-     * @param parent the parent component for dialogs (can be null)
-     * @param file   the file to load
-     * @return a LoadedGraph object containing the model, matrix, and Laplacian matrix, or null if failed
      */
     public LoadedGraph loadGraphFromFile(JFrame parent, File file)
     {
         try
         {
             GraphModel model = GraphLoader.loadFromFile(file);
+            // Print graph data to terminal
+            model.printGraphData();
             CSRmatrix matrix = GraphLoader.toCSRmatrix(model);
             CSRmatrix laplacian = GraphLoader.toLaplacianCSRmatrix(model);
+            // Print Laplacian matrix data to terminal
+            laplacian.printMatrixData("Laplacian CSR matrix data:");
             return new LoadedGraph(model, matrix, laplacian);
         } catch (IOException ex)
         {
-            // Show error dialog if loading fails
             JOptionPane.showMessageDialog(parent, "Failed to load graph: " + ex.getMessage(),
                     "Load Error", JOptionPane.ERROR_MESSAGE);
             return null;
@@ -42,7 +40,6 @@ public final class GraphController
 
     /**
      * Data holder for loaded graph model, matrix, and Laplacian matrix.
-     * Used to pass model, matrix, and Laplacian matrix to the view or other components.
      */
     public static class LoadedGraph
     {

@@ -2,6 +2,7 @@ package graphdivider.model;
 
 /**
  * Represents a graph in memory using the Compressed Sparse Row (CSR) format.
+ * Immutable data model for use in MVC.
  *
  * The associated .csrrg file must contain exactly five lines, each line consisting of integer values separated by semicolons:
  *
@@ -39,19 +40,20 @@ public final class GraphModel
      * @param adjacencyList     Flattened adjacency list for all vertices
      * @param adjacencyPointers For each vertex, index in adjacencyList where its neighbors start
      */
-    GraphModel
+    public GraphModel
     (
         int maxVerticesPerRow,
         int[] rowPositions,
         int[] rowStartIndices,
         int[] adjacencyList,
-        int[] adjacencyPointers)
+        int[] adjacencyPointers
+    )
     {
         this.maxVerticesPerRow  = maxVerticesPerRow;
-        this.rowPositions       = rowPositions;
-        this.rowStartIndices    = rowStartIndices;
-        this.adjacencyList      = adjacencyList;
-        this.adjacencyPointers  = adjacencyPointers;
+        this.rowPositions = rowPositions.clone();
+        this.rowStartIndices = rowStartIndices.clone();
+        this.adjacencyList = adjacencyList.clone();
+        this.adjacencyPointers = adjacencyPointers.clone();
     }
 
     // --- Getters for all fields ---
@@ -85,5 +87,21 @@ public final class GraphModel
     {
         return adjacencyPointers;
     }
-}
 
+    /**
+     * Prints the graph's data arrays to the terminal for debugging.
+     */
+    public void printGraphData()
+    {
+        System.out.println("GraphModel data:");
+        System.out.println("maxVerticesPerRow: " + maxVerticesPerRow);
+        System.out.print("rowPositions: ");
+        System.out.println(java.util.Arrays.toString(rowPositions));
+        System.out.print("rowStartIndices: ");
+        System.out.println(java.util.Arrays.toString(rowStartIndices));
+        System.out.print("adjacencyList: ");
+        System.out.println(java.util.Arrays.toString(adjacencyList));
+        System.out.print("adjacencyPointers: ");
+        System.out.println(java.util.Arrays.toString(adjacencyPointers));
+    }
+}
