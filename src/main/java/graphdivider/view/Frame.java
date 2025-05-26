@@ -78,7 +78,21 @@ public final class Frame extends JFrame implements PropertyChangeListener
 
         // Set up the main graph visualization panel.
         graphPanel = new Graph(toolPanel);
-        getContentPane().add(graphPanel, BorderLayout.CENTER);
+
+        // Wrap the graphPanel in a JScrollPane to enable scrollbars for large graphs
+        JScrollPane scrollPane = new JScrollPane(graphPanel,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        // Use custom wide scrollbars
+        scrollPane.setVerticalScrollBar(new graphdivider.view.ui.ScrollBar(JScrollBar.VERTICAL));
+        scrollPane.setHorizontalScrollBar(new graphdivider.view.ui.ScrollBar(JScrollBar.HORIZONTAL));
+        // Optional: Remove border for a cleaner look
+        scrollPane.setBorder(null);
+
+        // Set a wider preferred viewport size for the scroll pane
+        scrollPane.setPreferredSize(new Dimension(1800, 900));
+
+        getContentPane().add(scrollPane, BorderLayout.CENTER);
 
         // Register listeners for theme switching via the menu bar.
         menuBar.addLightThemeListener(e -> switchTheme(false));

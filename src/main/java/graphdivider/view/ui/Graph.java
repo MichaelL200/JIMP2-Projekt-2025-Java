@@ -73,11 +73,32 @@ public final class Graph extends JPanel
         setupVertices(model);
         setupEdges(model);
 
+        // Set preferred size based on the bounding box of the vertices
+        updatePreferredSize();
+
         revalidate();
         repaint();
 
         // Enable the divide button after the graph is displayed
         toolPanel.setDivideButtonEnabled(true);
+    }
+
+    /**
+     * Updates the preferred size of the panel to fit all vertices.
+     * This ensures scrollbars appear when the graph is too large.
+     */
+    private void updatePreferredSize()
+    {
+        int maxX = 0, maxY = 0;
+        for (Vertex v : vertices)
+        {
+            Rectangle bounds = v.getBounds();
+            maxX = Math.max(maxX, bounds.x + bounds.width);
+            maxY = Math.max(maxY, bounds.y + bounds.height);
+        }
+        // Add some margin for aesthetics
+        int margin = 40;
+        setPreferredSize(new Dimension(maxX + margin, maxY + margin));
     }
 
     /**
