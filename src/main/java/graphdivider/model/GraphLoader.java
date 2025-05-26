@@ -131,6 +131,98 @@ public final class GraphLoader
     }
 
     /**
+     * Computes the Laplacian matrix (L = D - A) in CSR format for the given graph model.
+     * The Laplacian is defined as:
+     *   L[i][j] = degree(i) if i == j
+     *           = -1        if i != j and (i, j) is an edge
+     *           = 0         otherwise
+     *
+     * @param model the GraphModel to convert
+     * @return a CSRmatrix representing the Laplacian matrix
+     */
+    public static CSRmatrix toLaplacianCSRmatrix(GraphModel model)
+    {
+        int[] adjacencyList = model.getAdjacencyList();
+        int[] adjacencyPointers = model.getAdjacencyPointers();
+
+        // Find the maximum vertex index to determine the matrix size
+        int maxVertex = -1;
+        for (int v : adjacencyList) {
+            if (v > maxVertex) maxVertex = v;
+        }
+        int size = maxVertex + 1;
+
+        // Build undirected neighbor sets for all vertices
+        java.util.Map<Integer, java.util.Set<Integer>> neighborsMap = new java.util.HashMap<>();
+        for (int i = 0; i < adjacencyPointers.length; i++) {
+            int start = adjacencyPointers[i];
+            int end = (i + 1 < adjacencyPointers.length) ? adjacencyPointers[i + 1] : adjacencyList.length;
+            int vertex = adjacencyList[start];
+            neighborsMap.putIfAbsent(vertex, new java.util.HashSet<>());
+            for (int j = start + 1; j < end; j++) {
+                int neighbor = adjacencyList[j];
+                if (neighbor != vertex) {
+                    neighborsMap.get(vertex).add(neighbor);
+                    // Ensure undirected: add vertex to neighbor's set as well
+                    neighborsMap.putIfAbsent(neighbor, new java.util.HashSet<>());
+                    neighborsMap.get(neighbor).add(vertex);
+                }
+            }
+        }
+
+        // Prepare CSR arrays for all vertices 0..size-1
+        int[] rowPtr = new int[size + 1];
+        java.util.List<Integer> colIndList = new java.util.ArrayList<>();
+        java.util.List<Integer> valuesList = new java.util.ArrayList<>();
+        int idx = 0;
+
+        for (int i = 0; i < size; i++) {
+            rowPtr[i] = idx;
+            java.util.Set<Integer> neighbors = neighborsMap.getOrDefault(i, java.util.Collections.emptySet());
+            // Diagonal: degree (number of unique undirected neighbors)
+            colIndList.add(i);
+            valuesList.add(neighbors.size());
+            idx++;
+            // Off-diagonal: -1 for each unique neighbor
+            for (int neighbor : neighbors) {
+                if (neighbor == i) continue;
+                colIndList.add(neighbor);
+                valuesList.add(-1);
+                idx++;
+            }
+        }
+        rowPtr[size] = idx;
+
+        int[] colInd = new int[idx];
+        int[] values = new int[idx];
+        for (int i = 0; i < idx; i++) {
+            colInd[i] = colIndList.get(i);
+            values[i] = valuesList.get(i);
+        }
+
+        // Debug print
+        System.out.println("Laplacian CSR matrix: " + size + "x" + size + ", " + idx + " non-zero values");
+        System.out.println("Row pointers: " + java.util.Arrays.toString(rowPtr));
+        System.out.println("Column indices: " + java.util.Arrays.toString(colInd));
+        System.out.println("Values: " + java.util.Arrays.toString(values));
+
+        CSRmatrix laplacian = new CSRmatrix(rowPtr, colInd, values, size);
+
+        // Print the full Laplacian matrix
+        System.out.println("Full Laplacian matrix:");
+        for (int i = 0; i < size; i++) {
+            StringBuilder sb = new StringBuilder();
+            for (int j = 0; j < size; j++) {
+                sb.append(laplacian.getValue(i, j));
+                if (j < size - 1) sb.append(" ");
+            }
+            System.out.println(sb);
+        }
+
+        return laplacian;
+    }
+
+    /**
      * Parses a semicolon-separated string of integers into an int array.
      *
      * @param line the input string (e.g., "1;2;3")
