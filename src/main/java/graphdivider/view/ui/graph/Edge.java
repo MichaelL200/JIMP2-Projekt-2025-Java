@@ -1,7 +1,6 @@
 package graphdivider.view.ui.graph;
 
 import graphdivider.view.ui.Theme;
-
 import java.awt.*;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -15,9 +14,9 @@ public final class Edge
 {
     // Static list of all edges for global updates
     private static final List<Edge> allEdges = new CopyOnWriteArrayList<>();
-    private final Vertex v2;
     // The two vertices this edge connects
     private final Vertex v1;
+    private final Vertex v2;
     // Current color of the edge (depends on theme)
     private Color edgeColor;
     // Listener to update this edge's color when the theme changes
@@ -25,9 +24,6 @@ public final class Edge
 
     /**
      * Constructs an edge between two vertices and registers for theme updates.
-     *
-     * @param v1 The first vertex
-     * @param v2 The second vertex
      */
     public Edge(Vertex v1, Vertex v2)
     {
@@ -40,7 +36,6 @@ public final class Edge
 
     /**
      * Updates the color of all edges in the application.
-     * Should be called when the theme changes globally.
      */
     public static void updateAllEdgesColor()
     {
@@ -52,8 +47,6 @@ public final class Edge
 
     /**
      * Draws the edge as a line between the centers of its two vertices.
-     *
-     * @param g The Graphics2D context to draw with
      */
     public void draw(Graphics2D g)
     {
@@ -69,7 +62,6 @@ public final class Edge
 
     /**
      * Updates the edge color based on the current theme.
-     * Uses white for dark theme, black for light theme.
      */
     public void updateEdgeColor()
     {
@@ -88,7 +80,6 @@ public final class Edge
 
     /**
      * Cleans up resources when the edge is no longer needed.
-     * Unregisters the theme listener and removes itself from the global edge list.
      */
     public void dispose()
     {

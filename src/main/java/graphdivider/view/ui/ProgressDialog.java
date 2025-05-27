@@ -8,7 +8,7 @@ public class ProgressDialog extends JDialog
     private final JProgressBar progressBar;
 
     /**
-     * Creates a modal progress dialog with a message and indeterminate progress bar.
+     * Creates a non-modal progress dialog with a message and indeterminate progress bar.
      *
      * @param parent  The parent window (can be JFrame or JDialog)
      * @param title   The dialog window title
@@ -16,7 +16,7 @@ public class ProgressDialog extends JDialog
      */
     public ProgressDialog(Window parent, String title, String message)
     {
-        super(parent, title, ModalityType.APPLICATION_MODAL);
+        super(parent, title, ModalityType.MODELESS); // Non-modal
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.add(new JLabel("   " + message), BorderLayout.NORTH);
         progressBar = new JProgressBar();
@@ -26,6 +26,5 @@ public class ProgressDialog extends JDialog
         setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
         setSize(300, 100);
         setLocationRelativeTo(parent);
-        setAlwaysOnTop(true); // Ensure the dialog stays above the main window
     }
 }

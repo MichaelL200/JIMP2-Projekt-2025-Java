@@ -1,5 +1,6 @@
 package graphdivider;
 
+import graphdivider.controller.GraphController;
 import graphdivider.view.Frame;
 import graphdivider.view.ui.Theme;
 
@@ -44,13 +45,15 @@ public final class Main
             // 0 = auto (system default), 1 = light mode, 2 = dark mode.
             Theme.initTheme(0);
 
+            // Create the controller
+            GraphController controller = new GraphController();
+
             // Create the main application window (Frame).
-            // The Frame class sets up the main user interface.
-            Frame frame = new Frame();
+            // Pass the controller to the Frame
+            Frame frame = new Frame(controller);
 
             // Make the main window visible to the user.
             frame.setVisible(true);
         }
     }
 }
-

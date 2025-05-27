@@ -305,6 +305,40 @@ public final class Theme
     }
 
     /**
+     * Checks if the application is running under Windows Subsystem for Linux (WSL).
+     * @return true if running under WSL, false otherwise
+     */
+    public static boolean isRunningUnderWSL()
+    {
+        String os = System.getProperty("os.name").toLowerCase();
+        return os.contains("linux") && System.getenv("WSL_DISTRO_NAME") != null;
+    }
+
+    /**
+     * Starts a timer to poll for theme changes under WSL, since native theme events are not available.
+     * Calls the provided callback if the theme changes.
+     * @param onThemeChanged callback to run when theme changes (e.g., update window icon)
+     */
+    public static void startWSLThemePolling(java.util.function.Consumer<Boolean> onThemeChanged)
+    {
+        if (!isRunningUnderWSL()) return;
+        final boolean[] lastDarkMode = { isDarkPreferred() };
+        // Timer checks every 2 seconds for theme changes.
+        javax.swing.Timer wslThemeTimer = new javax.swing.Timer(2000, null);
+        wslThemeTimer.addActionListener(e ->
+        {
+            boolean dark = isDarkPreferred();
+            if (dark != lastDarkMode[0])
+            {
+                if (onThemeChanged != null) onThemeChanged.accept(dark);
+                lastDarkMode[0] = dark;
+            }
+        });
+        wslThemeTimer.setRepeats(true);
+        wslThemeTimer.start();
+    }
+
+    /**
      * Loads an icon that adapts to the current theme (light/dark).
      * Appends "_dark" or "_light" to the base icon filename as appropriate.
      * @param basePath Path to the icon resource (should end with .png)
@@ -328,4 +362,3 @@ public final class Theme
      */
     public enum ThemeMode { AUTO, LIGHT, DARK }
 }
-

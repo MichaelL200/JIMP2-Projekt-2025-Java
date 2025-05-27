@@ -4,10 +4,19 @@ import javax.swing.*;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
 
+/**
+ * Custom ScrollBar with modern styling and theme support.
+ */
 public class ScrollBar extends JScrollBar
 {
     private static final int DEFAULT_WIDTH = 17;
 
+    /**
+     * Constructs a ScrollBar with the given orientation and applies a modern UI.
+     * Listens for theme changes to update its appearance dynamically.
+     *
+     * @param orientation JScrollBar.VERTICAL or JScrollBar.HORIZONTAL
+     */
     public ScrollBar(int orientation)
     {
         super(orientation);
@@ -23,10 +32,18 @@ public class ScrollBar extends JScrollBar
         });
     }
 
+    /**
+     * ModernScrollBarUI customizes the appearance of the scrollbar
+     * to match the application's theme, with rounded corners and
+     * color adaptation for dark and light modes.
+     */
     private static class ModernScrollBarUI extends BasicScrollBarUI
     {
-        private static final int ARC = 16;
+        private static final int ARC = 16; // Corner arc for rounded rectangles
 
+        /**
+         * Returns the thumb color based on the current theme.
+         */
         private static Color getThumbColor()
         {
             return Theme.isDarkPreferred()
@@ -34,6 +51,9 @@ public class ScrollBar extends JScrollBar
                     : new Color(120, 144, 156, 200); // blue-grey, semi-transparent
         }
 
+        /**
+         * Returns the track color based on the current theme.
+         */
         private static Color getTrackColor()
         {
             return Theme.isDarkPreferred()
@@ -41,6 +61,9 @@ public class ScrollBar extends JScrollBar
                     : new Color(230, 230, 230, 180); // light grey, semi-transparent
         }
 
+        /**
+         * Paints the scrollbar thumb with rounded corners and theme color.
+         */
         @Override
         protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds)
         {
@@ -51,6 +74,9 @@ public class ScrollBar extends JScrollBar
             g2.dispose();
         }
 
+        /**
+         * Paints the scrollbar track with rounded corners and theme color.
+         */
         @Override
         protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds)
         {
@@ -61,18 +87,27 @@ public class ScrollBar extends JScrollBar
             g2.dispose();
         }
 
+        /**
+         * Creates a zero-size button for the decrease arrow to hide it.
+         */
         @Override
         protected JButton createDecreaseButton(int orientation)
         {
             return createZeroButton();
         }
 
+        /**
+         * Creates a zero-size button for the increase arrow to hide it.
+         */
         @Override
         protected JButton createIncreaseButton(int orientation)
         {
             return createZeroButton();
         }
 
+        /**
+         * Utility method to create a zero-size, invisible button.
+         */
         private JButton createZeroButton()
         {
             JButton button = new JButton();

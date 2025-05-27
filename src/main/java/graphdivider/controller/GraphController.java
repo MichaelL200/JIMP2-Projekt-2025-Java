@@ -1,59 +1,58 @@
 package graphdivider.controller;
 
-import graphdivider.model.CSRmatrix;
 import graphdivider.model.GraphLoader;
-import graphdivider.model.GraphModel;
+import graphdivider.model.GraphPartitioner;
+import graphdivider.view.ui.Graph;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * Controller for handling graph-related actions and business logic.
- * Decouples file loading and graph operations from the view (Frame).
- */
 public final class GraphController
 {
     /**
-     * Loads a graph from the given file and returns the model, matrix, and Laplacian matrix.
-     * Handles error dialogs and returns null if loading fails.
+     * Loads a text-based graph file and returns the loaded graph.
+     * Throws IOException on failure.
      */
-    public LoadedGraph loadGraphFromFile(JFrame parent, File file)
+    public GraphLoader.LoadedGraph loadTextGraph(File selectedFile) throws IOException
     {
-        try
-        {
-            GraphModel model = GraphLoader.loadFromFile(file);
-            // Print graph data to terminal
-            model.printGraphData();
-            CSRmatrix matrix = GraphLoader.toCSRmatrix(model);
-            CSRmatrix laplacian = GraphLoader.toLaplacianCSRmatrix(model);
-            // Print Laplacian matrix data to terminal
-            laplacian.printMatrixData("Laplacian CSR matrix data:");
-            return new LoadedGraph(model, matrix, laplacian);
-        } catch (IOException ex)
-        {
-            JOptionPane.showMessageDialog(parent, "Failed to load graph: " + ex.getMessage(),
-                    "Load Error", JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
+        return GraphLoader.loadGraphWithMatrices(selectedFile);
     }
 
     /**
-     * Data holder for loaded graph model, matrix, and Laplacian matrix.
+     * Loads a partitioned text graph file and returns the loaded graph.
+     * Throws IOException on failure.
      */
-    public static class LoadedGraph
+    public GraphLoader.LoadedGraph loadPartitionedTextGraph(File selectedFile) throws IOException
     {
-        public final GraphModel model;
-        public final CSRmatrix matrix;
-        public final CSRmatrix laplacian;
-
-        public LoadedGraph(GraphModel model, CSRmatrix matrix, CSRmatrix laplacian)
-        {
-            this.model = model;
-            this.matrix = matrix;
-            this.laplacian = laplacian;
-        }
+        return GraphPartitioner.loadPartitionedTextGraph(selectedFile);
     }
 
-    // Future: Add methods for partitioning, saving, etc.
+    /**
+     * Loads a partitioned binary graph file and returns the loaded graph.
+     * Throws IOException on failure.
+     */
+    public GraphLoader.LoadedGraph loadPartitionedBinaryGraph(File selectedFile) throws IOException
+    {
+        return GraphPartitioner.loadPartitionedBinaryGraph(selectedFile);
+    }
+
+    /**
+     * Loads a graph file of the specified type and displays it on the given graph panel.
+     * Handles both loading and display logic.
+     */
+    public void loadAndDisplayGraph(File selectedFile, Object type, Graph graphPanel) throws IOException
+    {
+        GraphLoader.LoadedGraph loaded;
+        if (type instanceof Enum<?> enumType) {
+            switch (enumType.name()) {
+                case "TEXT" -> loaded = loadTextGraph(selectedFile);
+                case "PARTITIONED_TEXT" -> loaded = loadPartitionedTextGraph(selectedFile);
+                case "PARTITIONED_BINARY" -> loaded = loadPartitionedBinaryGraph(selectedFile);
+                default -> throw new IllegalArgumentException("Unknown graph load type: " + type);
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid graph load type: " + type);
+        }
+        graphPanel.displayGraph(loaded.model);
+    }
 }
