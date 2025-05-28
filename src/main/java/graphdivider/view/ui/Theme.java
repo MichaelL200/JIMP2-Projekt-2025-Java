@@ -14,8 +14,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
 /**
- * Utility class for managing application themes (light, dark, auto).
- * Handles detection of system theme, switching look and feel, and notifying listeners of theme changes.
+ * Theme management utility for the application.
+ * Handles light, dark, and auto themes based on system preferences.
+ * Provides methods to register listeners for theme changes and apply themes.
+ * Supports dynamic updates of UI components when the theme changes.
  */
 public final class Theme
 {
@@ -23,6 +25,11 @@ public final class Theme
     private static final List<Runnable> themeListeners = new CopyOnWriteArrayList<>();
     // Tracks the current theme mode (auto, light, dark)
     private static ThemeMode currentTheme = ThemeMode.AUTO;
+
+    /**
+     * Enum representing the available theme modes.
+     */
+    public enum ThemeMode { AUTO, LIGHT, DARK }
 
     // Private constructor to prevent instantiation of utility class
     private Theme() {}
@@ -58,8 +65,46 @@ public final class Theme
      * Updates the color of all edges in the graph to match the current theme.
      * This is called after a theme change to ensure visual consistency.
      */
-    public static void updateAllEdgesColor() {
+    public static void updateAllEdgesColor()
+    {
         graphdivider.view.ui.graph.Edge.updateAllEdgesColor();
+    }
+
+    /**
+     * Applies the specified theme mode (AUTO, LIGHT, DARK).
+     * If AUTO, detects the system's preferred theme.
+     * Notifies listeners after applying.
+     * @param mode ThemeMode to apply
+     */
+    public static void applyTheme(ThemeMode mode)
+    {
+        currentTheme = mode;
+        if (mode == ThemeMode.AUTO)
+        {
+            if (isSystemDark())
+                setupTheme(ThemeMode.DARK);
+            else
+                setupTheme(ThemeMode.LIGHT);
+        }
+        else
+        {
+            setupTheme(mode);
+        }
+        notifyThemeChangeListeners();
+    }
+
+    // Helper to set up the look and feel for LIGHT or DARK
+    private static void setupTheme(ThemeMode mode)
+    {
+        if (mode == ThemeMode.DARK)
+        {
+            FlatDarkLaf.setup();
+        }
+        else
+        {
+            FlatLightLaf.setup();
+        }
+        refreshAllWindows();
     }
 
     /**
@@ -69,42 +114,15 @@ public final class Theme
      */
     public static void applyAutoTheme(Runnable onThemeChanged)
     {
-        currentTheme = ThemeMode.AUTO;
-        // Detect and apply the system's preferred theme
-        if (isSystemDark()) applyDarkTheme();
-        else applyLightTheme();
-        // Run the callback if provided
+        applyTheme(ThemeMode.AUTO);
         if (onThemeChanged != null) onThemeChanged.run();
     }
-
     /**
      * Applies the auto theme without a callback.
      */
     public static void applyAutoTheme()
     {
-        applyAutoTheme(null);
-    }
-
-    /**
-     * Applies the light theme and notifies listeners.
-     */
-    public static void applyLightTheme()
-    {
-        currentTheme = ThemeMode.LIGHT;
-        FlatLightLaf.setup(); // Set FlatLaf light look and feel
-        refreshAllWindows();  // Update all open windows to new look and feel
-        notifyThemeChangeListeners();
-    }
-
-    /**
-     * Applies the dark theme and notifies listeners.
-     */
-    public static void applyDarkTheme()
-    {
-        currentTheme = ThemeMode.DARK;
-        FlatDarkLaf.setup(); // Set FlatLaf dark look and feel
-        refreshAllWindows(); // Update all open windows to new look and feel
-        notifyThemeChangeListeners();
+        applyTheme(ThemeMode.AUTO);
     }
 
     /**
@@ -126,9 +144,9 @@ public final class Theme
         // Set the initial theme based on the mode parameter
         switch (mode)
         {
-            case 1 -> applyLightTheme();
-            case 2 -> applyDarkTheme();
-            default -> applyAutoTheme();
+            case 1 -> applyTheme(ThemeMode.LIGHT);
+            case 2 -> applyTheme(ThemeMode.DARK);
+            default -> applyTheme(ThemeMode.AUTO);
         }
     }
 
@@ -176,8 +194,99 @@ public final class Theme
             // Fallback for IDEs or unknown cases
             return "true".equalsIgnoreCase(System.getProperty("ide.win.menu.dark"));
         }
-        // Check for GNOME or KDE dark mode
-        return isGnomeDark() || isKdeDark();
+        // Linux: try multiple mechanisms
+        if (os.contains("linux"))
+        {
+            int theme = readLinuxTheme();
+            if (theme == 1) return true;   // dark
+            if (theme == 2) return false;  // light
+            // fallback: unknown, default to light
+            return false;
+        }
+        return false;
+    }
+
+    /**
+     * Try to detect Linux theme using multiple mechanisms.
+     * Returns: 1 = dark, 2 = light, 0 = unknown
+     */
+    private static int readLinuxTheme()
+    {
+        // 1. Try gsettings (GNOME, Cinnamon, etc.)
+        try
+        {
+            Process p = new ProcessBuilder
+            (
+                "gsettings", "get", "org.gnome.desktop.interface", "color-scheme"
+            ).start();
+            p.waitFor();
+            try (BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream())))
+            {
+                String line = r.readLine();
+                if (line != null)
+                {
+                    if (line.contains("prefer-dark")) return 1;
+                    if (line.contains("prefer-light")) return 2;
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // 2. Try gdbus (freedesktop portal, used by GNOME, KDE, etc.)
+        try
+        {
+            ProcessBuilder pb = new ProcessBuilder
+            (
+                "gdbus", "call", "--session", "--timeout=1000",
+                "--dest=org.freedesktop.portal.Desktop",
+                "--object-path", "/org/freedesktop/portal/desktop",
+                "--method", "org.freedesktop.portal.Settings.Read",
+                "org.freedesktop.appearance", "color-scheme"
+            );
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream())))
+            {
+                String line = reader.readLine();
+                if (line != null)
+                {
+                    if (line.contains("<<uint32 1>>")) return 1; // dark
+                    if (line.contains("<<uint32 2>>")) return 2; // light
+                }
+            }
+            process.waitFor();
+        } catch (Exception ignored) {}
+
+        // 3. Try KDE config
+        Path cfg = Paths.get(System.getProperty("user.home"), ".config", "kdeglobals");
+        if (Files.exists(cfg))
+        {
+            try (Stream<String> lines = Files.lines(cfg))
+            {
+                boolean inGeneral = false;
+                for (String line : (Iterable<String>) lines::iterator)
+                {
+                    line = line.trim();
+                    if (line.equals("[General]")) inGeneral = true;
+                    else if (inGeneral && line.startsWith("ColorScheme="))
+                    {
+                        return line.substring(line.indexOf('=') + 1).toLowerCase().contains("dark") ? 1 : 2;
+                    }
+                }
+            }
+            catch (IOException ignored) {}
+        }
+
+        // 4. Try environment variable (some distros set GTK_THEME or similar)
+        String gtkTheme = System.getenv("GTK_THEME");
+        if (gtkTheme != null && gtkTheme.toLowerCase().contains("dark")) return 1;
+        if (gtkTheme != null && gtkTheme.toLowerCase().contains("light")) return 2;
+
+        // 5. Try XDG_CURRENT_DESKTOP or DESKTOP_SESSION for known dark sessions
+        String desktop = System.getenv("XDG_CURRENT_DESKTOP");
+        if (desktop != null && desktop.toLowerCase().contains("dark")) return 1;
+
+        // Unknown
+        return 0;
     }
 
     /**
@@ -206,63 +315,6 @@ public final class Theme
             w.validate();
             w.repaint();
         }
-    }
-
-    /**
-     * Checks if GNOME desktop is using a dark color scheme.
-     * Uses gsettings to query the color-scheme property.
-     * @return true if GNOME prefers dark mode
-     */
-    private static boolean isGnomeDark()
-    {
-        try
-        {
-            Process p = new ProcessBuilder
-            (
-                "gsettings", "get",
-                "org.gnome.desktop.interface",
-                "color-scheme"
-            ).start();
-            p.waitFor();
-            try (BufferedReader r = new BufferedReader
-            (
-                     new InputStreamReader(p.getInputStream())
-            ))
-            {
-                String line = r.readLine();
-                return line != null && line.contains("prefer-dark");
-            }
-        }
-        catch (IOException | InterruptedException e)
-        {
-            return false;
-        }
-    }
-
-    /**
-     * Checks if KDE desktop is using a dark color scheme by reading the kdeglobals config.
-     * Looks for ColorScheme=...dark in the [General] section.
-     * @return true if KDE prefers dark mode
-     */
-    private static boolean isKdeDark()
-    {
-        Path cfg = Paths.get(System.getProperty("user.home"), ".config", "kdeglobals");
-        if (Files.exists(cfg))
-        {
-            try (Stream<String> lines = Files.lines(cfg))
-            {
-                boolean inGeneral = false;
-                for (String line : (Iterable<String>) lines::iterator)
-                {
-                    line = line.trim();
-                    if (line.equals("[General]")) inGeneral = true;
-                    else if (inGeneral && line.startsWith("ColorScheme="))
-                        return line.substring(line.indexOf('=')+1).toLowerCase().contains("dark");
-                }
-            }
-            catch (IOException ignored) {}
-        }
-        return false;
     }
 
     /**
@@ -337,28 +389,4 @@ public final class Theme
         wslThemeTimer.setRepeats(true);
         wslThemeTimer.start();
     }
-
-    /**
-     * Loads an icon that adapts to the current theme (light/dark).
-     * Appends "_dark" or "_light" to the base icon filename as appropriate.
-     * @param basePath Path to the icon resource (should end with .png)
-     * @return ImageIcon for the current theme, or null if not found
-     */
-    public static ImageIcon loadSystemAwareIcon(String basePath)
-    {
-        // Replace .png with _dark.png or _light.png depending on theme
-        String themedPath = basePath.replace(".png", isDarkPreferred() ? "_dark.png" : "_light.png");
-        java.net.URL url = Theme.class.getResource(themedPath);
-        if (url == null)
-        {
-            System.err.println("Warning: Icon resource not found: " + themedPath);
-            return null;
-        }
-        return new ImageIcon(url);
-    }
-
-    /**
-     * Enum representing the available theme modes.
-     */
-    public enum ThemeMode { AUTO, LIGHT, DARK }
 }

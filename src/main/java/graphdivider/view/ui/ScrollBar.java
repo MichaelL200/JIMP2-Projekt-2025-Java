@@ -39,7 +39,8 @@ public class ScrollBar extends JScrollBar
      */
     private static class ModernScrollBarUI extends BasicScrollBarUI
     {
-        private static final int ARC = 16; // Corner arc for rounded rectangles
+        // Corner arc for rounded rectangles
+        private static final int ARC = 16;
 
         /**
          * Returns the thumb color based on the current theme.

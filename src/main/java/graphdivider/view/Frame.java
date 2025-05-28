@@ -46,13 +46,16 @@ public final class Frame extends JFrame implements PropertyChangeListener
         // Delegate WSL theme polling to Theme
         Theme.startWSLThemePolling(this::updateWindowIcon);
 
+        // Set the initial window size and maximize it.
         setInitialWindowSize();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        maximizeWindow();
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        // Workaround: Force size to usable screen area when maximized (for laptops with maximization issues)
-        this.addWindowStateListener(e -> {
-            if ((e.getNewState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH) {
+        // Force size to usable screen area when maximized (for laptops with maximization issues)
+        this.addWindowStateListener(e ->
+        {
+            if ((e.getNewState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH)
+            {
                 GraphicsConfiguration gc = getGraphicsConfiguration();
                 Rectangle bounds = gc.getBounds();
                 Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(gc);
@@ -79,23 +82,12 @@ public final class Frame extends JFrame implements PropertyChangeListener
         graphPanel = new Graph(toolPanel);
 
         // Wrap the graphPanel in a JScrollPane to enable scrollbars for large graphs
-        JScrollPane scrollPane = new JScrollPane(graphPanel,
-                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        // Use custom wide scrollbars
-        scrollPane.setVerticalScrollBar(new graphdivider.view.ui.ScrollBar(JScrollBar.VERTICAL));
-        scrollPane.setHorizontalScrollBar(new graphdivider.view.ui.ScrollBar(JScrollBar.HORIZONTAL));
-        // Optional: Remove border for a cleaner look
-        scrollPane.setBorder(null);
-
-        // Set a wider preferred viewport size for the scroll pane
-        scrollPane.setPreferredSize(new Dimension(1800, 900));
-
+        JScrollPane scrollPane = getScrollPane();
         getContentPane().add(scrollPane, BorderLayout.CENTER);
 
         // Register listeners for theme switching via the menu bar.
-        menuBar.addLightThemeListener(e -> switchTheme(false));
-        menuBar.addDarkThemeListener(e -> switchTheme(true));
+        menuBar.addLightThemeListener(e -> switchTheme(Theme.ThemeMode.LIGHT));
+        menuBar.addDarkThemeListener(e -> switchTheme(Theme.ThemeMode.DARK));
         menuBar.addAutoThemeListener(e -> Theme.applyAutoTheme(() ->
         {
             // Callback to update icon and UI when auto theme changes.
@@ -105,39 +97,45 @@ public final class Frame extends JFrame implements PropertyChangeListener
         }));
 
         // Register listener for loading a text-based graph file.
-        menuBar.addLoadTextGraphListener(e -> {
+        menuBar.addLoadTextGraphListener(e ->
+        {
             JFileChooser fileChooser = new JFileChooser("src/main/resources/graphs/");
             fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             fileChooser.setAcceptAllFileFilterUsed(false);
             fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSR Graph files (*.csrrg)", "csrrg"));
             int result = fileChooser.showOpenDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION) {
+            if (result == JFileChooser.APPROVE_OPTION)
+            {
                 File selectedFile = fileChooser.getSelectedFile();
                 loadGraphAsync(selectedFile, GraphLoadType.TEXT);
             }
         });
 
         // Register listener for loading a partitioned text graph file.
-        menuBar.addLoadPartitionedTextListener(e -> {
+        menuBar.addLoadPartitionedTextListener(e ->
+        {
             JFileChooser fileChooser = new JFileChooser("src/main/resources/divided_graphs/");
             fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             fileChooser.setAcceptAllFileFilterUsed(false);
             fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSR (Partitioned) Graph files (*.csrrg)", "csrrg"));
             int result = fileChooser.showOpenDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION) {
+            if (result == JFileChooser.APPROVE_OPTION)
+            {
                 File selectedFile = fileChooser.getSelectedFile();
                 loadGraphAsync(selectedFile, GraphLoadType.PARTITIONED_TEXT);
             }
         });
 
         // Register listener for loading a partitioned binary graph file.
-        menuBar.addLoadPartitionedBinaryListener(e -> {
+        menuBar.addLoadPartitionedBinaryListener(e ->
+        {
             JFileChooser fileChooser = new JFileChooser("src/main/resources/divided_graphs/");
             fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             fileChooser.setAcceptAllFileFilterUsed(false);
             fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSR (Partitioned) Graph Binary files (*.bin)", "bin"));
             int result = fileChooser.showOpenDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION) {
+            if (result == JFileChooser.APPROVE_OPTION)
+            {
                 File selectedFile = fileChooser.getSelectedFile();
                 loadGraphAsync(selectedFile, GraphLoadType.PARTITIONED_BINARY);
             }
@@ -148,8 +146,6 @@ public final class Frame extends JFrame implements PropertyChangeListener
         {
             int parts = toolPanel.getPartitions();
             int margin = toolPanel.getMargin();
-            // Delegate to controller if business logic is needed
-            // controller.handlePartitionSettings(parts, margin);
             System.out.println("Partitions: " + parts + ", Margin: " + margin + "%");
         });
 
@@ -163,24 +159,38 @@ public final class Frame extends JFrame implements PropertyChangeListener
     }
 
     /**
-     * Switches the application theme between light and dark modes.
+     * Creates a JScrollPane to wrap the graph panel.
+     * This allows for scrollbars when the graph exceeds the viewport size.
+     * Uses custom scrollbars for a modern look and feel.
+     *
+     * @return a JScrollPane containing the graph panel
+     */
+    private JScrollPane getScrollPane()
+    {
+        JScrollPane scrollPane = new JScrollPane(graphPanel,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        // Use custom wide scrollbars
+        scrollPane.setVerticalScrollBar(new ScrollBar(JScrollBar.VERTICAL));
+        scrollPane.setHorizontalScrollBar(new ScrollBar(JScrollBar.HORIZONTAL));
+        // Remove border for a cleaner look
+        scrollPane.setBorder(null);
+        // Set a wider preferred viewport size for the scroll pane
+        scrollPane.setPreferredSize(new Dimension(1800, 900));
+        return scrollPane;
+    }
+
+    /**
+     * Switches the application theme.
      * Updates the window icon and repaints the graph panel to reflect the new theme.
      *
-     * @param dark true for dark theme, false for light theme
+     * @param mode ThemeMode to apply
      */
-    private void switchTheme(boolean dark)
+    private void switchTheme(Theme.ThemeMode mode)
     {
-        if (dark)
-        {
-            Theme.applyDarkTheme();
-        }
-        else
-        {
-            Theme.applyLightTheme();
-        }
+        Theme.applyTheme(mode);
         updateWindowIcon(Theme.isDarkPreferred());
         SwingUtilities.updateComponentTreeUI(graphPanel);
-        graphPanel.repaint(); // Ensures edge color updates
     }
 
     /**
@@ -191,18 +201,9 @@ public final class Frame extends JFrame implements PropertyChangeListener
     {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int halfWidth  = screenSize.width / 2;
-        int halfHeight = (int) (screenSize.height / 1.5);
-        setMinimumSize(new Dimension(halfWidth, halfHeight));
-        setSize(halfWidth, halfHeight);
-    }
-
-    /**
-     * Maximizes the window.
-     * WSL-specific logic is now handled by Theme.
-     */
-    private void maximizeWindow()
-    {
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        int twoThirdsHeight = (int) (screenSize.height / 1.5);
+        setMinimumSize(new Dimension(halfWidth, twoThirdsHeight));
+        setSize(halfWidth, twoThirdsHeight);
     }
 
     /**
@@ -230,17 +231,15 @@ public final class Frame extends JFrame implements PropertyChangeListener
     public void updateWindowIcon(boolean darkMode)
     {
         String resource = darkMode ? "/icon/icon_dark.png" : "/icon/icon_light.png";
-        try
+        try (java.io.InputStream iconStream = getClass().getResourceAsStream(resource))
         {
-            java.io.InputStream iconStream = getClass().getResourceAsStream(resource);
             if (iconStream == null)
             {
                 throw new IllegalArgumentException("Resource not found: " + resource);
             }
             Image icon = ImageIO.read(iconStream);
             setIconImage(icon);
-        }
-        catch (IOException | IllegalArgumentException e)
+        } catch (IOException | IllegalArgumentException e)
         {
             System.err.println("Warning: Unable to load window icon '" + resource + "': " + e.getMessage());
         }
@@ -253,20 +252,25 @@ public final class Frame extends JFrame implements PropertyChangeListener
     private void loadGraphAsync(File selectedFile, GraphLoadType type)
     {
         String title, message;
-        switch (type) {
-            case TEXT -> {
+        switch (type)
+        {
+            case TEXT ->
+            {
                 title = "Loading Graph...";
                 message = "Loading graph, please wait...";
             }
-            case PARTITIONED_TEXT -> {
+            case PARTITIONED_TEXT ->
+            {
                 title = "Loading Partitioned Graph...";
                 message = "Loading partitioned graph, please wait...";
             }
-            case PARTITIONED_BINARY -> {
+            case PARTITIONED_BINARY ->
+            {
                 title = "Loading Partitioned Binary Graph...";
                 message = "Loading partitioned binary graph, please wait...";
             }
-            default -> {
+            default ->
+            {
                 title = "Loading...";
                 message = "Loading, please wait...";
             }
@@ -278,23 +282,37 @@ public final class Frame extends JFrame implements PropertyChangeListener
         {
             private Exception error = null;
 
+            /**
+             * Background task to load the graph file.
+             * Runs in a separate thread to avoid blocking the Event Dispatch Thread.
+             * Displays a progress dialog while loading.
+             *
+             * @return null when done
+             */
             @Override
             protected Void doInBackground()
             {
-                try {
+                try
+                {
                     controller.loadAndDisplayGraph(selectedFile, type, graphPanel);
-                } catch (Exception ex) {
+                } catch (Exception ex)
+                {
                     error = ex;
                     cancel(true);
                 }
                 return null;
             }
 
+            /**
+             * Called on the Event Dispatch Thread after doInBackground completes.
+             * Disposes the progress dialog and shows an error message if loading failed.
+             */
             @Override
             protected void done()
             {
                 progressDialog.dispose();
-                if (error != null || isCancelled()) {
+                if (error != null || isCancelled())
+                {
                     JOptionPane.showMessageDialog(Frame.this, "Failed to load graph." +
                                     (error != null ? "\n" + error.getMessage() : ""),
                             "Error", JOptionPane.ERROR_MESSAGE);
@@ -302,7 +320,8 @@ public final class Frame extends JFrame implements PropertyChangeListener
             }
         };
 
-        SwingUtilities.invokeLater(() -> {
+        SwingUtilities.invokeLater(() ->
+        {
             progressDialog.setVisible(true);
             loader.execute();
         });
@@ -311,7 +330,8 @@ public final class Frame extends JFrame implements PropertyChangeListener
     /**
      * Enum for graph load types.
      */
-    private enum GraphLoadType {
+    private enum GraphLoadType
+    {
         TEXT, PARTITIONED_TEXT, PARTITIONED_BINARY
     }
 }

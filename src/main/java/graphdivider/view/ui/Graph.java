@@ -22,8 +22,10 @@ public final class Graph extends JPanel
     private final List<Vertex> vertices = new ArrayList<>();
     // List of edges in the graph (drawn manually)
     private final List<Edge> edges = new ArrayList<>();
+
     // Store mapping for use between setupVertices and setupEdges
     private java.util.Map<Integer, Vertex> vertexIndexToComponent;
+
     // Reference to the ToolPanel instance
     private final ToolPanel toolPanel;
 
@@ -178,9 +180,11 @@ public final class Graph extends JPanel
             int col = rowPositions[i];
             int visualRowIdx = rowToVisualRow.get(row);
 
+            // Calculate the position based on row and column
             int x = margin + col * (vertexDiameter + spacing);
             int y = 20 + visualRowIdx * rowSpacing;
 
+            // Create the vertex component and add it to the panel
             Vertex vertex = new Vertex(i, Vertex.DEFAULT_BLUE, vertexDiameter);
             vertex.setBounds(x, y, vertexDiameter, vertexDiameter);
             vertices.add(vertex);
@@ -203,12 +207,12 @@ public final class Graph extends JPanel
         int vertexCount = model.getRowPositions().length;
         int[] adjacencyList = model.getAdjacencyList();
         int[] adjacencyPointers = model.getAdjacencyPointers();
-        int[] rowStartIndices = model.getRowStartIndices();
 
-        // To avoid duplicate edges (for undirected graphs), use a set of pairs (min, max)
+        // To avoid duplicate edges, use a set of pairs (min, max)
         java.util.Set<String> edgeSet = new java.util.HashSet<>();
         for (int i = 0; i < adjacencyPointers.length; i++)
         {
+            // Skip empty rows
             int start = adjacencyPointers[i];
             int end = (i + 1 < adjacencyPointers.length) ? adjacencyPointers[i + 1] : adjacencyList.length;
             int vertexIdx = adjacencyList[start];

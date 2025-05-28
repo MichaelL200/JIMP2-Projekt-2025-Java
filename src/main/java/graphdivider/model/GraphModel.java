@@ -2,22 +2,22 @@ package graphdivider.model;
 
 /**
  * Represents a graph in memory using the Compressed Sparse Row (CSR) format.
- * Immutable data model for use in MVC.
+ * This immutable data model is intended for use in MVC architectures.
  *
  * The associated .csrrg file must contain exactly five lines, each line consisting of integer values separated by semicolons:
  *
  * 1. maxVerticesPerRow        - Maximum number of vertices in any row (single integer).
- * 2. rowPositions             - Array of row identifiers.
+ * 2. rowPositions             - Array of row identifiers (one per row).
  * 3. rowStartIndices          - For each row, the index in adjacencyList where that row’s neighbors start.
  * 4. adjacencyList            - Flattened array of all neighbor vertex indices.
  * 5. adjacencyPointers        - For each vertex (in row order), the index in adjacencyList where its neighbor list begins.
  */
 public final class GraphModel
 {
-    /** Maximum number of vertices present in any row. */
+    /** The maximum number of vertices present in any row of the graph. */
     private final int maxVerticesPerRow;
 
-    /** Identifiers for each row in the graph. */
+    /** Array containing the identifiers for each row in the graph. */
     private final int[] rowPositions;
 
     /** For each row, the starting index in adjacencyList for its neighbors. */
@@ -28,17 +28,18 @@ public final class GraphModel
 
     /**
      * For each vertex (ordered by row), the index in adjacencyList where its neighbor list begins.
+     * This allows efficient access to each vertex's adjacency list.
      */
     private final int[] adjacencyPointers;
 
     /**
      * Constructs a GraphModel with all required CSR arrays.
      *
-     * @param maxVerticesPerRow Maximum number of vertices in any row
-     * @param rowPositions      Identifiers for each row
-     * @param rowStartIndices   Start indices in adjacencyList for each row
-     * @param adjacencyList     Flattened adjacency list for all vertices
-     * @param adjacencyPointers For each vertex, index in adjacencyList where its neighbors start
+     * @param maxVerticesPerRow Maximum number of vertices in any row.
+     * @param rowPositions      Identifiers for each row.
+     * @param rowStartIndices   Start indices in adjacencyList for each row.
+     * @param adjacencyList     Flattened adjacency list for all vertices.
+     * @param adjacencyPointers For each vertex, index in adjacencyList where its neighbors start.
      */
     public GraphModel
     (
@@ -50,6 +51,7 @@ public final class GraphModel
     )
     {
         this.maxVerticesPerRow  = maxVerticesPerRow;
+        // Defensive copies to preserve immutability
         this.rowPositions = rowPositions.clone();
         this.rowStartIndices = rowStartIndices.clone();
         this.adjacencyList = adjacencyList.clone();
@@ -58,13 +60,13 @@ public final class GraphModel
 
     // --- Getters for all fields ---
 
-    /** @return Maximum number of vertices present in any row. */
+    /** @return The maximum number of vertices present in any row of the graph. */
     public int getMaxVerticesPerRow()
     {
         return maxVerticesPerRow;
     }
 
-    /** @return Identifiers for each row in the graph. */
+    /** @return Array containing the identifiers for each row in the graph. */
     public int[] getRowPositions()
     {
         return rowPositions;
@@ -82,14 +84,17 @@ public final class GraphModel
         return adjacencyList;
     }
 
-    /** @return For each vertex (ordered by row), the index in adjacencyList where its neighbor list begins. */
+    /**
+     * @return For each vertex (ordered by row), the index in adjacencyList where its neighbor list begins.
+     */
     public int[] getAdjacencyPointers()
     {
         return adjacencyPointers;
     }
 
     /**
-     * Prints the graph's data arrays to the terminal for debugging.
+     * Prints the graph's data arrays to the terminal for debugging purposes.
+     * Each field is printed on a separate line for clarity.
      */
     public void printGraphData()
     {

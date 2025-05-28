@@ -43,14 +43,17 @@ public final class GraphController
     public void loadAndDisplayGraph(File selectedFile, Object type, Graph graphPanel) throws IOException
     {
         GraphLoader.LoadedGraph loaded;
-        if (type instanceof Enum<?> enumType) {
-            switch (enumType.name()) {
+        if (type instanceof Enum<?> enumType)
+        {
+            switch (enumType.name())
+            {
                 case "TEXT" -> loaded = loadTextGraph(selectedFile);
                 case "PARTITIONED_TEXT" -> loaded = loadPartitionedTextGraph(selectedFile);
                 case "PARTITIONED_BINARY" -> loaded = loadPartitionedBinaryGraph(selectedFile);
                 default -> throw new IllegalArgumentException("Unknown graph load type: " + type);
             }
-        } else {
+        } else
+        {
             throw new IllegalArgumentException("Invalid graph load type: " + type);
         }
         graphPanel.displayGraph(loaded.model);

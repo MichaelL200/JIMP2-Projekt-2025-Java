@@ -144,9 +144,8 @@ public final class ToolPanel extends JPanel
          * Adds a button spanning two columns to the next row in the panel.
          *
          * @param button the button component
-         * @return this builder for chaining
          */
-        ToolPanelBuilder addButton(JButton button)
+        void addButton(JButton button)
         {
             gbc.gridx = 0;
             gbc.gridy = panel.getComponentCount() / 2;
@@ -155,7 +154,6 @@ public final class ToolPanel extends JPanel
             panel.add(button, gbc);
             gbc.gridwidth = 1;
             gbc.fill = GridBagConstraints.NONE;
-            return this;
         }
 
         /**

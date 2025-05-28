@@ -15,18 +15,26 @@ import java.awt.event.ActionListener;
 public final class MenuBar extends JMenuBar
 {
     // Menu items for loading different types of graphs
-    private final JMenuItem loadTextGraphItem = new JMenuItem("Graph (Text)…"); // Load a plain text graph file
-    private final JMenuItem loadPartitionedTextItem = new JMenuItem("Partitioned Graph (Text)…"); // Load a partitioned graph in text format
-    private final JMenuItem loadPartitionedBinaryItem = new JMenuItem("Partitioned Graph (Binary)…"); // Load a partitioned graph in binary format
+    private final JMenuItem loadTextGraphItem =
+        new JMenuItem("Graph (Text)…"); // Load a plain text graph file
+    private final JMenuItem loadPartitionedTextItem =
+        new JMenuItem("Partitioned Graph (Text)…"); // Load a partitioned graph in text format
+    private final JMenuItem loadPartitionedBinaryItem =
+        new JMenuItem("Partitioned Graph (Binary)…"); // Load a partitioned graph in binary format
 
     // Menu items for saving partitioned graphs
-    private final JMenuItem savePartitionedTextItem = new JMenuItem("Partitioned Graph (Text)…"); // Save partitioned graph as text
-    private final JMenuItem saveBinaryItem = new JMenuItem("Partitioned Graph (Binary)…"); // Save partitioned graph as binary
+    private final JMenuItem savePartitionedTextItem =
+        new JMenuItem("Partitioned Graph (Text)…"); // Save partitioned graph as text
+    private final JMenuItem saveBinaryItem =
+        new JMenuItem("Partitioned Graph (Binary)…"); // Save partitioned graph as binary
 
     // Menu items for theme selection
-    private final JMenuItem autoThemeItem = new JMenuItem("Auto");   // Use system theme
-    private final JMenuItem lightThemeItem = new JMenuItem("Light"); // Force light theme
-    private final JMenuItem darkThemeItem = new JMenuItem("Dark");  // Force dark theme
+    private final JMenuItem autoThemeItem =
+        new JMenuItem("Auto");   // Use system theme
+    private final JMenuItem lightThemeItem =
+        new JMenuItem("Light");  // Force light theme
+    private final JMenuItem darkThemeItem =
+        new JMenuItem("Dark");   // Force dark theme
 
     /**
      * Constructs the menu bar, sets up menus and menu items.
@@ -134,4 +142,3 @@ public final class MenuBar extends JMenuBar
         darkThemeItem.addActionListener(l);
     }
 }
-
