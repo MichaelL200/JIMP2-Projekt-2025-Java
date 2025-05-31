@@ -12,14 +12,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * Main application window for the Graph Divider tool.
- *
- * Responsibilities:
- * - Hosts the main UI components (menu, tool panel, graph visualization).
- * - Handles theme switching and adapts to OS theme changes (Observer pattern).
- * - Delegates business logic (file loading, partitioning) to the controller.
- */
+// Main application window
 public final class Frame extends JFrame implements PropertyChangeListener
 {
     // The main panel responsible for graph visualization.
@@ -29,10 +22,13 @@ public final class Frame extends JFrame implements PropertyChangeListener
     // Tracks the last known dark mode state to detect theme changes.
     private boolean lastDarkMode;
 
-    /**
-     * Constructs the main application window and initializes all UI components and listeners.
-     * @param controller the GraphController to use for business logic
-     */
+    // Enum to represent different types of graph loading
+    private enum GraphLoadType
+    {
+        TEXT, PARTITIONED_TEXT, PARTITIONED_BINARY
+    }
+
+    //Constructs the main application window and initializes all UI components and listeners
     public Frame(GraphController controller)
     {
         this.controller = controller;
@@ -158,13 +154,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
         });
     }
 
-    /**
-     * Creates a JScrollPane to wrap the graph panel.
-     * This allows for scrollbars when the graph exceeds the viewport size.
-     * Uses custom scrollbars for a modern look and feel.
-     *
-     * @return a JScrollPane containing the graph panel
-     */
+    // Creates a JScrollPane to wrap the graph panel
     private JScrollPane getScrollPane()
     {
         JScrollPane scrollPane = new JScrollPane(graphPanel,
@@ -180,12 +170,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
         return scrollPane;
     }
 
-    /**
-     * Switches the application theme.
-     * Updates the window icon and repaints the graph panel to reflect the new theme.
-     *
-     * @param mode ThemeMode to apply
-     */
+    // Switches the application theme
     private void switchTheme(Theme.ThemeMode mode)
     {
         Theme.applyTheme(mode);
@@ -193,10 +178,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
         SwingUtilities.updateComponentTreeUI(graphPanel);
     }
 
-    /**
-     * Sets the initial window size to half the screen width and two-thirds of the screen height.
-     * Ensures the window is large enough for comfortable use.
-     */
+    // Sets the initial window size based on the screen dimensions
     private void setInitialWindowSize()
     {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -206,11 +188,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
         setSize(halfWidth, twoThirdsHeight);
     }
 
-    /**
-     * Observer update for theme changes.
-     * Called when the OS theme changes (Windows 11+).
-     * Updates the window icon if the theme has changed.
-     */
+    // Handles theme changes
     @Override
     public void propertyChange(PropertyChangeEvent evt)
     {
@@ -222,12 +200,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
         }
     }
 
-    /**
-     * Updates the window icon depending on the current theme.
-     * Loads either the dark or light icon resource.
-     *
-     * @param darkMode true to use icon_dark.png, false to use icon_light.png
-     */
+    // Updates the window icon based on the current theme
     public void updateWindowIcon(boolean darkMode)
     {
         String resource = darkMode ? "/icon/icon_dark.png" : "/icon/icon_light.png";
@@ -245,10 +218,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
         }
     }
 
-    /**
-     * Loads a graph file asynchronously, showing a progress dialog.
-     * Delegates file loading and graph display to the controller.
-     */
+    // Asynchronously loads a graph file and displays it in the graph panel
     private void loadGraphAsync(File selectedFile, GraphLoadType type)
     {
         String title, message;
@@ -282,13 +252,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
         {
             private Exception error = null;
 
-            /**
-             * Background task to load the graph file.
-             * Runs in a separate thread to avoid blocking the Event Dispatch Thread.
-             * Displays a progress dialog while loading.
-             *
-             * @return null when done
-             */
+            // Executes the graph loading in a background thread
             @Override
             protected Void doInBackground()
             {
@@ -303,10 +267,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
                 return null;
             }
 
-            /**
-             * Called on the Event Dispatch Thread after doInBackground completes.
-             * Disposes the progress dialog and shows an error message if loading failed.
-             */
+            // Updates the progress dialog when the loading is complete
             @Override
             protected void done()
             {
@@ -325,13 +286,5 @@ public final class Frame extends JFrame implements PropertyChangeListener
             progressDialog.setVisible(true);
             loader.execute();
         });
-    }
-
-    /**
-     * Enum for graph load types.
-     */
-    private enum GraphLoadType
-    {
-        TEXT, PARTITIONED_TEXT, PARTITIONED_BINARY
     }
 }

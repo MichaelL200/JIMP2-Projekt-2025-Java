@@ -3,15 +3,7 @@ package graphdivider.view.ui;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 
-/**
- * Custom menu bar for the application.
- * Provides file loading/saving and theme selection options.
- *
- * Structure:
- * - "Load File" menu: for loading various graph formats.
- * - "Save File" menu: for saving partitioned graphs.
- * - "Theme" menu: for switching between light, dark, and auto themes.
- */
+// Menu Bar for loading, saving, and theme selection
 public final class MenuBar extends JMenuBar
 {
     // Menu items for loading different types of graphs
@@ -36,10 +28,7 @@ public final class MenuBar extends JMenuBar
     private final JMenuItem darkThemeItem =
         new JMenuItem("Dark");   // Force dark theme
 
-    /**
-     * Constructs the menu bar, sets up menus and menu items.
-     * Organizes menus for loading, saving, and theme selection.
-     */
+    // Constructor to initialize the menu bar
     public MenuBar()
     {
         // Create and populate the "Load File" menu
@@ -70,73 +59,49 @@ public final class MenuBar extends JMenuBar
 
     // --- Listener registration methods for menu actions ---
 
-    /**
-     * Registers a listener for loading a text graph.
-     * @param l the ActionListener to add
-     */
+    // Registers a listener for loading a text graph
     public void addLoadTextGraphListener(ActionListener l)
     {
         loadTextGraphItem.addActionListener(l);
     }
 
-    /**
-     * Registers a listener for loading a partitioned text graph.
-     * @param l the ActionListener to add
-     */
+    // Registers a listener for loading a partitioned text graph
     public void addLoadPartitionedTextListener(ActionListener l)
     {
         loadPartitionedTextItem.addActionListener(l);
     }
 
-    /**
-     * Registers a listener for loading a partitioned binary graph.
-     * @param l the ActionListener to add
-     */
+    // Registers a listener for loading a partitioned binary graph
     public void addLoadPartitionedBinaryListener(ActionListener l)
     {
         loadPartitionedBinaryItem.addActionListener(l);
     }
 
-    /**
-     * Registers a listener for saving a partitioned text graph.
-     * @param l the ActionListener to add
-     */
+    // Registers a listener for saving a partitioned text graph
     public void addSavePartitionedTextListener(ActionListener l)
     {
         savePartitionedTextItem.addActionListener(l);
     }
 
-    /**
-     * Registers a listener for saving a partitioned binary graph.
-     * @param l the ActionListener to add
-     */
+    // Registers a listener for saving a partitioned binary graph
     public void addSaveBinaryListener(ActionListener l)
     {
         saveBinaryItem.addActionListener(l);
     }
 
-    /**
-     * Registers a listener for selecting the auto theme.
-     * @param l the ActionListener to add
-     */
+    // Registers a listener for selecting the auto theme
     public void addAutoThemeListener(ActionListener l)
     {
         autoThemeItem.addActionListener(l);
     }
 
-    /**
-     * Registers a listener for selecting the light theme.
-     * @param l the ActionListener to add
-     */
+    // Registers a listener for selecting the light theme
     public void addLightThemeListener(ActionListener l)
     {
         lightThemeItem.addActionListener(l);
     }
 
-    /**
-     * Registers a listener for selecting the dark theme.
-     * @param l the ActionListener to add
-     */
+    // Registers a listener for selecting the dark theme
     public void addDarkThemeListener(ActionListener l)
     {
         darkThemeItem.addActionListener(l);

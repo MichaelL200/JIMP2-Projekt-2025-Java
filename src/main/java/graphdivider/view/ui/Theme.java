@@ -13,12 +13,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
-/**
- * Theme management utility for the application.
- * Handles light, dark, and auto themes based on system preferences.
- * Provides methods to register listeners for theme changes and apply themes.
- * Supports dynamic updates of UI components when the theme changes.
- */
+// Theme management utility class for the GraphDivider application
 public final class Theme
 {
     // Thread-safe list of listeners to notify when the theme changes
@@ -26,56 +21,37 @@ public final class Theme
     // Tracks the current theme mode (auto, light, dark)
     private static ThemeMode currentTheme = ThemeMode.AUTO;
 
-    /**
-     * Enum representing the available theme modes.
-     */
+    // Enum representing the available theme modes.
     public enum ThemeMode { AUTO, LIGHT, DARK }
 
     // Private constructor to prevent instantiation of utility class
     private Theme() {}
 
-    /**
-     * Registers a listener to be notified when the theme changes.
-     *
-     * @param listener Runnable to execute on theme change
-     */
+    // Registers a listener to be notified when the theme changes
     public static void addThemeChangeListener(Runnable listener)
     {
         themeListeners.add(listener);
     }
 
-    /**
-     * Removes a previously registered theme change listener.
-     * @param listener Runnable to remove
-     */
+    // Removes a previously registered theme change listener
     public static void removeThemeChangeListener(Runnable listener)
     {
         themeListeners.remove(listener);
     }
 
-    /**
-     * Notifies all registered listeners that the theme has changed.
-     */
+    // Notifies all registered listeners that the theme has changed.
     private static void notifyThemeChangeListeners()
     {
         for (Runnable r : themeListeners) r.run();
     }
 
-    /**
-     * Updates the color of all edges in the graph to match the current theme.
-     * This is called after a theme change to ensure visual consistency.
-     */
+    // Updates the color of all edges in the graph view
     public static void updateAllEdgesColor()
     {
         graphdivider.view.ui.graph.Edge.updateAllEdgesColor();
     }
 
-    /**
-     * Applies the specified theme mode (AUTO, LIGHT, DARK).
-     * If AUTO, detects the system's preferred theme.
-     * Notifies listeners after applying.
-     * @param mode ThemeMode to apply
-     */
+    // Applies the specified theme mode (AUTO, LIGHT, DARK)
     public static void applyTheme(ThemeMode mode)
     {
         currentTheme = mode;
@@ -107,29 +83,19 @@ public final class Theme
         refreshAllWindows();
     }
 
-    /**
-     * Applies the auto theme, detecting the system's preferred theme.
-     * Optionally runs a callback after the theme is applied.
-     * @param onThemeChanged Callback to run after theme change (may be null)
-     */
+    // Applies the specified theme mode with a callback
     public static void applyAutoTheme(Runnable onThemeChanged)
     {
         applyTheme(ThemeMode.AUTO);
         if (onThemeChanged != null) onThemeChanged.run();
     }
-    /**
-     * Applies the auto theme without a callback.
-     */
+    // Applies the auto theme without a callback
     public static void applyAutoTheme()
     {
         applyTheme(ThemeMode.AUTO);
     }
 
-    /**
-     * Initializes the theme system and sets the initial theme.
-     * Registers listeners for OS theme changes and KDE config changes.
-     * @param mode 0 = auto, 1 = light, 2 = dark
-     */
+    // Initializes the theme based on the provided mode
     public static void initTheme(int mode)
     {
         Toolkit tk = Toolkit.getDefaultToolkit();
@@ -150,11 +116,7 @@ public final class Theme
         }
     }
 
-    /**
-     * Detects if the system's preferred theme is dark.
-     * Supports Windows, macOS, GNOME, KDE, and WSL environments.
-     * @return true if dark mode is preferred, false otherwise
-     */
+    // Checks if the system is currently using a dark theme.
     private static boolean isSystemDark()
     {
         String os = System.getProperty("os.name").toLowerCase();
@@ -206,10 +168,7 @@ public final class Theme
         return false;
     }
 
-    /**
-     * Try to detect Linux theme using multiple mechanisms.
-     * Returns: 1 = dark, 2 = light, 0 = unknown
-     */
+    // Reads the current Linux theme using various methods
     private static int readLinuxTheme()
     {
         // 1. Try gsettings (GNOME, Cinnamon, etc.)
@@ -289,10 +248,7 @@ public final class Theme
         return 0;
     }
 
-    /**
-     * Returns true if the current theme (manual or auto) is dark.
-     * @return true if dark theme is active or preferred
-     */
+    // Checks if the current theme is dark preferred
     public static boolean isDarkPreferred()
     {
         if (currentTheme == ThemeMode.DARK) return true;
@@ -300,10 +256,7 @@ public final class Theme
         return isSystemDark();
     }
 
-    /**
-     * Refreshes the look and feel of all open windows to match the current theme.
-     * This ensures that all UI components update their appearance.
-     */
+    // Refreshes all open windows to apply the current look and feel
     private static void refreshAllWindows()
     {
         JFrame.setDefaultLookAndFeelDecorated(true);
@@ -317,10 +270,7 @@ public final class Theme
         }
     }
 
-    /**
-     * Watches the KDE config directory for changes to kdeglobals and applies the auto theme if it changes.
-     * Runs in a background daemon thread.
-     */
+    // Watches the KDE configuration directory for changes to kdeglobals
     private static void watchKdeConfig()
     {
         Path dir = Paths.get(System.getProperty("user.home"), ".config");
@@ -356,21 +306,14 @@ public final class Theme
         catch (IOException ignored) {}
     }
 
-    /**
-     * Checks if the application is running under Windows Subsystem for Linux (WSL).
-     * @return true if running under WSL, false otherwise
-     */
+    // Checks if the application is running under Windows Subsystem for Linux (WSL)
     public static boolean isRunningUnderWSL()
     {
         String os = System.getProperty("os.name").toLowerCase();
         return os.contains("linux") && System.getenv("WSL_DISTRO_NAME") != null;
     }
 
-    /**
-     * Starts a timer to poll for theme changes under WSL, since native theme events are not available.
-     * Calls the provided callback if the theme changes.
-     * @param onThemeChanged callback to run when theme changes (e.g., update window icon)
-     */
+    // Starts a polling mechanism to check for theme changes in WSL
     public static void startWSLThemePolling(java.util.function.Consumer<Boolean> onThemeChanged)
     {
         if (!isRunningUnderWSL()) return;

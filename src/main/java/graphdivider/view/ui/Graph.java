@@ -9,19 +9,13 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * JPanel responsible for displaying the graph visualization.
- * Manages vertices and edges, and handles their rendering.
- * <p>
- * This class is intended to be the main drawing area for the graph.
- * Vertices are added as child components, while edges are drawn manually.
- */
+// Panel for displaying the graph
 public final class Graph extends JPanel
 {
-    // List of vertices in the graph (each is a component)
-    private final List<Vertex> vertices = new ArrayList<>();
-    // List of edges in the graph (drawn manually)
-    private final List<Edge> edges = new ArrayList<>();
+    // List of all vertices in the graph
+    private final List<Vertex> vertices = new java.util.concurrent.CopyOnWriteArrayList<>();
+    // List of all edges in the graph
+    private final List<Edge> edges = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     // Store mapping for use between setupVertices and setupEdges
     private java.util.Map<Integer, Vertex> vertexIndexToComponent;
@@ -29,10 +23,7 @@ public final class Graph extends JPanel
     // Reference to the ToolPanel instance
     private final ToolPanel toolPanel;
 
-    /**
-     * Constructs the graph panel.
-     * Registers a theme change listener to update edge colors when the theme changes.
-     */
+    // Constructor that initializes the Graph with a ToolPanel
     public Graph(ToolPanel toolPanel)
     {
         this.toolPanel = toolPanel;
@@ -50,12 +41,7 @@ public final class Graph extends JPanel
         });
     }
 
-    /**
-     * Displays the graph from the given GraphModel.
-     * Clears any previous vertices and edges.
-     *
-     * @param model the GraphModel containing the vertices and edges
-     */
+    // Displays the graph from the given GraphModel
     public void displayGraph(GraphModel model)
     {
         // Remove old vertices
@@ -85,10 +71,7 @@ public final class Graph extends JPanel
         toolPanel.setDivideButtonEnabled(true);
     }
 
-    /**
-     * Updates the preferred size of the panel to fit all vertices.
-     * This ensures scrollbars appear when the graph is too large.
-     */
+    // Updates the preferred size of the panel based on the vertices' positions
     private void updatePreferredSize()
     {
         int maxX = 0, maxY = 0;
@@ -103,9 +86,7 @@ public final class Graph extends JPanel
         setPreferredSize(new Dimension(maxX + margin, maxY + margin));
     }
 
-    /**
-     * Helper method to find the row index for a given vertex index.
-     */
+    // Finds the row index for a given vertex index based on the row start indices.
     private int findRowForVertex(int vertexIndex, int[] rowStartIndices, int vertexCount)
     {
         for (int r = 0; r < rowStartIndices.length; r++)
@@ -120,9 +101,7 @@ public final class Graph extends JPanel
         return -1; // Not found
     }
 
-    /**
-     * Helper method to build a mapping from actual row indices to visual row indices (skipping empty rows).
-     */
+    // Builds a mapping from actual row indices to visual row indices
     private java.util.Map<Integer, Integer> buildRowToVisualRow(java.util.Set<Integer> usedRows, int[] rowStartIndices)
     {
         java.util.Map<Integer, Integer> rowToVisualRow = new java.util.HashMap<>();
@@ -137,10 +116,7 @@ public final class Graph extends JPanel
         return rowToVisualRow;
     }
 
-    /**
-     * Sets up vertices from the given GraphModel.
-     * Clears and adds new Vertex components.
-     */
+    // Sets up vertices from the given GraphModel
     private void setupVertices(GraphModel model)
     {
         int vertexCount = model.getRowPositions().length;
@@ -196,10 +172,7 @@ public final class Graph extends JPanel
         this.vertexIndexToComponent = vertexIndexToComponent;
     }
 
-    /**
-     * Sets up edges from the given GraphModel.
-     * Uses the mapping from vertex indices to Vertex components.
-     */
+    // Sets up edges based on the adjacency list from the GraphModel
     private void setupEdges(GraphModel model)
     {
         if (this.vertexIndexToComponent == null) return;
@@ -235,12 +208,7 @@ public final class Graph extends JPanel
         }
     }
 
-    /**
-     * Paints the graph edges on the panel.
-     * Vertices are painted by their own components (handled by Swing).
-     *
-     * @param g the Graphics context used for drawing
-     */
+    // Override the paintComponent method to draw edges before vertices
     @Override
     protected void paintComponent(Graphics g)
     {

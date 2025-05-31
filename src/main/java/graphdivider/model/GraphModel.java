@@ -1,53 +1,31 @@
 package graphdivider.model;
 
-/**
- * Represents a graph in memory using the Compressed Sparse Row (CSR) format.
- * This immutable data model is intended for use in MVC architectures.
- *
- * The associated .csrrg file must contain exactly five lines, each line consisting of integer values separated by semicolons:
- *
- * 1. maxVerticesPerRow        - Maximum number of vertices in any row (single integer).
- * 2. rowPositions             - Array of row identifiers (one per row).
- * 3. rowStartIndices          - For each row, the index in adjacencyList where that row’s neighbors start.
- * 4. adjacencyList            - Flattened array of all neighbor vertex indices.
- * 5. adjacencyPointers        - For each vertex (in row order), the index in adjacencyList where its neighbor list begins.
- */
+// Represents a graph in Compressed Sparse Row (CSR) format
 public final class GraphModel
 {
-    /** The maximum number of vertices present in any row of the graph. */
+    // The maximum number of vertices present in any row of the graph
     private final int maxVerticesPerRow;
 
-    /** Array containing the identifiers for each row in the graph. */
+    // Array containing the identifiers for each row in the graph
     private final int[] rowPositions;
 
-    /** For each row, the starting index in adjacencyList for its neighbors. */
+    // For each row, the starting index in adjacencyList for its neighbors
     private final int[] rowStartIndices;
 
-    /** Flattened list of all neighbor vertex indices for the graph. */
+    // Flattened list of all neighbor vertex indices for the graph.
     private final int[] adjacencyList;
 
-    /**
-     * For each vertex (ordered by row), the index in adjacencyList where its neighbor list begins.
-     * This allows efficient access to each vertex's adjacency list.
-     */
+    // For each vertex (ordered by row), the index in adjacencyList where its neighbor list begins
     private final int[] adjacencyPointers;
 
-    /**
-     * Constructs a GraphModel with all required CSR arrays.
-     *
-     * @param maxVerticesPerRow Maximum number of vertices in any row.
-     * @param rowPositions      Identifiers for each row.
-     * @param rowStartIndices   Start indices in adjacencyList for each row.
-     * @param adjacencyList     Flattened adjacency list for all vertices.
-     * @param adjacencyPointers For each vertex, index in adjacencyList where its neighbors start.
-     */
+    // Constructs a GraphModel with all required CSR arrays
     public GraphModel
     (
-        int maxVerticesPerRow,
-        int[] rowPositions,
-        int[] rowStartIndices,
-        int[] adjacencyList,
-        int[] adjacencyPointers
+            int maxVerticesPerRow,
+            int[] rowPositions,
+            int[] rowStartIndices,
+            int[] adjacencyList,
+            int[] adjacencyPointers
     )
     {
         this.maxVerticesPerRow  = maxVerticesPerRow;
@@ -58,44 +36,39 @@ public final class GraphModel
         this.adjacencyPointers = adjacencyPointers.clone();
     }
 
-    // --- Getters for all fields ---
+    // GETTERS
 
-    /** @return The maximum number of vertices present in any row of the graph. */
+    // Returns the maximum number of vertices present in any row of the graph
     public int getMaxVerticesPerRow()
     {
         return maxVerticesPerRow;
     }
 
-    /** @return Array containing the identifiers for each row in the graph. */
+    // Returns array containing the identifiers for each row in the graph
     public int[] getRowPositions()
     {
         return rowPositions;
     }
 
-    /** @return For each row, the starting index in adjacencyList for its neighbors. */
+    // Returns for each row, the starting index in adjacencyList for its neighbors
     public int[] getRowStartIndices()
     {
         return rowStartIndices;
     }
 
-    /** @return Flattened list of all neighbor vertex indices for the graph. */
+    // Returns flattened list of all neighbor vertex indices for the graph
     public int[] getAdjacencyList()
     {
         return adjacencyList;
     }
 
-    /**
-     * @return For each vertex (ordered by row), the index in adjacencyList where its neighbor list begins.
-     */
+    // Returns for each vertex (ordered by row)
     public int[] getAdjacencyPointers()
     {
         return adjacencyPointers;
     }
 
-    /**
-     * Prints the graph's data arrays to the terminal for debugging purposes.
-     * Each field is printed on a separate line for clarity.
-     */
+    // Prints the graph's data arrays to the terminal for debugging purposes
     public void printGraphData()
     {
         System.out.println("GraphModel data:");

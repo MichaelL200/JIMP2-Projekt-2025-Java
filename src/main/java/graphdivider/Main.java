@@ -6,37 +6,20 @@ import graphdivider.view.ui.Theme;
 
 import javax.swing.*;
 
-/**
- * Entry point for the Graph Divider application.
- * Initializes the look and feel, then launches the main window.
- * Uses the Command pattern to encapsulate the startup logic for thread safety and clarity.
- */
+// Main class serves as the entry point for the Graph Divider application
 public final class Main
 {
-    /**
-     * The main method is the starting point of the application.
-     * It schedules the GUI initialization to run on the Event Dispatch Thread (EDT),
-     * which is the standard practice for Swing applications to ensure thread safety.
-     *
-     * @param args Command-line arguments (not used).
-     */
+    // Private constructor to prevent instantiation of the Main class
     public static void main(String[] args)
     {
-        // Schedule the application launch on the Event Dispatch Thread (EDT) for thread safety.
-        // This ensures that all Swing components are created and updated on the correct thread.
+        // Ensure that the GUI is created and manipulated on the Event Dispatch Thread (EDT)
         SwingUtilities.invokeLater(new LaunchApplicationCommand());
     }
 
-    /**
-     * Command object that encapsulates the logic for launching the main application window.
-     * Ensures that theme initialization and frame creation occur on the EDT.
-     */
+    // Runnable implementation that encapsulates the logic to launch the application
     private static class LaunchApplicationCommand implements Runnable
     {
-        /**
-         * This method is called when the Runnable is executed.
-         * It initializes the application's theme and creates the main window.
-         */
+        // Initializes the application's theme and creates the main window
         @Override
         public void run()
         {

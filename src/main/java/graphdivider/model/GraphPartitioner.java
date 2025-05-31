@@ -9,35 +9,21 @@ public final class GraphPartitioner
 
     private GraphPartitioner() {}
 
-    /**
-     * Loads a partitioned text graph file (.csrrg) and returns the loaded graph.
-     * @param file the input .csrrg file
-     * @return LoadedGraph containing the model, CSR matrix, and Laplacian
-     * @throws IOException if file cannot be read or is malformed
-     */
+    // Loads a partitioned text graph file (.csrrg) and returns the loaded graph
     public static GraphLoader.LoadedGraph loadPartitionedTextGraph(File file) throws IOException
     {
         // For now, reuse the same logic as GraphLoader for .csrrg files
         return GraphLoader.loadGraphWithMatrices(file);
     }
 
-    /**
-     * Loads a partitioned binary graph file (.bin) and returns the loaded graph.
-     * @param file the input .bin file
-     * @return LoadedGraph containing the model, CSR matrix, and Laplacian
-     * @throws IOException if file cannot be read or is malformed
-     */
+    // Loads a partitioned binary graph file (.bin) and returns the loaded graph
     public static GraphLoader.LoadedGraph loadPartitionedBinaryGraph(File file) throws IOException
     {
         // Not implemented: throw for now
         throw new UnsupportedOperationException("Binary partitioned graph loading not implemented yet.");
     }
 
-    /**
-     * Computes the Laplacian matrix (L = D - A) in CSR format for the given graph model.
-     * @param model the GraphModel to convert
-     * @return a CSRmatrix representing the Laplacian matrix
-     */
+    // Computes the Laplacian matrix (L = D - A) in CSR format for the given graph model
     public static CSRmatrix toLaplacianCSRmatrix(GraphModel model)
     {
         // Get adjacency list and pointers from the model
