@@ -16,6 +16,8 @@ public final class Frame extends JFrame implements PropertyChangeListener
 {
     // Graph panel
     private final Graph graphPanel;
+    private final ToolPanel toolPanel;
+    private final MenuBar menuBar;
     // Controller
     private final GraphController controller = new GraphController();
     // Last dark mode state
@@ -64,27 +66,17 @@ public final class Frame extends JFrame implements PropertyChangeListener
             }
         });
 
-        // Menu bar
-        MenuBar menuBar = new MenuBar();
+        menuBar = new MenuBar();
         setJMenuBar(menuBar);
 
-        // Tool panel
-        ToolPanel toolPanel = new ToolPanel();
+        toolPanel = new ToolPanel();
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(toolPanel, BorderLayout.WEST);
 
-        // Graph visualization panel
         graphPanel = new Graph(toolPanel);
 
-        // Add mouse listener to clear the graph when clicked
-        graphPanel.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                graphPanel.clearGraph();
-                toolPanel.setDivideButtonEnabled(false);
-                setTitle("Graph Divider");
-            }
-        });
+        // Pass the view to the controller (MVC alignment)
+        controller.setGraphView(graphPanel);
 
         // Scroll pane for graph panel
         JScrollPane scrollPane = new JScrollPane(graphPanel,
@@ -133,14 +125,10 @@ public final class Frame extends JFrame implements PropertyChangeListener
             System.out.println("[MenuBar] Load partitioned binary graph selected.");
             handleLoadPartitionedBinaryGraph();
         });
-        toolPanel.addDivideButtonListener(e ->
-        {
-            System.out.println("[ToolPanel] Divide Graph button pressed.");
-        });
     }
 
     // Sets the window title based on the loaded file
-    private void setWindowTitleForFile(java.io.File file)
+    public void setWindowTitleForFile(java.io.File file)
     {
         if (file != null)
         {
@@ -150,6 +138,14 @@ public final class Frame extends JFrame implements PropertyChangeListener
         {
             setTitle("Graph Divider");
         }
+    }
+
+    // Clears the graph panel
+    public void clearGraphPanel()
+    {
+        graphPanel.clearGraph();
+        toolPanel.setDivideButtonEnabled(false);
+        setTitle("Graph Divider");
     }
 
     // Loads a text-based graph file.
@@ -193,7 +189,8 @@ public final class Frame extends JFrame implements PropertyChangeListener
                                 protected Void doInBackground()
                                 {
                                     System.out.println("[Frame] Displaying graph on panel...");
-                                    graphPanel.displayGraph(loaded.model);
+                                    // graphPanel.displayGraph(loaded.model);
+                                    controller.displayGraph(loaded.model); // Delegate to controller
                                     return null;
                                 }
 
@@ -403,5 +400,15 @@ public final class Frame extends JFrame implements PropertyChangeListener
         {
             System.err.println("Warning: Unable to load window icon '" + resource + "': " + e.getMessage());
         }
+    }
+
+    public ToolPanel getToolPanel()
+    {
+        return toolPanel;
+    }
+
+    public MenuBar getAppMenuBar()
+    {
+        return menuBar;
     }
 }

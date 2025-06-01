@@ -3,6 +3,7 @@ package graphdivider.controller;
 import graphdivider.model.CSRmatrix;
 import graphdivider.model.GraphLoader;
 import graphdivider.model.GraphModel;
+import graphdivider.view.ui.Theme;
 
 import javax.swing.*;
 import java.io.File;
@@ -11,6 +12,23 @@ import java.io.IOException;
 // Controller for handling graph-related actions and business logic.
 public final class GraphController
 {
+    private graphdivider.view.ui.Graph graphView;
+
+    // Set the Graph view for this controller
+    public void setGraphView(graphdivider.view.ui.Graph view)
+    {
+        this.graphView = view;
+    }
+
+    // Display the graph model on the view
+    public void displayGraph(graphdivider.model.GraphModel model)
+    {
+        if (graphView != null)
+        {
+            graphView.displayGraph(model);
+        }
+    }
+
     // Loads a graph from the given file and returns the model, matrix, and Laplacian matrix.
     public LoadedGraph loadGraphFromFile(JFrame parent, File file)
     {
@@ -30,6 +48,56 @@ public final class GraphController
                     "Load Error", JOptionPane.ERROR_MESSAGE);
             return null;
         }
+    }
+
+    // Register all listeners on the view components.
+    public void registerViewListeners(graphdivider.view.Frame frame)
+    {
+        graphdivider.view.ui.MenuBar menuBar = frame.getAppMenuBar();
+        graphdivider.view.ui.ToolPanel toolPanel = frame.getToolPanel();
+        graphdivider.view.ui.Graph graphPanel = this.graphView;
+
+        menuBar.addLightThemeListener(e ->
+        {
+            Theme.applyLightTheme();
+            frame.updateWindowIcon(false);
+            SwingUtilities.updateComponentTreeUI(graphPanel);
+            graphPanel.repaint();
+        });
+        menuBar.addDarkThemeListener(e ->
+        {
+            Theme.applyDarkTheme();
+            frame.updateWindowIcon(true);
+            SwingUtilities.updateComponentTreeUI(graphPanel);
+            graphPanel.repaint();
+        });
+        menuBar.addAutoThemeListener(e ->
+        {
+            Theme.applyAutoTheme(() ->
+            {
+                frame.updateWindowIcon(Theme.isDarkPreferred());
+                SwingUtilities.updateComponentTreeUI(graphPanel);
+                graphPanel.repaint();
+            });
+        });
+        menuBar.addLoadTextGraphListener(e ->
+        {
+            
+        });
+
+        toolPanel.addDivideButtonListener(e ->
+        {
+            
+        });
+
+        graphPanel.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e)
+            {
+                frame.clearGraphPanel();
+            }
+        });
     }
 
     // Data holder for loaded graph model, matrix, and Laplacian matrix.
