@@ -222,7 +222,7 @@ public final class Theme
             dir.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
             Thread t = new Thread(() ->
             {
-                while (true)
+                while (!Thread.currentThread().isInterrupted())
                 {
                     try
                     {
@@ -238,7 +238,7 @@ public final class Theme
                     }
                     catch (InterruptedException ignored)
                     {
-                        break;
+                        Thread.currentThread().interrupt();
                     }
                 }
             });

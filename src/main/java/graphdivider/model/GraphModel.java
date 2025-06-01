@@ -19,10 +19,11 @@ public final class GraphModel
     )
     {
         this.maxVerticesPerRow  = maxVerticesPerRow;
-        this.rowPositions = rowPositions.clone();
-        this.rowStartIndices = rowStartIndices.clone();
-        this.adjacencyList = adjacencyList.clone();
-        this.adjacencyPointers = adjacencyPointers.clone();
+        // Defensive copy only if input is not already safe (if you control input, can skip clone)
+        this.rowPositions = rowPositions;
+        this.rowStartIndices = rowStartIndices;
+        this.adjacencyList = adjacencyList;
+        this.adjacencyPointers = adjacencyPointers;
     }
 
     // Get max vertices per row

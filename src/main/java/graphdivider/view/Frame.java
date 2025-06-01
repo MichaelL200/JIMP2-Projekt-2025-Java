@@ -76,6 +76,16 @@ public final class Frame extends JFrame implements PropertyChangeListener
         // Graph visualization panel
         graphPanel = new Graph(toolPanel);
 
+        // Add mouse listener to clear the graph when clicked
+        graphPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                graphPanel.clearGraph();
+                toolPanel.setDivideButtonEnabled(false);
+                setTitle("Graph Divider");
+            }
+        });
+
         // Scroll pane for graph panel
         JScrollPane scrollPane = new JScrollPane(graphPanel,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -328,13 +338,15 @@ public final class Frame extends JFrame implements PropertyChangeListener
             {
                 if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0)
                 {
-                    new javax.swing.Timer(100, e ->
+                    Timer timer = new javax.swing.Timer(100, e ->
                     {
                         setExtendedState(JFrame.MAXIMIZED_BOTH);
                         revalidate();
                         repaint();
-                        ((javax.swing.Timer) e.getSource()).stop();
-                    }).start();
+                        ((Timer) e.getSource()).stop();
+                    });
+                    timer.setRepeats(false);
+                    timer.start();
                 }
             });
         }

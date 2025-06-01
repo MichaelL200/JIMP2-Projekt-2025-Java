@@ -45,22 +45,7 @@ public final class Graph extends JPanel
     // Displays the graph from the given GraphModel. Clears any previous vertices and edges.
     public void displayGraph(GraphModel model)
     {
-        // Remove old vertices
-        for (Vertex v : vertices)
-        {
-            remove(v);
-        }
-        vertices.clear();
-
-        // Remove old edges
-        for (Edge e : edges)
-        {
-            e.dispose();
-        }
-        edges.clear();
-
-        revalidate();
-        repaint();
+        clearGraph();
 
         setupVertices(model);
         setupEdges(model);
@@ -235,5 +220,27 @@ public final class Graph extends JPanel
             edge.draw(g2);
         }
         g2.dispose();
+    }
+
+    // Clears the graph completely (removes all vertices and edges).
+    public void clearGraph()
+    {
+        // Remove all vertices from panel
+        for (Vertex v : vertices) remove(v);
+        vertices.clear();
+
+        // Dispose all edges
+        for (Edge e : edges) e.dispose();
+        edges.clear();
+
+        // Clear mapping
+        vertexIndexToComponent = null;
+
+        // Reset preferred size
+        cachedPreferredSize = null;
+        setPreferredSize(new Dimension(0, 0));
+
+        revalidate();
+        repaint();
     }
 }
