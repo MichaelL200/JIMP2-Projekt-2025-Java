@@ -14,18 +14,18 @@ public final class GraphController
     // Loads a graph from the given file and returns the model, matrix, and Laplacian matrix.
     public LoadedGraph loadGraphFromFile(JFrame parent, File file)
     {
+        System.out.println("[GraphController] Loading graph from file: " + file.getAbsolutePath());
         try
         {
             GraphModel model = GraphLoader.loadFromFile(file);
-            // Print graph data to terminal
             model.printGraphData();
             CSRmatrix matrix = GraphLoader.toCSRmatrix(model);
             CSRmatrix laplacian = GraphLoader.toLaplacianCSRmatrix(model);
-            // Print Laplacian matrix data to terminal
             laplacian.printMatrixData("Laplacian CSR matrix data:");
             return new LoadedGraph(model, matrix, laplacian);
         } catch (IOException ex)
         {
+            System.out.println("[GraphController] Failed to load graph: " + ex.getMessage());
             JOptionPane.showMessageDialog(parent, "Failed to load graph: " + ex.getMessage(),
                     "Load Error", JOptionPane.ERROR_MESSAGE);
             return null;

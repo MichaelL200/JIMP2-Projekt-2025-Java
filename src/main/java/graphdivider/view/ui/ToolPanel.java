@@ -18,17 +18,34 @@ public final class ToolPanel extends JPanel
     // Constructs the tool panel with controls for partition settings and graph division.
     public ToolPanel()
     {
-        // Use ToolPanelBuilder to construct the layout and add components
-        ToolPanelBuilder builder = new ToolPanelBuilder();
+        // Use GridBagLayout directly for clarity and efficiency
         setBorder(BorderFactory.createTitledBorder("Partition Settings"));
-        builder.addLabel("Number of parts:")
-               .addSpinner(partitionsSpinner = new JSpinner(new SpinnerNumberModel(2, 2, 100, 1)))
-               .addLabel("Margin %:")
-               .addSpinner(marginSpinner = new JSpinner(new SpinnerNumberModel(10, 10, 999, 1)))
-               .addButton(divideButton = new JButton("Divide Graph"));
-        // Disable the divide button until a graph is loaded
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 5, 10, 5);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        // Row 0: Number of parts
+        gbc.gridx = 0; gbc.gridy = 0;
+        add(new JLabel("Number of parts:"), gbc);
+        gbc.gridx = 1;
+        partitionsSpinner = new JSpinner(new SpinnerNumberModel(2, 2, 100, 1));
+        add(partitionsSpinner, gbc);
+
+        // Row 1: Margin %
+        gbc.gridx = 0; gbc.gridy = 1;
+        add(new JLabel("Margin %:"), gbc);
+        gbc.gridx = 1;
+        marginSpinner = new JSpinner(new SpinnerNumberModel(10, 10, 999, 1));
+        add(marginSpinner, gbc);
+
+        // Row 2: Divide Graph button (span 2 columns)
+        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        divideButton = new JButton("Divide Graph");
         divideButton.setEnabled(false);
-        builder.applyTo(this);
+        add(divideButton, gbc);
     }
 
     // Registers a ChangeListener for both spinners.
@@ -60,63 +77,5 @@ public final class ToolPanel extends JPanel
     public void setDivideButtonEnabled(boolean enabled)
     {
         divideButton.setEnabled(enabled);
-    }
-
-    // ToolPanelBuilder helps construct the ToolPanel layout using GridBagLayout.
-    private static class ToolPanelBuilder
-    {
-        private final GridBagLayout layout = new GridBagLayout();
-        private final GridBagConstraints gbc = new GridBagConstraints();
-        private final JPanel panel = new JPanel();
-
-        // Initializes the builder with default layout and spacing.
-        ToolPanelBuilder()
-        {
-            panel.setLayout(layout);
-            // Set spacing between components
-            gbc.insets = new Insets(10, 5, 10, 5);
-            gbc.anchor = GridBagConstraints.WEST;
-        }
-
-        // Adds a label to the next row in the panel.
-        ToolPanelBuilder addLabel(String text)
-        {
-            gbc.gridx = 0;
-            gbc.gridy = panel.getComponentCount() / 2;
-            panel.add(new JLabel(text), gbc);
-            return this;
-        }
-
-        // Adds a spinner to the next row in the panel.
-        ToolPanelBuilder addSpinner(JSpinner spinner)
-        {
-            gbc.gridx = 1;
-            gbc.gridy = panel.getComponentCount() / 2;
-            panel.add(spinner, gbc);
-            return this;
-        }
-
-        // Adds a button spanning two columns to the next row in the panel.
-        ToolPanelBuilder addButton(JButton button)
-        {
-            gbc.gridx = 0;
-            gbc.gridy = panel.getComponentCount() / 2;
-            gbc.gridwidth = 2;
-            gbc.fill = GridBagConstraints.HORIZONTAL;
-            panel.add(button, gbc);
-            gbc.gridwidth = 1;
-            gbc.fill = GridBagConstraints.NONE;
-            return this;
-        }
-
-        // Applies the built layout and components to the target panel.
-        void applyTo(JPanel target)
-        {
-            target.setLayout(layout);
-            for (Component c : panel.getComponents())
-            {
-                target.add(c, ((GridBagLayout) panel.getLayout()).getConstraints(c));
-            }
-        }
     }
 }

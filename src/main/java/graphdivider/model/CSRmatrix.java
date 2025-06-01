@@ -25,39 +25,5 @@ public record CSRmatrix(int[] rowPtr, int[] colInd, int[] values, int size)
         {
             System.out.println(label);
         }
-        System.out.println("size: " + size);
-        System.out.print("rowPtr: ");
-        System.out.println(java.util.Arrays.toString(rowPtr));
-        System.out.print("colInd: ");
-        System.out.println(java.util.Arrays.toString(colInd));
-        System.out.print("values: ");
-        System.out.println(java.util.Arrays.toString(values));
-        if (size <= 10)
-        {
-            System.out.println("Full matrix:");
-            // Print column headers
-            System.out.print("     ");
-            for (int j = 0; j < size; j++)
-            {
-                System.out.printf("%4d", j);
-            }
-            System.out.println();
-            System.out.print("    ");
-            for (int j = 0; j < size; j++)
-            {
-                System.out.print("----");
-            }
-            System.out.println();
-            // Print each row with row index
-            for (int i = 0; i < size; i++)
-            {
-                System.out.printf("%3d|", i);
-                for (int j = 0; j < size; j++)
-                {
-                    System.out.printf("%4d", getValue(i, j));
-                }
-                System.out.println();
-            }
-        }
     }
 }

@@ -20,12 +20,15 @@ public final class Frame extends JFrame implements PropertyChangeListener
     private final GraphController controller = new GraphController();
     // Last dark mode state
     private boolean lastDarkMode;
+    // Track last applied theme mode to avoid redundant UI updates
+    private Theme.ThemeMode lastThemeMode = null;
 
     // Constructs the main window and initializes UI.
     public Frame()
     {
         setTitle("Graph Divider");
         lastDarkMode = Theme.isDarkPreferred();
+        lastThemeMode = getCurrentThemeMode();
         updateWindowIcon(lastDarkMode);
 
         // Listen for Windows theme changes
@@ -35,6 +38,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
         boolean isWSL = isRunningUnderWSL();
         if (isWSL)
         {
+            System.out.println("[Frame] Detected WSL environment. Starting theme polling.");
             startWSLThemePolling();
         }
 
@@ -42,9 +46,11 @@ public final class Frame extends JFrame implements PropertyChangeListener
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         maximizeWindow(isWSL);
 
-        // Workaround: fill usable area when maximized
-        this.addWindowStateListener(e -> {
-            if ((e.getNewState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH) {
+        // Fill usable area when maximized
+        this.addWindowStateListener(e ->
+        {
+            if ((e.getNewState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH)
+            {
                 GraphicsConfiguration gc = getGraphicsConfiguration();
                 Rectangle bounds = gc.getBounds();
                 Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(gc);
@@ -82,46 +88,56 @@ public final class Frame extends JFrame implements PropertyChangeListener
         getContentPane().add(scrollPane, BorderLayout.CENTER);
 
         // Theme switching listeners
-        menuBar.addLightThemeListener(e -> switchTheme(false));
-        menuBar.addDarkThemeListener(e -> switchTheme(true));
-        menuBar.addAutoThemeListener(e -> Theme.applyAutoTheme(() ->
+        menuBar.addLightThemeListener(e ->
         {
-            updateWindowIcon(Theme.isDarkPreferred());
-            SwingUtilities.updateComponentTreeUI(graphPanel);
-            graphPanel.repaint();
-        }));
-
-        // Load text graph listener
-        menuBar.addLoadTextGraphListener(e -> handleLoadTextGraph());
-
-        // Load partitioned text graph listener
-        menuBar.addLoadPartitionedTextListener(e -> handleLoadPartitionedTextGraph());
-
-        // Load partitioned binary graph listener
-        menuBar.addLoadPartitionedBinaryListener(e -> handleLoadPartitionedBinaryGraph());
-
-        // Tool panel spinner listeners
-        toolPanel.addChangeListener(e ->
-        {
-            int parts = toolPanel.getPartitions();
-            int margin = toolPanel.getMargin();
-            // controller.handlePartitionSettings(parts, margin);
-            System.out.println("Partitions: " + parts + ", Margin: " + margin + "%");
+            System.out.println("[MenuBar] Light theme selected.");
+            switchTheme(false);
         });
-
-        // Divide Graph button listener
+        menuBar.addDarkThemeListener(e ->
+        {
+            System.out.println("[MenuBar] Dark theme selected.");
+            switchTheme(true);
+        });
+        menuBar.addAutoThemeListener(e ->
+        {
+            System.out.println("[MenuBar] Auto theme selected.");
+            Theme.applyAutoTheme(() ->
+            {
+                updateWindowIcon(Theme.isDarkPreferred());
+                SwingUtilities.updateComponentTreeUI(graphPanel);
+                graphPanel.repaint();
+            });
+        });
+        menuBar.addLoadTextGraphListener(e ->
+        {
+            System.out.println("[MenuBar] Load text graph selected.");
+            handleLoadTextGraph();
+        });
+        menuBar.addLoadPartitionedTextListener(e ->
+        {
+            System.out.println("[MenuBar] Load partitioned text graph selected.");
+            handleLoadPartitionedTextGraph();
+        });
+        menuBar.addLoadPartitionedBinaryListener(e ->
+        {
+            System.out.println("[MenuBar] Load partitioned binary graph selected.");
+            handleLoadPartitionedBinaryGraph();
+        });
         toolPanel.addDivideButtonListener(e ->
         {
-            // controller.divideGraph(...);
-            System.out.println("Divide Graph button pressed.");
+            System.out.println("[ToolPanel] Divide Graph button pressed.");
         });
     }
 
     // Sets the window title based on the loaded file
-    private void setWindowTitleForFile(java.io.File file) {
-        if (file != null) {
+    private void setWindowTitleForFile(java.io.File file)
+    {
+        if (file != null)
+        {
+            System.out.println("[Frame] Setting window title for file: " + file.getName());
             setTitle("Graph Divider - " + file.getName());
-        } else {
+        } else
+        {
             setTitle("Graph Divider");
         }
     }
@@ -129,6 +145,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
     // Loads a text-based graph file.
     private void handleLoadTextGraph()
     {
+        System.out.println("[Frame] Opening file chooser for text graph...");
         JFileChooser fileChooser = new JFileChooser("src/main/resources/graphs/");
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fileChooser.setAcceptAllFileFilterUsed(false);
@@ -137,6 +154,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
         if (result == JFileChooser.APPROVE_OPTION)
         {
             java.io.File selectedFile = fileChooser.getSelectedFile();
+            System.out.println("[Frame] Selected file: " + selectedFile.getAbsolutePath());
 
             // Load graph in background
             SwingWorker<GraphController.LoadedGraph, Void> loader = new SwingWorker<>()
@@ -144,6 +162,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
                 @Override
                 protected GraphController.LoadedGraph doInBackground()
                 {
+                    System.out.println("[Frame] Loading graph from file (background): " + selectedFile.getAbsolutePath());
                     return controller.loadGraphFromFile(Frame.this, selectedFile);
                 }
 
@@ -155,6 +174,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
                         GraphController.LoadedGraph loaded = get();
                         if (loaded != null)
                         {
+                            System.out.println("[Frame] Graph loaded successfully. Displaying...");
                             // Show progress dialog while displaying
                             ProgressDialog progressDialog = new ProgressDialog(Frame.this, "Displaying Graph...", "Displaying graph, please wait...");
                             SwingWorker<Void, Void> displayer = new SwingWorker<>()
@@ -162,6 +182,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
                                 @Override
                                 protected Void doInBackground()
                                 {
+                                    System.out.println("[Frame] Displaying graph on panel...");
                                     graphPanel.displayGraph(loaded.model);
                                     return null;
                                 }
@@ -169,6 +190,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
                                 @Override
                                 protected void done()
                                 {
+                                    System.out.println("[Frame] Graph display complete.");
                                     progressDialog.dispose();
                                     setWindowTitleForFile(selectedFile); // <-- Universal title update
                                 }
@@ -178,11 +200,13 @@ public final class Frame extends JFrame implements PropertyChangeListener
                             progressDialog.setVisible(true);
                         } else
                         {
+                            System.out.println("[Frame] Failed to load graph.");
                             JOptionPane.showMessageDialog(Frame.this, "Failed to load graph.",
                                     "Error", JOptionPane.ERROR_MESSAGE);
                         }
                     } catch (Exception ex)
                     {
+                        System.out.println("[Frame] Exception while loading graph: " + ex.getMessage());
                         JOptionPane.showMessageDialog(Frame.this, "Failed to load graph: " + ex.getMessage(),
                                 "Error", JOptionPane.ERROR_MESSAGE);
                     }
@@ -191,11 +215,16 @@ public final class Frame extends JFrame implements PropertyChangeListener
 
             loader.execute();
         }
+        else
+        {
+            System.out.println("[Frame] File chooser cancelled or closed.");
+        }
     }
 
     // Loads a partitioned text graph file.
     private void handleLoadPartitionedTextGraph()
     {
+        System.out.println("[Frame] Opening file chooser for partitioned text graph...");
         JFileChooser fileChooser = new JFileChooser("src/main/resources/divided_graphs/");
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fileChooser.setAcceptAllFileFilterUsed(false);
@@ -204,15 +233,20 @@ public final class Frame extends JFrame implements PropertyChangeListener
         if (result == JFileChooser.APPROVE_OPTION)
         {
             java.io.File selectedFile = fileChooser.getSelectedFile();
-            setWindowTitleForFile(selectedFile); // <-- Universal title update
+            System.out.println("[Frame] Selected partitioned text file: " + selectedFile.getAbsolutePath());
+            setWindowTitleForFile(selectedFile);
             // controller.loadPartitionedGraphFromFile(this, selectedFile);
-            System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+        }
+        else
+        {
+            System.out.println("[Frame] File chooser cancelled or closed.");
         }
     }
 
     // Loads a partitioned binary graph file.
     private void handleLoadPartitionedBinaryGraph()
     {
+        System.out.println("[Frame] Opening file chooser for partitioned binary graph...");
         JFileChooser fileChooser = new JFileChooser("src/main/resources/divided_graphs/");
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fileChooser.setAcceptAllFileFilterUsed(false);
@@ -221,15 +255,25 @@ public final class Frame extends JFrame implements PropertyChangeListener
         if (result == JFileChooser.APPROVE_OPTION)
         {
             java.io.File selectedFile = fileChooser.getSelectedFile();
-            setWindowTitleForFile(selectedFile); // <-- Universal title update
+            System.out.println("[Frame] Selected partitioned binary file: " + selectedFile.getAbsolutePath());
+            setWindowTitleForFile(selectedFile);
             // controller.loadPartitionedBinaryGraphFromFile(this, selectedFile);
-            System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+        }
+        else
+        {
+            System.out.println("[Frame] File chooser cancelled or closed.");
         }
     }
 
-    // Switches theme and updates icon/UI.
+    // Switches theme and updates icon/UI only if theme actually changed.
     private void switchTheme(boolean dark)
     {
+        Theme.ThemeMode desired = dark ? Theme.ThemeMode.DARK : Theme.ThemeMode.LIGHT;
+        if (lastThemeMode == desired)
+        {
+            return;
+        }
+        System.out.println("[Frame] Switching theme to " + (dark ? "dark" : "light") + "...");
         if (dark)
         {
             Theme.applyDarkTheme();
@@ -238,9 +282,24 @@ public final class Frame extends JFrame implements PropertyChangeListener
         {
             Theme.applyLightTheme();
         }
+        lastThemeMode = desired;
         updateWindowIcon(Theme.isDarkPreferred());
         SwingUtilities.updateComponentTreeUI(graphPanel);
         graphPanel.repaint();
+    }
+
+    // Helper to get the current theme mode
+    private Theme.ThemeMode getCurrentThemeMode()
+    {
+        try
+        {
+            java.lang.reflect.Field f = Theme.class.getDeclaredField("currentTheme");
+            f.setAccessible(true);
+            return (Theme.ThemeMode) f.get(null);
+        } catch (Exception e)
+        {
+            return null;
+        }
     }
 
     // Checks if running under WSL.
@@ -265,7 +324,6 @@ public final class Frame extends JFrame implements PropertyChangeListener
     {
         if (isWSL)
         {
-            // In WSL, maximize after delay
             SwingUtilities.invokeLater(() ->
             {
                 if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0)
@@ -289,7 +347,6 @@ public final class Frame extends JFrame implements PropertyChangeListener
     // Starts polling for theme changes under WSL.
     private void startWSLThemePolling()
     {
-        // Timer checks every 2 seconds
         Timer wslThemeTimer = new Timer(2000, null);
         wslThemeTimer.addActionListener(e ->
         {
