@@ -21,6 +21,9 @@ public final class Graph extends JPanel
     // Reference to the ToolPanel instance
     private final ToolPanel toolPanel;
 
+    // Cached preferred size for performance
+    private Dimension cachedPreferredSize = null;
+
     // Constructs the graph panel. Registers a theme change listener to update edge colors.
     public Graph(ToolPanel toolPanel)
     {
@@ -56,6 +59,9 @@ public final class Graph extends JPanel
         }
         edges.clear();
 
+        revalidate();
+        repaint();
+
         setupVertices(model);
         setupEdges(model);
 
@@ -72,6 +78,12 @@ public final class Graph extends JPanel
     // Updates the preferred size of the panel to fit all vertices.
     private void updatePreferredSize()
     {
+        if (vertices.isEmpty())
+        {
+            cachedPreferredSize = new Dimension(0, 0);
+            setPreferredSize(cachedPreferredSize);
+            return;
+        }
         int maxX = 0, maxY = 0;
         for (Vertex v : vertices)
         {
@@ -81,7 +93,15 @@ public final class Graph extends JPanel
         }
         // Add some margin for aesthetics
         int margin = 40;
-        setPreferredSize(new Dimension(maxX + margin, maxY + margin));
+        cachedPreferredSize = new Dimension(maxX + margin, maxY + margin);
+        setPreferredSize(cachedPreferredSize);
+    }
+
+    @Override
+    public Dimension getPreferredSize()
+    {
+        // Use cached value for performance
+        return cachedPreferredSize != null ? cachedPreferredSize : super.getPreferredSize();
     }
 
     // Helper method to find the row index for a given vertex index.
