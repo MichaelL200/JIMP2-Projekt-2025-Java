@@ -117,6 +117,15 @@ public final class Frame extends JFrame implements PropertyChangeListener
         });
     }
 
+    // Sets the window title based on the loaded file
+    private void setWindowTitleForFile(java.io.File file) {
+        if (file != null) {
+            setTitle("Graph Divider - " + file.getName());
+        } else {
+            setTitle("Graph Divider");
+        }
+    }
+
     // Loads a text-based graph file.
     private void handleLoadTextGraph()
     {
@@ -161,6 +170,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
                                 protected void done()
                                 {
                                     progressDialog.dispose();
+                                    setWindowTitleForFile(selectedFile); // <-- Universal title update
                                 }
                             };
 
@@ -194,6 +204,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
         if (result == JFileChooser.APPROVE_OPTION)
         {
             java.io.File selectedFile = fileChooser.getSelectedFile();
+            setWindowTitleForFile(selectedFile); // <-- Universal title update
             // controller.loadPartitionedGraphFromFile(this, selectedFile);
             System.out.println("Selected file: " + selectedFile.getAbsolutePath());
         }
@@ -210,6 +221,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
         if (result == JFileChooser.APPROVE_OPTION)
         {
             java.io.File selectedFile = fileChooser.getSelectedFile();
+            setWindowTitleForFile(selectedFile); // <-- Universal title update
             // controller.loadPartitionedBinaryGraphFromFile(this, selectedFile);
             System.out.println("Selected file: " + selectedFile.getAbsolutePath());
         }
