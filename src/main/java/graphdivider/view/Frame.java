@@ -11,36 +11,27 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
-/**
- * Main application window for the Graph Divider tool.
- *
- * Responsibilities:
- * - Hosts the main UI components (menu, tool panel, graph visualization).
- * - Handles theme switching and adapts to OS theme changes (Observer pattern).
- * - Delegates business logic (file loading, partitioning) to the controller.
- */
+// Main window for the Graph Divider tool.
 public final class Frame extends JFrame implements PropertyChangeListener
 {
-    // The main panel responsible for graph visualization.
+    // Graph panel
     private final Graph graphPanel;
-    // Controller for handling graph-related logic.
+    // Controller
     private final GraphController controller = new GraphController();
-    // Tracks the last known dark mode state to detect theme changes.
+    // Last dark mode state
     private boolean lastDarkMode;
 
-    /**
-     * Constructs the main application window and initializes all UI components and listeners.
-     */
+    // Constructs the main window and initializes UI.
     public Frame()
     {
         setTitle("Graph Divider");
         lastDarkMode = Theme.isDarkPreferred();
         updateWindowIcon(lastDarkMode);
 
-        // Register as observer for Windows theme changes (Windows 11+).
+        // Listen for Windows theme changes
         Toolkit.getDefaultToolkit().addPropertyChangeListener("win.menu.dark", this);
 
-        // Detect if running under WSL (Windows Subsystem for Linux) and start polling for theme changes if so.
+        // Detect WSL and start polling if needed
         boolean isWSL = isRunningUnderWSL();
         if (isWSL)
         {
@@ -51,7 +42,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         maximizeWindow(isWSL);
 
-        // Workaround: Force size to usable screen area when maximized (for laptops with maximization issues)
+        // Workaround: fill usable area when maximized
         this.addWindowStateListener(e -> {
             if ((e.getNewState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH) {
                 GraphicsConfiguration gc = getGraphicsConfiguration();
@@ -61,82 +52,72 @@ public final class Frame extends JFrame implements PropertyChangeListener
                 int y = bounds.y + insets.top;
                 int width = bounds.width - insets.left - insets.right;
                 int height = bounds.height - insets.top - insets.bottom;
-                setBounds(x, y, width, height); // Only fill usable area, not covering taskbar
+                setBounds(x, y, width, height);
                 revalidate();
                 repaint();
             }
         });
 
-        // Set up the menu bar with theme and file loading actions.
+        // Menu bar
         MenuBar menuBar = new MenuBar();
         setJMenuBar(menuBar);
 
-        // Set up the tool panel for partition settings and graph division controls.
+        // Tool panel
         ToolPanel toolPanel = new ToolPanel();
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(toolPanel, BorderLayout.WEST);
 
-        // Set up the main graph visualization panel.
+        // Graph visualization panel
         graphPanel = new Graph(toolPanel);
 
-        // Wrap the graphPanel in a JScrollPane to enable scrollbars for large graphs
+        // Scroll pane for graph panel
         JScrollPane scrollPane = new JScrollPane(graphPanel,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        // Use custom wide scrollbars
+        // Custom scrollbars
         scrollPane.setVerticalScrollBar(new graphdivider.view.ui.ScrollBar(JScrollBar.VERTICAL));
         scrollPane.setHorizontalScrollBar(new graphdivider.view.ui.ScrollBar(JScrollBar.HORIZONTAL));
-        // Optional: Remove border for a cleaner look
         scrollPane.setBorder(null);
-
-        // Set a wider preferred viewport size for the scroll pane
         scrollPane.setPreferredSize(new Dimension(1800, 900));
-
         getContentPane().add(scrollPane, BorderLayout.CENTER);
 
-        // Register listeners for theme switching via the menu bar.
+        // Theme switching listeners
         menuBar.addLightThemeListener(e -> switchTheme(false));
         menuBar.addDarkThemeListener(e -> switchTheme(true));
         menuBar.addAutoThemeListener(e -> Theme.applyAutoTheme(() ->
         {
-            // Callback to update icon and UI when auto theme changes.
             updateWindowIcon(Theme.isDarkPreferred());
             SwingUtilities.updateComponentTreeUI(graphPanel);
             graphPanel.repaint();
         }));
 
-        // Register listener for loading a text-based graph file.
+        // Load text graph listener
         menuBar.addLoadTextGraphListener(e -> handleLoadTextGraph());
 
-        // Register listener for loading a partitioned text graph file.
+        // Load partitioned text graph listener
         menuBar.addLoadPartitionedTextListener(e -> handleLoadPartitionedTextGraph());
 
-        // Register listener for loading a partitioned binary graph file.
+        // Load partitioned binary graph listener
         menuBar.addLoadPartitionedBinaryListener(e -> handleLoadPartitionedBinaryGraph());
 
-        // Listen for changes in the tool panel's spinners (number of partitions and margin).
+        // Tool panel spinner listeners
         toolPanel.addChangeListener(e ->
         {
             int parts = toolPanel.getPartitions();
             int margin = toolPanel.getMargin();
-            // Delegate to controller if business logic is needed
             // controller.handlePartitionSettings(parts, margin);
             System.out.println("Partitions: " + parts + ", Margin: " + margin + "%");
         });
 
-        // Listen for Divide Graph button press to trigger graph partitioning.
+        // Divide Graph button listener
         toolPanel.addDivideButtonListener(e ->
         {
-            // Delegate to controller for partitioning logic
             // controller.divideGraph(...);
             System.out.println("Divide Graph button pressed.");
         });
     }
 
-    /**
-     * Handles loading a text-based graph file using the controller.
-     * Shows a progress bar while displaying the graph.
-     */
+    // Loads a text-based graph file.
     private void handleLoadTextGraph()
     {
         JFileChooser fileChooser = new JFileChooser("src/main/resources/graphs/");
@@ -148,7 +129,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
         {
             java.io.File selectedFile = fileChooser.getSelectedFile();
 
-            // Load the graph model in background
+            // Load graph in background
             SwingWorker<GraphController.LoadedGraph, Void> loader = new SwingWorker<>()
             {
                 @Override
@@ -165,7 +146,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
                         GraphController.LoadedGraph loaded = get();
                         if (loaded != null)
                         {
-                            // Use ProgressDialog for displaying phase
+                            // Show progress dialog while displaying
                             ProgressDialog progressDialog = new ProgressDialog(Frame.this, "Displaying Graph...", "Displaying graph, please wait...");
                             SwingWorker<Void, Void> displayer = new SwingWorker<>()
                             {
@@ -202,10 +183,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
         }
     }
 
-    /**
-     * Handles loading a partitioned text graph file.
-     * Extend the controller to support this if needed.
-     */
+    // Loads a partitioned text graph file.
     private void handleLoadPartitionedTextGraph()
     {
         JFileChooser fileChooser = new JFileChooser("src/main/resources/divided_graphs/");
@@ -216,15 +194,12 @@ public final class Frame extends JFrame implements PropertyChangeListener
         if (result == JFileChooser.APPROVE_OPTION)
         {
             java.io.File selectedFile = fileChooser.getSelectedFile();
-            // Example: controller.loadPartitionedGraphFromFile(this, selectedFile);
+            // controller.loadPartitionedGraphFromFile(this, selectedFile);
             System.out.println("Selected file: " + selectedFile.getAbsolutePath());
         }
     }
 
-    /**
-     * Handles loading a partitioned binary graph file.
-     * Extend the controller to support this if needed.
-     */
+    // Loads a partitioned binary graph file.
     private void handleLoadPartitionedBinaryGraph()
     {
         JFileChooser fileChooser = new JFileChooser("src/main/resources/divided_graphs/");
@@ -235,17 +210,12 @@ public final class Frame extends JFrame implements PropertyChangeListener
         if (result == JFileChooser.APPROVE_OPTION)
         {
             java.io.File selectedFile = fileChooser.getSelectedFile();
-            // Example: controller.loadPartitionedBinaryGraphFromFile(this, selectedFile);
+            // controller.loadPartitionedBinaryGraphFromFile(this, selectedFile);
             System.out.println("Selected file: " + selectedFile.getAbsolutePath());
         }
     }
 
-    /**
-     * Switches the application theme between light and dark modes.
-     * Updates the window icon and repaints the graph panel to reflect the new theme.
-     *
-     * @param dark true for dark theme, false for light theme
-     */
+    // Switches theme and updates icon/UI.
     private void switchTheme(boolean dark)
     {
         if (dark)
@@ -258,25 +228,17 @@ public final class Frame extends JFrame implements PropertyChangeListener
         }
         updateWindowIcon(Theme.isDarkPreferred());
         SwingUtilities.updateComponentTreeUI(graphPanel);
-        graphPanel.repaint(); // Ensures edge color updates
+        graphPanel.repaint();
     }
 
-    /**
-     * Checks if the application is running under Windows Subsystem for Linux (WSL).
-     * Used to determine if theme polling is necessary.
-     *
-     * @return true if running under WSL, false otherwise
-     */
+    // Checks if running under WSL.
     private boolean isRunningUnderWSL()
     {
         String os = System.getProperty("os.name").toLowerCase();
         return os.contains("linux") && System.getenv("WSL_DISTRO_NAME") != null;
     }
 
-    /**
-     * Sets the initial window size to half the screen width and two-thirds of the screen height.
-     * Ensures the window is large enough for comfortable use.
-     */
+    // Sets initial window size.
     private void setInitialWindowSize()
     {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -286,16 +248,12 @@ public final class Frame extends JFrame implements PropertyChangeListener
         setSize(halfWidth, halfHeight);
     }
 
-    /**
-     * Maximizes the window, with a workaround for WSL where maximizing must be delayed.
-     *
-     * @param isWSL true if running under WSL, false otherwise
-     */
+    // Maximizes window, workaround for WSL.
     private void maximizeWindow(boolean isWSL)
     {
         if (isWSL)
         {
-            // In WSL, maximize after a short delay to ensure proper sizing.
+            // In WSL, maximize after delay
             SwingUtilities.invokeLater(() ->
             {
                 if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0)
@@ -316,13 +274,10 @@ public final class Frame extends JFrame implements PropertyChangeListener
         }
     }
 
-    /**
-     * Starts a timer to poll for theme changes under WSL, since native theme events are not available.
-     * Updates the window icon if the theme changes.
-     */
+    // Starts polling for theme changes under WSL.
     private void startWSLThemePolling()
     {
-        // Timer checks every 2 seconds for theme changes.
+        // Timer checks every 2 seconds
         Timer wslThemeTimer = new Timer(2000, null);
         wslThemeTimer.addActionListener(e ->
         {
@@ -337,11 +292,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
         wslThemeTimer.start();
     }
 
-    /**
-     * Observer update for theme changes.
-     * Called when the OS theme changes (Windows 11+).
-     * Updates the window icon if the theme has changed.
-     */
+    // Called on OS theme change.
     @Override
     public void propertyChange(PropertyChangeEvent evt)
     {
@@ -353,12 +304,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
         }
     }
 
-    /**
-     * Updates the window icon depending on the current theme.
-     * Loads either the dark or light icon resource.
-     *
-     * @param darkMode true to use icon_dark.png, false to use icon_light.png
-     */
+    // Updates window icon for current theme.
     public void updateWindowIcon(boolean darkMode)
     {
         String resource = darkMode ? "/icon/icon_dark.png" : "/icon/icon_light.png";

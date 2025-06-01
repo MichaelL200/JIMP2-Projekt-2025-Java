@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
 
+// Custom ScrollBar with theme-aware UI
 public class ScrollBar extends JScrollBar
 {
     private static final int DEFAULT_WIDTH = 17;
@@ -23,10 +24,12 @@ public class ScrollBar extends JScrollBar
         });
     }
 
+    // Modern, theme-aware ScrollBar UI
     private static class ModernScrollBarUI extends BasicScrollBarUI
     {
         private static final int ARC = 16;
 
+        // Get thumb color based on theme
         private static Color getThumbColor()
         {
             return Theme.isDarkPreferred()
@@ -34,6 +37,7 @@ public class ScrollBar extends JScrollBar
                     : new Color(120, 144, 156, 200); // blue-grey, semi-transparent
         }
 
+        // Get track color based on theme
         private static Color getTrackColor()
         {
             return Theme.isDarkPreferred()
@@ -41,6 +45,7 @@ public class ScrollBar extends JScrollBar
                     : new Color(230, 230, 230, 180); // light grey, semi-transparent
         }
 
+        // Override the getPreferredSize method to ensure consistent width
         @Override
         protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds)
         {
@@ -51,6 +56,7 @@ public class ScrollBar extends JScrollBar
             g2.dispose();
         }
 
+        // Override the paintTrack method to customize track appearance
         @Override
         protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds)
         {
@@ -61,18 +67,21 @@ public class ScrollBar extends JScrollBar
             g2.dispose();
         }
 
+        // Override the getPreferredSize method to ensure consistent width
         @Override
         protected JButton createDecreaseButton(int orientation)
         {
             return createZeroButton();
         }
 
+        // Override the createIncreaseButton method to ensure no buttons are shown
         @Override
         protected JButton createIncreaseButton(int orientation)
         {
             return createZeroButton();
         }
 
+        // Create a zero-size button to hide the default buttons
         private JButton createZeroButton()
         {
             JButton button = new JButton();

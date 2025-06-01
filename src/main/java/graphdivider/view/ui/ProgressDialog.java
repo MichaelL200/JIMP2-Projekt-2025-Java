@@ -7,13 +7,7 @@ public class ProgressDialog extends JDialog
 {
     private final JProgressBar progressBar;
 
-    /**
-     * Creates a modal progress dialog with a message and indeterminate progress bar.
-     *
-     * @param parent  The parent window (can be JFrame or JDialog)
-     * @param title   The dialog window title
-     * @param message The message to display above the progress bar
-     */
+    // Creates a modal progress dialog with a message and indeterminate progress bar.
     public ProgressDialog(Window parent, String title, String message)
     {
         super(parent, title, ModalityType.APPLICATION_MODAL);

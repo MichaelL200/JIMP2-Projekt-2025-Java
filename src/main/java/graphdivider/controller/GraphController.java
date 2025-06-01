@@ -8,16 +8,10 @@ import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * Controller for handling graph-related actions and business logic.
- * Decouples file loading and graph operations from the view (Frame).
- */
+// Controller for handling graph-related actions and business logic.
 public final class GraphController
 {
-    /**
-     * Loads a graph from the given file and returns the model, matrix, and Laplacian matrix.
-     * Handles error dialogs and returns null if loading fails.
-     */
+    // Loads a graph from the given file and returns the model, matrix, and Laplacian matrix.
     public LoadedGraph loadGraphFromFile(JFrame parent, File file)
     {
         try
@@ -38,9 +32,7 @@ public final class GraphController
         }
     }
 
-    /**
-     * Data holder for loaded graph model, matrix, and Laplacian matrix.
-     */
+    // Data holder for loaded graph model, matrix, and Laplacian matrix.
     public static class LoadedGraph
     {
         public final GraphModel model;
@@ -54,6 +46,4 @@ public final class GraphController
             this.laplacian = laplacian;
         }
     }
-
-    // Future: Add methods for partitioning, saving, etc.
 }

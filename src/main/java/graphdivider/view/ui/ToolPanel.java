@@ -5,11 +5,7 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-/**
- * ToolPanel provides user controls for partitioning a graph.
- * It contains spinners for the number of partitions and margin,
- * and a button to trigger the division operation.
- */
+// ToolPanel provides user controls for partitioning a graph.
 public final class ToolPanel extends JPanel
 {
     // Spinner for selecting the number of partitions (minimum 2, maximum 100)
@@ -19,10 +15,7 @@ public final class ToolPanel extends JPanel
     // Button to trigger the graph division operation
     private final JButton divideButton;
 
-    /**
-     * Constructs the tool panel with controls for partition settings and graph division.
-     * Uses a builder pattern for concise and readable UI layout construction.
-     */
+    // Constructs the tool panel with controls for partition settings and graph division.
     public ToolPanel()
     {
         // Use ToolPanelBuilder to construct the layout and add components
@@ -38,72 +31,45 @@ public final class ToolPanel extends JPanel
         builder.applyTo(this);
     }
 
-    /**
-     * Registers a ChangeListener for both spinners (number of partitions and margin).
-     * Allows external components to react to user input changes.
-     *
-     * @param listener the listener to notify on value changes
-     */
+    // Registers a ChangeListener for both spinners.
     public void addChangeListener(ChangeListener listener)
     {
         partitionsSpinner.addChangeListener(listener);
         marginSpinner.addChangeListener(listener);
     }
 
-    /**
-     * Registers an ActionListener for the Divide Graph button.
-     * Allows external components to handle the divide action.
-     *
-     * @param listener the listener to notify on button press
-     */
+    // Registers an ActionListener for the Divide Graph button.
     public void addDivideButtonListener(ActionListener listener)
     {
         divideButton.addActionListener(listener);
     }
 
-    /**
-     * Gets the current number of partitions from the spinner.
-     *
-     * @return the number of partitions selected by the user
-     */
+    // Gets the current number of partitions from the spinner.
     public int getPartitions()
     {
         return (Integer) partitionsSpinner.getValue();
     }
 
-    /**
-     * Gets the current margin percentage from the spinner.
-     *
-     * @return the margin percentage selected by the user
-     */
+    // Gets the current margin percentage from the spinner.
     public int getMargin()
     {
         return (Integer) marginSpinner.getValue();
     }
 
-    /**
-     * Enables or disables the divide button.
-     *
-     * @param enabled true to enable, false to disable
-     */
+    // Enables or disables the divide button.
     public void setDivideButtonEnabled(boolean enabled)
     {
         divideButton.setEnabled(enabled);
     }
 
-    /**
-     * ToolPanelBuilder helps construct the ToolPanel layout using GridBagLayout.
-     * It encapsulates repetitive layout code for clarity and maintainability.
-     */
+    // ToolPanelBuilder helps construct the ToolPanel layout using GridBagLayout.
     private static class ToolPanelBuilder
     {
         private final GridBagLayout layout = new GridBagLayout();
         private final GridBagConstraints gbc = new GridBagConstraints();
         private final JPanel panel = new JPanel();
 
-        /**
-         * Initializes the builder with default layout and spacing.
-         */
+        // Initializes the builder with default layout and spacing.
         ToolPanelBuilder()
         {
             panel.setLayout(layout);
@@ -112,12 +78,7 @@ public final class ToolPanel extends JPanel
             gbc.anchor = GridBagConstraints.WEST;
         }
 
-        /**
-         * Adds a label to the next row in the panel.
-         *
-         * @param text the label text
-         * @return this builder for chaining
-         */
+        // Adds a label to the next row in the panel.
         ToolPanelBuilder addLabel(String text)
         {
             gbc.gridx = 0;
@@ -126,12 +87,7 @@ public final class ToolPanel extends JPanel
             return this;
         }
 
-        /**
-         * Adds a spinner to the next row in the panel.
-         *
-         * @param spinner the spinner component
-         * @return this builder for chaining
-         */
+        // Adds a spinner to the next row in the panel.
         ToolPanelBuilder addSpinner(JSpinner spinner)
         {
             gbc.gridx = 1;
@@ -140,12 +96,7 @@ public final class ToolPanel extends JPanel
             return this;
         }
 
-        /**
-         * Adds a button spanning two columns to the next row in the panel.
-         *
-         * @param button the button component
-         * @return this builder for chaining
-         */
+        // Adds a button spanning two columns to the next row in the panel.
         ToolPanelBuilder addButton(JButton button)
         {
             gbc.gridx = 0;
@@ -158,12 +109,7 @@ public final class ToolPanel extends JPanel
             return this;
         }
 
-        /**
-         * Applies the built layout and components to the target panel.
-         * Copies all components and their constraints to the given JPanel.
-         *
-         * @param target the panel to apply the layout to
-         */
+        // Applies the built layout and components to the target panel.
         void applyTo(JPanel target)
         {
             target.setLayout(layout);

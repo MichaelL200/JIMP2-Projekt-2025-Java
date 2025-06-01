@@ -6,11 +6,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-/**
- * Represents an edge (connection) between two vertices in the graph visualization.
- * Handles drawing itself and adapts its color to the current theme.
- * All edges are tracked for easy global updates (e.g., theme changes).
- */
+// Represents an edge (connection) between two vertices in the graph visualization.
 public final class Edge
 {
     // Static list of all edges for global updates
@@ -23,12 +19,7 @@ public final class Edge
     // Listener to update this edge's color when the theme changes
     private final Runnable themeListener = this::onThemeChanged;
 
-    /**
-     * Constructs an edge between two vertices and registers for theme updates.
-     *
-     * @param v1 The first vertex
-     * @param v2 The second vertex
-     */
+    // Constructs an edge between two vertices and registers for theme updates.
     public Edge(Vertex v1, Vertex v2)
     {
         this.v1 = v1;
@@ -38,10 +29,7 @@ public final class Edge
         allEdges.add(this);
     }
 
-    /**
-     * Updates the color of all edges in the application.
-     * Should be called when the theme changes globally.
-     */
+    // Updates the color of all edges in the application.
     public static void updateAllEdgesColor()
     {
         for (Edge edge : allEdges)
@@ -50,11 +38,7 @@ public final class Edge
         }
     }
 
-    /**
-     * Draws the edge as a line between the centers of its two vertices.
-     *
-     * @param g The Graphics2D context to draw with
-     */
+    // Draws the edge as a line between the centers of its two vertices.
     public void draw(Graphics2D g)
     {
         int x1 = v1.getX() + v1.getDiameter() / 2;
@@ -67,18 +51,13 @@ public final class Edge
         g.drawLine(x1, y1, x2, y2);
     }
 
-    /**
-     * Updates the edge color based on the current theme.
-     * Uses white for dark theme, black for light theme.
-     */
+    // Updates the edge color based on the current theme.
     public void updateEdgeColor()
     {
         edgeColor = Theme.isDarkPreferred() ? Color.WHITE : Color.BLACK;
     }
 
-    /**
-     * Called when the theme changes. Updates the edge color and repaints the connected vertices.
-     */
+    // Called when the theme changes. Updates the edge color and repaints the connected vertices.
     private void onThemeChanged()
     {
         updateEdgeColor();
@@ -86,10 +65,7 @@ public final class Edge
         v2.repaint();
     }
 
-    /**
-     * Cleans up resources when the edge is no longer needed.
-     * Unregisters the theme listener and removes itself from the global edge list.
-     */
+    // Cleans up resources when the edge is no longer needed.
     public void dispose()
     {
         Theme.removeThemeChangeListener(themeListener);

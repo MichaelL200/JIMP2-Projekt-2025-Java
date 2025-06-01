@@ -3,35 +3,19 @@ package graphdivider.view.ui.graph;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * Represents a single vertex (node) in a graph visualization.
- * Displays as a colored circle with an ID label centered inside.
- */
+// Represents a single vertex (node) in a graph visualization.
 public final class Vertex extends JComponent
 {
-    /**
-     * Default blue color for vertices.
-     */
+    // Default blue color for vertices.
     public static final Color DEFAULT_BLUE = new Color(173, 216, 230);
-    /**
-     * Diameter of the vertex circle (in pixels).
-     */
+    // Diameter of the vertex circle (in pixels).
     private final int diameter;
-    /**
-     * Unique identifier for the vertex (displayed as label).
-     */
+    // Unique identifier for the vertex (displayed as label).
     private int id;
-    /**
-     * Fill color of the vertex circle.
-     */
+    // Fill color of the vertex circle.
     private Color color;
 
-    /**
-     * Constructs a vertex with the given id, color, and diameter.
-     * @param id The identifier to display inside the vertex
-     * @param color The fill color of the vertex
-     * @param diameter The diameter (in pixels) of the vertex
-     */
+    // Constructs a vertex with the given id, color, and diameter.
     public Vertex(int id, Color color, int diameter)
     {
         this.id = id;
@@ -43,10 +27,7 @@ public final class Vertex extends JComponent
         setMaximumSize(size);
     }
 
-    /**
-     * Paints the vertex as a filled circle with a centered label.
-     * Uses anti-aliasing for smooth edges.
-     */
+    // Paints the vertex as a filled circle with a centered label.
     @Override
     protected void paintComponent(Graphics g)
     {
@@ -70,30 +51,21 @@ public final class Vertex extends JComponent
         }
     }
 
-    /**
-     * Sets the fill color of the vertex and repaints.
-     * @param color The new fill color
-     */
+    // Sets the fill color of the vertex and repaints.
     public void setColor(Color color)
     {
         this.color = color;
         repaint();
     }
 
-    /**
-     * Sets the id of the vertex and repaints.
-     * @param id The new identifier
-     */
+    // Sets the id of the vertex and repaints.
     public void setId(int id)
     {
         this.id = id;
         repaint();
     }
 
-    /**
-     * Returns the diameter of the vertex.
-     * @return The diameter in pixels
-     */
+    // Returns the diameter of the vertex.
     public int getDiameter()
     {
         return diameter;

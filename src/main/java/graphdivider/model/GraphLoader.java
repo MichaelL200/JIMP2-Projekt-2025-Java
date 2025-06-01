@@ -1,29 +1,18 @@
 package graphdivider.model;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Utility class for loading a GraphModel from a file.
- * Intended to parse .csrrg files and construct GraphModel instances.
- */
+// Loads GraphModel from file and converts to CSRmatrix
 public final class GraphLoader
 {
     private static final Logger LOGGER = Logger.getLogger(GraphLoader.class.getName());
 
     private GraphLoader() {}
 
-    /**
-     * Loads a GraphModel from a .csrrg file.
-     * @param file the input .csrrg file
-     * @return the loaded GraphModel instance
-     * @throws IOException if file cannot be read or is malformed
-     */
+    // Load GraphModel from .csrrg file
     public static GraphModel loadFromFile(File file) throws IOException
     {
         try (BufferedReader reader = new BufferedReader(new FileReader(file)))
@@ -53,11 +42,7 @@ public final class GraphLoader
         }
     }
 
-    /**
-     * Converts a GraphModel to a CSRmatrix.
-     * @param model the GraphModel to convert
-     * @return a CSRmatrix representing the same graph
-     */
+    // Convert GraphModel to CSRmatrix
     public static CSRmatrix toCSRmatrix(GraphModel model)
     {
         int[] adjacencyList = model.getAdjacencyList();
@@ -95,68 +80,53 @@ public final class GraphLoader
         return new CSRmatrix(rowPtr, colInd, values, size);
     }
 
-    /**
-     * Computes the Laplacian matrix (L = D - A) in CSR format for the given graph model.
-     * @param model the GraphModel to convert
-     * @return a CSRmatrix representing the Laplacian matrix
-     */
+    // Convert GraphModel to Laplacian CSRmatrix
     public static CSRmatrix toLaplacianCSRmatrix(GraphModel model)
     {
         int[] adjacencyList = model.getAdjacencyList();
         int[] adjacencyPointers = model.getAdjacencyPointers();
+        int size = adjacencyPointers.length;
 
-        int maxVertex = Arrays.stream(adjacencyList).max().orElse(-1);
-        int size = maxVertex + 1;
-
-        Map<Integer, Set<Integer>> neighborsMap = new HashMap<>();
-        for (int i = 0; i < adjacencyPointers.length; i++)
+        int[] rowPtr = new int[size + 1];
+        int nnz = 0;
+        for (int i = 0; i < size; i++)
         {
             int start = adjacencyPointers[i];
-            int end = (i + 1 < adjacencyPointers.length) ? adjacencyPointers[i + 1] : adjacencyList.length;
-            int vertex = adjacencyList[start];
-            neighborsMap.putIfAbsent(vertex, new HashSet<>());
+            int end = (i + 1 < size) ? adjacencyPointers[i + 1] : adjacencyList.length;
+            int neighbors = (end - start) - 1;
+            rowPtr[i + 1] = rowPtr[i] + 1 + neighbors;
+            nnz += 1 + neighbors;
+        }
+
+        int[] colInd = new int[nnz];
+        int[] values = new int[nnz];
+        int idx = 0;
+        for (int i = 0; i < size; i++)
+        {
+            int start = adjacencyPointers[i];
+            int end = (i + 1 < size) ? adjacencyPointers[i + 1] : adjacencyList.length;
+            int degree = (end - start) - 1;
+            colInd[idx] = i;
+            values[idx] = degree;
+            idx++;
             for (int j = start + 1; j < end; j++)
             {
                 int neighbor = adjacencyList[j];
-                if (neighbor != vertex)
+                if (neighbor != i)
                 {
-                    neighborsMap.get(vertex).add(neighbor);
-                    neighborsMap.putIfAbsent(neighbor, new HashSet<>());
-                    neighborsMap.get(neighbor).add(vertex);
+                    colInd[idx] = neighbor;
+                    values[idx] = -1;
+                    idx++;
                 }
             }
         }
 
-        int[] rowPtr = new int[size + 1];
-        List<Integer> colIndList = new ArrayList<>();
-        List<Integer> valuesList = new ArrayList<>();
-        int idx = 0;
-
-        for (int i = 0; i < size; i++)
-        {
-            rowPtr[i] = idx;
-            Set<Integer> neighbors = neighborsMap.getOrDefault(i, Collections.emptySet());
-            colIndList.add(i);
-            valuesList.add(neighbors.size());
-            idx++;
-            for (int neighbor : neighbors)
-            {
-                if (neighbor == i) continue;
-                colIndList.add(neighbor);
-                valuesList.add(-1);
-                idx++;
-            }
-        }
-        rowPtr[size] = idx;
-
-        int[] colInd = colIndList.stream().mapToInt(Integer::intValue).toArray();
-        int[] values = valuesList.stream().mapToInt(Integer::intValue).toArray();
-
-        logLaplacianInfo(size, idx, rowPtr, colInd, values);
+        logCSRInfo(size, nnz, rowPtr, colInd, values);
 
         return new CSRmatrix(rowPtr, colInd, values, size);
     }
 
+    // Parse int array from semicolon-separated string
     private static int[] parseIntArray(String line)
     {
         return Arrays.stream(line.trim().split(";"))
@@ -164,6 +134,7 @@ public final class GraphLoader
                 .toArray();
     }
 
+    // Log graph info if needed
     private static void logGraphInfo(int maxVerticesPerRow, int[] rowPositions, int[] rowStartIndices, int[] adjacencyList, int[] adjacencyPointers)
     {
         if (LOGGER.isLoggable(Level.FINE))
@@ -176,6 +147,7 @@ public final class GraphLoader
         }
     }
 
+    // Log CSR info if needed
     private static void logCSRInfo(int size, int nnz, int[] rowPtr, int[] colInd, int[] values)
     {
         if (LOGGER.isLoggable(Level.FINE))
@@ -184,26 +156,6 @@ public final class GraphLoader
             LOGGER.fine("Row pointers: " + Arrays.toString(rowPtr));
             LOGGER.fine("Column indices: " + Arrays.toString(colInd));
             LOGGER.fine("Values: " + Arrays.toString(values));
-        }
-    }
-
-    private static void logLaplacianInfo(int size, int nnz, int[] rowPtr, int[] colInd, int[] values)
-    {
-        if (LOGGER.isLoggable(Level.FINE))
-        {
-            LOGGER.fine("Laplacian CSR matrix: " + size + "x" + size + ", " + nnz + " non-zero values");
-            // Only print full arrays for small graphs
-            if (size <= 100)
-            {
-                LOGGER.fine("Row pointers: " + Arrays.toString(rowPtr));
-                LOGGER.fine("Column indices: " + Arrays.toString(colInd));
-                LOGGER.fine("Values: " + Arrays.toString(values));
-            } else
-            {
-                LOGGER.fine("Row pointers: [length=" + rowPtr.length + "]");
-                LOGGER.fine("Column indices: [length=" + colInd.length + "]");
-                LOGGER.fine("Values: [length=" + values.length + "]");
-            }
         }
     }
 }
