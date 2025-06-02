@@ -2,7 +2,6 @@ package graphdivider.model;
 
 import java.io.*;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 // Loads GraphModel from file and converts to CSRmatrix
@@ -80,7 +79,7 @@ public final class GraphLoader
     // Convert GraphModel to Laplacian CSRmatrix
     public static CSRmatrix toLaplacianCSRmatrix(GraphModel model)
     {
-        CSRmatrix laplacian = GraphPartitioner.toLaplacianCSRmatrix(model);
+        CSRmatrix laplacian = GraphEigenvalues.toLaplacianCSRmatrix(model);
 
         return laplacian;
     }

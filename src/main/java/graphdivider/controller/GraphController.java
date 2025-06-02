@@ -1,9 +1,6 @@
 package graphdivider.controller;
 
-import graphdivider.model.CSRmatrix;
-import graphdivider.model.GraphLoader;
-import graphdivider.model.GraphModel;
-import graphdivider.model.GraphPartitioner;
+import graphdivider.model.*;
 import graphdivider.view.ui.Theme;
 import graphdivider.view.ui.ProgressDialog;
 
@@ -160,21 +157,29 @@ public final class GraphController
                 ProgressDialog progressDialog = new ProgressDialog(frame, "Partitioning Graph", "Calculating eigenvalues and eigenvectors...");
                 progressDialog.setVisible(true);
 
-                SwingWorker<GraphPartitioner.EigenResult, Void> worker = new SwingWorker<>()
+                SwingWorker<GraphEigenvalues.EigenResult, Void> worker = new SwingWorker<>()
                 {
                     @Override
-                    protected GraphPartitioner.EigenResult doInBackground() throws Exception
+                    protected GraphEigenvalues.EigenResult doInBackground() throws Exception
                     {
                         CSRmatrix laplacian = loadedGraph.laplacian;
-                        return GraphPartitioner.computeSmallestEigenpairs(laplacian, numParts);
+                        return GraphEigenvalues.computeSmallestEigenpairs(laplacian, numParts);
                     }
 
                     @Override
                     protected void done()
                     {
-                        try {
-                            GraphPartitioner.EigenResult eigenresult = get();
-                            GraphPartitioner.printEigenData(eigenresult);
+                        try
+                        {
+                            GraphEigenvalues.EigenResult eigenresult = get();
+                            GraphEigenvalues.printEigenData(eigenresult);
+
+                            // Perform graph clusterization
+                            int numParts = toolPanel.getPartitions();
+                            int[] clusters = GraphClusterization.clusterizeGraph(eigenresult, numParts);
+
+                            // Print the clusters
+                            GraphClusterization.printClusters(clusters);
                         } catch (Exception ex)
                         {
                             ex.printStackTrace();

@@ -9,9 +9,9 @@ import org.netlib.util.intW;
 import java.util.Arrays;
 
 // Utility class for spectral partitioning of graphs.
-public final class GraphPartitioner
+public final class GraphEigenvalues
 {
-    private static final Logger LOGGER = Logger.getLogger(GraphPartitioner.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GraphEigenvalues.class.getName());
 
     public static class EigenResult
     {
@@ -32,7 +32,7 @@ public final class GraphPartitioner
         }
     }
 
-    private GraphPartitioner()
+    private GraphEigenvalues()
     {
     }
 
@@ -219,7 +219,7 @@ public final class GraphPartitioner
     }
 
     // Prints each eigenvalue followed by its corresponding eigenvector.
-    public static void printEigenData(GraphPartitioner.EigenResult eigenResult)
+    public static void printEigenData(GraphEigenvalues.EigenResult eigenResult)
     {
         final String ANSI_CYAN = "\u001B[36m";
         final String ANSI_RESET = "\u001B[0m";
