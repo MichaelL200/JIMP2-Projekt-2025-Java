@@ -35,30 +35,28 @@ public final class GraphPartitioner
         int size = maxVertex + 1;
 
         // Build a map from each vertex to its set of neighbors
-        Map<Integer, Set<Integer>> neighborsMap = new HashMap<>();
+        Map<Integer, Set<Integer>> neighborsMap = new HashMap<>(size);
         for (int i = 0; i < adjacencyPointers.length; i++)
         {
             int start = adjacencyPointers[i];
             int end = (i + 1 < adjacencyPointers.length) ? adjacencyPointers[i + 1] : adjacencyList.length;
             int vertex = adjacencyList[start];
-            neighborsMap.putIfAbsent(vertex, new HashSet<>());
+            neighborsMap.computeIfAbsent(vertex, k -> new HashSet<>());
             for (int j = start + 1; j < end; j++)
             {
                 int neighbor = adjacencyList[j];
                 if (neighbor != vertex)
                 {
-                    // Add neighbor to vertex's set and ensure symmetry
                     neighborsMap.get(vertex).add(neighbor);
-                    neighborsMap.putIfAbsent(neighbor, new HashSet<>());
-                    neighborsMap.get(neighbor).add(vertex);
+                    neighborsMap.computeIfAbsent(neighbor, k -> new HashSet<>()).add(vertex);
                 }
             }
         }
 
         // Prepare CSR matrix data structures
         int[] rowPtr = new int[size + 1];
-        List<Integer> colIndList = new ArrayList<>();
-        List<Integer> valuesList = new ArrayList<>();
+        List<Integer> colIndList = new ArrayList<>(size * 2);
+        List<Integer> valuesList = new ArrayList<>(size * 2);
         int idx = 0;
 
         // Construct each row of the Laplacian matrix
@@ -91,3 +89,4 @@ public final class GraphPartitioner
         return new CSRmatrix(rowPtr, colInd, values, size);
     }
 }
+
