@@ -18,12 +18,25 @@ public record CSRmatrix(int[] rowPtr, int[] colInd, int[] values, int size)
         return 0;
     }
 
+    // Accessors for internal arrays
+    public int[] getRowPtr() { return rowPtr; }
+    public int[] getColInd() { return colInd; }
+    public int[] getValues() { return values; }
+
     // Prints the CSR matrix data to the terminal for debugging.
     public void printMatrixData(String label)
     {
+        final String ANSI_MAGENTA = "\u001B[35m";
+        final String ANSI_RESET = "\u001B[0m";
         if (label != null && !label.isEmpty())
         {
-            System.out.println(label);
+            System.out.println(ANSI_MAGENTA + label + ANSI_RESET);
         }
+        System.out.print(ANSI_MAGENTA + "\trowPtr: ");
+        System.out.println(java.util.Arrays.toString(rowPtr) + ANSI_RESET);
+        System.out.print(ANSI_MAGENTA + "\tcolInd: ");
+        System.out.println(java.util.Arrays.toString(colInd) + ANSI_RESET);
+        System.out.print(ANSI_MAGENTA + "\tvalues: ");
+        System.out.println(java.util.Arrays.toString(values) + ANSI_RESET);
     }
 }

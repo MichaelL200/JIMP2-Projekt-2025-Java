@@ -36,10 +36,19 @@ public final class GraphController
         try
         {
             GraphModel model = GraphLoader.loadFromFile(file);
+            // Print Graph Model data with color
+            final String ANSI_CYAN = "\u001B[36m";
+            final String ANSI_MAGENTA = "\u001B[35m";
+            final String ANSI_RESET = "\u001B[0m";
+            System.out.println(ANSI_CYAN + "\tGRAPH MODEL DATA:" + ANSI_RESET);
             model.printGraphData();
+
             CSRmatrix matrix = GraphLoader.toCSRmatrix(model);
+
+            // Print Laplacian data with color
+            System.out.println(ANSI_MAGENTA + "\tGRAPH LAPLACIAN DATA:" + ANSI_RESET);
             CSRmatrix laplacian = GraphLoader.toLaplacianCSRmatrix(model);
-            laplacian.printMatrixData("Laplacian CSR matrix data:");
+
             return new LoadedGraph(model, matrix, laplacian);
         } catch (IOException ex)
         {

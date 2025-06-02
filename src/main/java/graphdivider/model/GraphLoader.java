@@ -83,47 +83,31 @@ public final class GraphLoader
     // Convert GraphModel to Laplacian CSRmatrix
     public static CSRmatrix toLaplacianCSRmatrix(GraphModel model)
     {
-        int[] adjacencyList = model.getAdjacencyList();
-        int[] adjacencyPointers = model.getAdjacencyPointers();
-        int size = adjacencyPointers.length;
+        CSRmatrix laplacian = GraphPartitioner.toLaplacianCSRmatrix(model);
 
-        int[] rowPtr = new int[size + 1];
-        int nnz = 0;
-        for (int i = 0; i < size; i++)
-        {
-            int start = adjacencyPointers[i];
-            int end = (i + 1 < size) ? adjacencyPointers[i + 1] : adjacencyList.length;
-            int neighbors = (end - start) - 1;
-            rowPtr[i + 1] = rowPtr[i] + 1 + neighbors;
-            nnz += 1 + neighbors;
-        }
+        // Print Laplacian CSR matrix data
+        laplacian.printMatrixData(null);
 
-        int[] colInd = new int[nnz];
-        int[] values = new int[nnz];
-        int idx = 0;
-        for (int i = 0; i < size; i++)
-        {
-            int start = adjacencyPointers[i];
-            int end = (i + 1 < size) ? adjacencyPointers[i + 1] : adjacencyList.length;
-            int degree = (end - start) - 1;
-            colInd[idx] = i;
-            values[idx] = degree;
-            idx++;
-            for (int j = start + 1; j < end; j++)
+        // Then print dense Laplacian matrix for small graphs
+        int size = laplacian.size();
+        final String ANSI_MAGENTA = "\u001B[35m";
+        final String ANSI_RESET = "\u001B[0m";
+        if (size <= 10) {
+            for (int i = 0; i < size; i++)
             {
-                int neighbor = adjacencyList[j];
-                if (neighbor != i)
+                int[] row = new int[size];
+                int[] rowPtr = laplacian.getRowPtr();
+                int[] colInd = laplacian.getColInd();
+                int[] values = laplacian.getValues();
+                for (int j = rowPtr[i]; j < rowPtr[i + 1]; j++)
                 {
-                    colInd[idx] = neighbor;
-                    values[idx] = -1;
-                    idx++;
+                    row[colInd[j]] = values[j];
                 }
+                System.out.println(ANSI_MAGENTA + "\t" + java.util.Arrays.toString(row) + ANSI_RESET);
             }
         }
 
-        logCSRInfo(size, nnz, rowPtr, colInd, values);
-
-        return new CSRmatrix(rowPtr, colInd, values, size);
+        return laplacian;
     }
 
     // Parse int array from semicolon-separated string
@@ -139,11 +123,11 @@ public final class GraphLoader
     {
         if (LOGGER.isLoggable(Level.FINE))
         {
-            LOGGER.fine("Loaded graph: maxVerticesPerRow=" + maxVerticesPerRow);
-            LOGGER.fine("Row positions: " + Arrays.toString(rowPositions));
-            LOGGER.fine("Row start indices: " + Arrays.toString(rowStartIndices));
-            LOGGER.fine("Adjacency list: " + Arrays.toString(adjacencyList));
-            LOGGER.fine("Adjacency pointers: " + Arrays.toString(adjacencyPointers));
+            LOGGER.fine("\tLoaded graph: maxVerticesPerRow=" + maxVerticesPerRow);
+            LOGGER.fine("\tRow positions: " + Arrays.toString(rowPositions));
+            LOGGER.fine("\tRow start indices: " + Arrays.toString(rowStartIndices));
+            LOGGER.fine("\tAdjacency list: " + Arrays.toString(adjacencyList));
+            LOGGER.fine("\tAdjacency pointers: " + Arrays.toString(adjacencyPointers));
         }
     }
 
