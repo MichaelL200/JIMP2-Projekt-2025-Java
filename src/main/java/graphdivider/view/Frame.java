@@ -77,6 +77,8 @@ public final class Frame extends JFrame implements PropertyChangeListener
 
         // Pass the view to the controller (MVC alignment)
         controller.setGraphView(graphPanel);
+        // Register the controller with the graph panel
+        controller.registerViewListeners(this);
 
         // Scroll pane for graph panel
         JScrollPane scrollPane = new JScrollPane(graphPanel,
@@ -88,43 +90,6 @@ public final class Frame extends JFrame implements PropertyChangeListener
         scrollPane.setBorder(null);
         scrollPane.setPreferredSize(new Dimension(1800, 900));
         getContentPane().add(scrollPane, BorderLayout.CENTER);
-
-        // Theme switching listeners
-        menuBar.addLightThemeListener(e ->
-        {
-            System.out.println("[MenuBar] Light theme selected.");
-            switchTheme(false);
-        });
-        menuBar.addDarkThemeListener(e ->
-        {
-            System.out.println("[MenuBar] Dark theme selected.");
-            switchTheme(true);
-        });
-        menuBar.addAutoThemeListener(e ->
-        {
-            System.out.println("[MenuBar] Auto theme selected.");
-            Theme.applyAutoTheme(() ->
-            {
-                updateWindowIcon(Theme.isDarkPreferred());
-                SwingUtilities.updateComponentTreeUI(graphPanel);
-                graphPanel.repaint();
-            });
-        });
-        menuBar.addLoadTextGraphListener(e ->
-        {
-            System.out.println("[MenuBar] Load text graph selected.");
-            handleLoadTextGraph();
-        });
-        menuBar.addLoadPartitionedTextListener(e ->
-        {
-            System.out.println("[MenuBar] Load partitioned text graph selected.");
-            handleLoadPartitionedTextGraph();
-        });
-        menuBar.addLoadPartitionedBinaryListener(e ->
-        {
-            System.out.println("[MenuBar] Load partitioned binary graph selected.");
-            handleLoadPartitionedBinaryGraph();
-        });
     }
 
     // Sets the window title based on the loaded file
@@ -149,7 +114,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
     }
 
     // Loads a text-based graph file.
-    private void handleLoadTextGraph()
+    public void handleLoadTextGraph()
     {
         System.out.println("[Frame] Opening file chooser for text graph...");
         JFileChooser fileChooser = new JFileChooser("src/main/resources/graphs/");
@@ -229,7 +194,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
     }
 
     // Loads a partitioned text graph file.
-    private void handleLoadPartitionedTextGraph()
+    public void handleLoadPartitionedTextGraph()
     {
         System.out.println("[Frame] Opening file chooser for partitioned text graph...");
         JFileChooser fileChooser = new JFileChooser("src/main/resources/divided_graphs/");
@@ -251,7 +216,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
     }
 
     // Loads a partitioned binary graph file.
-    private void handleLoadPartitionedBinaryGraph()
+    public void handleLoadPartitionedBinaryGraph()
     {
         System.out.println("[Frame] Opening file chooser for partitioned binary graph...");
         JFileChooser fileChooser = new JFileChooser("src/main/resources/divided_graphs/");
@@ -273,7 +238,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
     }
 
     // Switches theme and updates icon/UI only if theme actually changed.
-    private void switchTheme(boolean dark)
+    public void switchTheme(boolean dark)
     {
         Theme.ThemeMode desired = dark ? Theme.ThemeMode.DARK : Theme.ThemeMode.LIGHT;
         if (lastThemeMode == desired)

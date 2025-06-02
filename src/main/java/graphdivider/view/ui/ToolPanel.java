@@ -55,6 +55,13 @@ public final class ToolPanel extends JPanel
         marginSpinner.addChangeListener(listener);
     }
 
+    // Registers an ActionListener for the Divide Graph button (alternative naming).
+    public void addDivideButtonActionListener(ActionListener listener)
+    {
+        divideButton.addActionListener(listener);
+    }
+
+
     // Registers an ActionListener for the Divide Graph button.
     public void addDivideButtonListener(ActionListener listener)
     {

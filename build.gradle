@@ -19,12 +19,20 @@ tasks.jar
 repositories
 {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies
 {
     // FlatLaf Swing Look & Feel (Light + Dark)
     implementation "com.formdev:flatlaf:3.6"
+
+    // Core Netlib libraries (BLAS, LAPACK, ARPACK)
+    implementation 'com.github.fommil.netlib:core:1.1.2'
+    // Platform-specific native acceleration
+    implementation 'com.github.fommil.netlib:netlib-native_ref-win-x86_64:1.1'  // Windows
+    // implementation 'com.github.fommil.netlib:netlib-native_ref-linux-x86_64:1.1'  // Linux
+    // implementation 'com.github.fommil.netlib:netlib-native_ref-osx-x86_64:1.1'    // macOS
 }
 
 tasks.register('runJar', JavaExec)

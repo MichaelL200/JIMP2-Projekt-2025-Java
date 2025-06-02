@@ -3,16 +3,21 @@ package graphdivider.controller;
 import graphdivider.model.CSRmatrix;
 import graphdivider.model.GraphLoader;
 import graphdivider.model.GraphModel;
+import graphdivider.model.GraphPartitioner;
 import graphdivider.view.ui.Theme;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 // Controller for handling graph-related actions and business logic.
 public final class GraphController
 {
     private graphdivider.view.ui.Graph graphView;
+
+    // Field to store the loaded graph
+    private LoadedGraph loadedGraph;
 
     // Set the Graph view for this controller
     public void setGraphView(graphdivider.view.ui.Graph view)
@@ -36,20 +41,12 @@ public final class GraphController
         try
         {
             GraphModel model = GraphLoader.loadFromFile(file);
-            // Print Graph Model data with color
-            final String ANSI_CYAN = "\u001B[36m";
-            final String ANSI_MAGENTA = "\u001B[35m";
-            final String ANSI_RESET = "\u001B[0m";
-            System.out.println(ANSI_CYAN + "\tGRAPH MODEL DATA:" + ANSI_RESET);
-            model.printGraphData();
-
             CSRmatrix matrix = GraphLoader.toCSRmatrix(model);
-
-            // Print Laplacian data with color
-            System.out.println(ANSI_MAGENTA + "\tGRAPH LAPLACIAN DATA:" + ANSI_RESET);
             CSRmatrix laplacian = GraphLoader.toLaplacianCSRmatrix(model);
 
-            return new LoadedGraph(model, matrix, laplacian);
+            this.loadedGraph = new LoadedGraph(model, matrix, laplacian);
+
+            return this.loadedGraph;
         } catch (IOException ex)
         {
             System.out.println("[GraphController] Failed to load graph: " + ex.getMessage());
@@ -66,6 +63,40 @@ public final class GraphController
         graphdivider.view.ui.ToolPanel toolPanel = frame.getToolPanel();
         graphdivider.view.ui.Graph graphPanel = this.graphView;
 
+        menuBar.addLightThemeListener(e ->
+        {
+            System.out.println("[MenuBar] Light theme selected.");
+            frame.switchTheme(false); // Use the Frame's switchTheme method
+        });
+
+        menuBar.addDarkThemeListener(e ->
+        {
+            System.out.println("[MenuBar] Dark theme selected.");
+            frame.switchTheme(true); // Use the Frame's switchTheme method
+        });
+
+        menuBar.addAutoThemeListener(e ->
+        {
+            System.out.println("[MenuBar] Auto theme selected.");
+            Theme.applyAutoTheme(() -> {
+                frame.switchTheme(Theme.isDarkPreferred());
+            });
+        });
+        menuBar.addLoadTextGraphListener(e ->
+        {
+            System.out.println("[MenuBar] Load text graph selected.");
+            frame.handleLoadTextGraph();
+        });
+        menuBar.addLoadPartitionedTextListener(e ->
+        {
+            System.out.println("[MenuBar] Load partitioned text graph selected.");
+            frame.handleLoadPartitionedTextGraph();
+        });
+        menuBar.addLoadPartitionedBinaryListener(e ->
+        {
+            System.out.println("[MenuBar] Load partitioned binary graph selected.");
+            frame.handleLoadPartitionedBinaryGraph();
+        });
         menuBar.addLightThemeListener(e ->
         {
             Theme.applyLightTheme();
@@ -91,12 +122,32 @@ public final class GraphController
         });
         menuBar.addLoadTextGraphListener(e ->
         {
-            
+
         });
 
-        toolPanel.addDivideButtonListener(e ->
+        toolPanel.addDivideButtonActionListener(e ->
         {
-            
+            try
+            {
+                if (this.loadedGraph == null)
+                {
+                    throw new IllegalStateException("No graph loaded.");
+                }
+
+                // Compute 2 smallest eigenpairs
+                CSRmatrix laplacian = this.loadedGraph.laplacian;
+                double[][] eigenpairs = GraphPartitioner.computeSmallestEigenpairs(laplacian, 2);
+
+                // Log or process the eigenpairs
+                double[] eigenvalues = eigenpairs[0];
+                double[] eigenvectors = eigenpairs[1];
+                System.out.println("Eigenvalues: " + Arrays.toString(eigenvalues));
+                System.out.println("Eigenvectors: " + Arrays.toString(eigenvectors));
+            } catch (Exception ex)
+            {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(frame, "Error computing eigenpairs: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         graphPanel.addMouseListener(new java.awt.event.MouseAdapter()
