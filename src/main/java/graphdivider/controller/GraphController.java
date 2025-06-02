@@ -5,11 +5,12 @@ import graphdivider.model.GraphLoader;
 import graphdivider.model.GraphModel;
 import graphdivider.model.GraphPartitioner;
 import graphdivider.view.ui.Theme;
+import graphdivider.view.ui.ProgressDialog;
 
 import javax.swing.*;
+import javax.swing.SwingWorker;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 
 // Controller for handling graph-related actions and business logic.
 public final class GraphController
@@ -50,6 +51,19 @@ public final class GraphController
             laplacian.printLaplacian();
 
             this.loadedGraph = new LoadedGraph(model, matrix, laplacian);
+
+            // Update the maximum number of partitions in the tool panel
+            int vertexCount = model.getRowPositions().length;
+            int maxPartitions = Math.min(100, vertexCount < 8 ? 2 : vertexCount / 4);
+            if (parent instanceof graphdivider.view.Frame)
+            {
+                graphdivider.view.Frame frame = (graphdivider.view.Frame) parent;
+                frame.getToolPanel().setMaxPartitions(maxPartitions);
+                frame.getToolPanel().setPartitionsSpinnerValue(2);
+            } else
+            {
+                throw new IllegalArgumentException("Parent is not an instance of Frame.");
+            }
 
             return this.loadedGraph;
         } catch (IOException ex)
@@ -139,12 +153,41 @@ public final class GraphController
                     throw new IllegalStateException("No graph loaded.");
                 }
 
-                // Compute 2 smallest eigenpairs
-                CSRmatrix laplacian = this.loadedGraph.laplacian;
-                GraphPartitioner.EigenResult eigenresult = GraphPartitioner.computeSmallestEigenpairs(laplacian, 2);
-                GraphPartitioner.printEigenData(eigenresult);
-            } catch (Exception ex)
-            {
+                // Retrieve the number of parts from the tool panel
+                int numParts = toolPanel.getPartitions();
+
+                // Show progress dialog
+                ProgressDialog progressDialog = new ProgressDialog(frame, "Partitioning Graph", "Calculating eigenvalues and eigenvectors...");
+                progressDialog.setVisible(true);
+
+                SwingWorker<GraphPartitioner.EigenResult, Void> worker = new SwingWorker<>()
+                {
+                    @Override
+                    protected GraphPartitioner.EigenResult doInBackground() throws Exception
+                    {
+                        CSRmatrix laplacian = loadedGraph.laplacian;
+                        return GraphPartitioner.computeSmallestEigenpairs(laplacian, numParts);
+                    }
+
+                    @Override
+                    protected void done()
+                    {
+                        try {
+                            GraphPartitioner.EigenResult eigenresult = get();
+                            GraphPartitioner.printEigenData(eigenresult);
+                        } catch (Exception ex)
+                        {
+                            ex.printStackTrace();
+                            JOptionPane.showMessageDialog(frame, "Error computing eigenpairs: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        } finally
+                        {
+                            progressDialog.dispose();
+                        }
+                    }
+                };
+
+                worker.execute();
+            } catch (Exception ex) {
                 ex.printStackTrace();
                 JOptionPane.showMessageDialog(frame, "Error computing eigenpairs: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }

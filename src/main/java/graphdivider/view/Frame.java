@@ -147,7 +147,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
                         {
                             System.out.println("[Frame] Graph loaded successfully. Displaying...");
                             // Show progress dialog while displaying
-                            ProgressDialog progressDialog = new ProgressDialog(Frame.this, "Displaying Graph...", "Displaying graph, please wait...");
+                            ProgressDialog progressDialog = new ProgressDialog(Frame.this, "Displaying Graph", "Displaying graph, please wait...");
                             SwingWorker<Void, Void> displayer = new SwingWorker<>()
                             {
                                 @Override

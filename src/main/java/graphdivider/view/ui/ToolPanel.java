@@ -30,6 +30,7 @@ public final class ToolPanel extends JPanel
         add(new JLabel("Number of parts:"), gbc);
         gbc.gridx = 1;
         partitionsSpinner = new JSpinner(new SpinnerNumberModel(2, 2, 100, 1));
+        partitionsSpinner.setEnabled(false);
         add(partitionsSpinner, gbc);
 
         // Row 1: Margin %
@@ -84,5 +85,18 @@ public final class ToolPanel extends JPanel
     public void setDivideButtonEnabled(boolean enabled)
     {
         divideButton.setEnabled(enabled);
+    }
+
+    public void setPartitionsSpinnerValue(int value)
+    {
+        partitionsSpinner.setValue(value);
+    }
+
+    public void setMaxPartitions(int maxPartitions)
+    {
+        SpinnerNumberModel model = (SpinnerNumberModel) partitionsSpinner.getModel();
+        model.setMaximum(maxPartitions);
+        partitionsSpinner.setToolTipText("Minimum: 2\nMaximum: " + maxPartitions); // Update tooltip
+        partitionsSpinner.setEnabled(true);
     }
 }
