@@ -4,6 +4,7 @@ import graphdivider.model.*;
 import graphdivider.view.ui.Theme;
 import graphdivider.view.ui.ProgressDialog;
 import graphdivider.view.ui.graph.GraphColoring;
+import graphdivider.view.ui.graph.Vertex;
 
 import javax.swing.*;
 import javax.swing.SwingWorker;
@@ -178,6 +179,19 @@ public final class GraphController
                             // Perform graph clusterization
                             int numParts = toolPanel.getPartitions();
                             int[] clusters = GraphClusterization.clusterizeGraph(eigenresult, numParts);
+
+                            // Validate clusters and vertices
+                            Vertex[] vertices = graphView.getVertices();
+                            if (vertices == null || clusters == null)
+                            {
+                                throw new IllegalArgumentException("Vertices or clusters are null.");
+                            }
+                            if (vertices.length != clusters.length)
+                            {
+                                System.err.println("Vertices length: " + vertices.length);
+                                System.err.println("Clusters length: " + clusters.length);
+                                throw new IllegalArgumentException("Vertices and clusters must have the same length.");
+                            }
 
                             // Print the clusters
                             GraphClusterization.printClusters(clusters);
