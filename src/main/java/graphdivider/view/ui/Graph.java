@@ -244,9 +244,13 @@ public final class Graph extends JPanel
         repaint();
     }
 
-    // Returns the list of vertices in the graph as an array.
+    // Getters for vertices and edges
     public Vertex[] getVertices()
     {
         return this.vertices.toArray(new Vertex[0]);
+    }
+    public java.util.List<Edge> getEdges()
+    {
+        return this.edges;
     }
 }

@@ -58,11 +58,15 @@ public final class Vertex extends JComponent
         repaint();
     }
 
-    // Sets the id of the vertex and repaints.
+    // Setter and getter for the vertex id.
     public void setId(int id)
     {
         this.id = id;
         repaint();
+    }
+    public int getId()
+    {
+        return this.id;
     }
 
     // Returns the diameter of the vertex.

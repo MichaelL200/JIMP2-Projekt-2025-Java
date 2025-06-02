@@ -71,4 +71,14 @@ public final class Edge
         Theme.removeThemeChangeListener(themeListener);
         allEdges.remove(this);
     }
+
+    // Getters for the connected vertices
+    public Vertex getVertex1()
+    {
+        return v1;
+    }
+    public Vertex getVertex2()
+    {
+        return v2;
+    }
 }

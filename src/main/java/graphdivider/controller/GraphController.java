@@ -183,7 +183,7 @@ public final class GraphController
                             GraphClusterization.printClusters(clusters);
 
                             // Divide the graph into clusters in the view
-                            GraphColoring.colorVertices(graphView.getVertices(), clusters);
+                            GraphColoring.colorVertices(graphView.getVertices(), clusters, graphView.getEdges());
                             graphView.repaint();
                         }
                         catch (Exception ex)
