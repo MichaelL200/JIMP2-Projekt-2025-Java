@@ -129,7 +129,7 @@ public final class GraphEigenvalues
         // ARPACK parameters
         int ncv = Math.min(4 * p, n); // Subspace dimension
         int maxIter = 10000;
-        double tol = 1e-10; // Stricter tolerance for higher precision
+        double tol = 1e-6; // Stricter tolerance for higher precision
 
         // ARPACK internal variables
         intW ido = new intW(0);
@@ -165,8 +165,10 @@ public final class GraphEigenvalues
                 int xOffset = ipntr[0] - 1;
                 int yOffset = ipntr[1] - 1;
 
+                // Compute y = L * x
                 for (int i = 0; i < n; i++) y[i] = 0.0;
 
+                // Matrix-vector multiplication for Laplacian
                 for (int i = 0; i < n; i++)
                 {
                     for (int j = laplacian.getRowPtr()[i]; j < laplacian.getRowPtr()[i + 1]; j++)

@@ -3,6 +3,7 @@ package graphdivider.controller;
 import graphdivider.model.*;
 import graphdivider.view.ui.Theme;
 import graphdivider.view.ui.ProgressDialog;
+import graphdivider.view.ui.graph.GraphColoring;
 
 import javax.swing.*;
 import javax.swing.SwingWorker;
@@ -180,7 +181,12 @@ public final class GraphController
 
                             // Print the clusters
                             GraphClusterization.printClusters(clusters);
-                        } catch (Exception ex)
+
+                            // Divide the graph into clusters in the view
+                            GraphColoring.colorVertices(graphView.getVertices(), clusters);
+                            graphView.repaint();
+                        }
+                        catch (Exception ex)
                         {
                             ex.printStackTrace();
                             JOptionPane.showMessageDialog(frame, "Error computing eigenpairs: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

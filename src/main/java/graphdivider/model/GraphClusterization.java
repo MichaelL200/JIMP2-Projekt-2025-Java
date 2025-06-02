@@ -18,11 +18,11 @@ public final class GraphClusterization
         } catch (Exception e)
         {
             System.err.println("Error during graph clustering: " + e.getMessage());
-            return null; // Return null in case of an error
+            return null;
         }
     }
 
-    // Helper method: Partition vertices into two groups using the Fiedler vector.
+    // Partition vertices into two groups using the Fiedler vector.
     private static int[] partitionByFiedlerVector(GraphEigenvalues.EigenResult eigenResult)
     {
         double[] fiedlerVector = eigenResult.eigenvectors[1];
@@ -38,11 +38,11 @@ public final class GraphClusterization
         return groupIndices;
     }
 
-    // Helper method: Placeholder for k-means clustering implementation.
+    // Placeholder for k-means clustering implementation.
     private static int[] clusterizeUsingKMeans(GraphEigenvalues.EigenResult eigenResult, int p)
     {
         System.out.println("K-means clustering with " + p + " clusters is not yet implemented.");
-        return null; // Placeholder return value
+        return null;
     }
 
     // Print the clusters (partitions) indices
