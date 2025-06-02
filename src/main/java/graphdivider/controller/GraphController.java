@@ -136,13 +136,8 @@ public final class GraphController
 
                 // Compute 2 smallest eigenpairs
                 CSRmatrix laplacian = this.loadedGraph.laplacian;
-                double[][] eigenpairs = GraphPartitioner.computeSmallestEigenpairs(laplacian, 2);
-
-                // Log or process the eigenpairs
-                double[] eigenvalues = eigenpairs[0];
-                double[] eigenvectors = eigenpairs[1];
-                System.out.println("Eigenvalues: " + Arrays.toString(eigenvalues));
-                System.out.println("Eigenvectors: " + Arrays.toString(eigenvectors));
+                GraphPartitioner.EigenResult eigenresult = GraphPartitioner.computeSmallestEigenpairs(laplacian, 2);
+                GraphPartitioner.printEigenData(eigenresult);
             } catch (Exception ex)
             {
                 ex.printStackTrace();

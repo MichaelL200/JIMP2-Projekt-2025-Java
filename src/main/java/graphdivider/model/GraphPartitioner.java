@@ -13,6 +13,25 @@ public final class GraphPartitioner
 {
     private static final Logger LOGGER = Logger.getLogger(GraphPartitioner.class.getName());
 
+    public static class EigenResult
+    {
+        public final double[] eigenvalues;
+        public final double[][] eigenvectors;
+
+        public EigenResult(double[] values, double[] vectors, int n, int p)
+        {
+            this.eigenvalues = values;
+            this.eigenvectors = new double[p][n];
+            for (int i = 0; i < p; i++)
+            {
+                for (int j = 0; j < n; j++)
+                {
+                    this.eigenvectors[i][j] = vectors[j * p + i];
+                }
+            }
+        }
+    }
+
     private GraphPartitioner()
     {
     }
@@ -97,15 +116,22 @@ public final class GraphPartitioner
     }
 
     // Computes the smallest p eigenpairs of the Laplacian matrix using ARPACK.
-    public static double[][] computeSmallestEigenpairs(CSRmatrix laplacian, int p) throws Exception
+    public static EigenResult computeSmallestEigenpairs(CSRmatrix laplacian, int p) throws Exception
     {
+        System.out.println("ARPACK implementation: " + ARPACK.getInstance().getClass().getName());
+
         int n = laplacian.size();
+        if (n <= 0 || p <= 0 || p > n)
+        {
+            throw new IllegalArgumentException("Invalid input: n = " + n + ", p = " + p + ". Ensure n > 0 and 0 < p <= n.");
+        }
+
         ARPACK arpack = ARPACK.getInstance();
 
         // ARPACK parameters
-        int ncv = Math.min(2 * p + 1, n); // Subspace dimension
-        int maxIter = 1000;
-        double tol = 1e-6;
+        int ncv = Math.min(4 * p, n); // Subspace dimension
+        int maxIter = 10000;
+        double tol = 1e-10; // Stricter tolerance for higher precision
 
         // ARPACK internal variables
         intW ido = new intW(0);
@@ -114,6 +140,7 @@ public final class GraphPartitioner
         String which = "SM"; // Smallest magnitude
 
         double[] resid = new double[n];
+        Arrays.fill(resid, 0.0); // Ensure deterministic initialization
         double[] V = new double[n * ncv];
         int ldv = n;
         int[] iparam = new int[11];
@@ -130,24 +157,27 @@ public final class GraphPartitioner
         // Reverse communication loop
         while (ido.val != 99)
         {
-            doubleW tolWrapper = new doubleW(tol); // Wrap the existing 'tol' variable
-            arpack.dsaupd(ido, bmat, n, which, p, tolWrapper, resid, ncv,
-                    V, ldv, iparam, ipntr, workd, workl, lworkl, info);
+            doubleW tolWrapper = new doubleW(tol);
+            arpack.dsaupd(ido, bmat, n, which, p, tolWrapper, resid, ncv, V, ldv, iparam, ipntr, workd, workl, lworkl, info);
 
             if (ido.val == -1 || ido.val == 1)
             {
-                // Perform y = A * x using CSR format
-                double[] x = Arrays.copyOfRange(workd, ipntr[0] - 1, ipntr[0] - 1 + n);
+                double[] x = workd;
                 double[] y = new double[n];
+                int xOffset = ipntr[0] - 1;
+                int yOffset = ipntr[1] - 1;
+
+                for (int i = 0; i < n; i++) y[i] = 0.0;
 
                 for (int i = 0; i < n; i++)
                 {
                     for (int j = laplacian.getRowPtr()[i]; j < laplacian.getRowPtr()[i + 1]; j++)
                     {
-                        y[i] += laplacian.getValues()[j] * x[laplacian.getColInd()[j]];
+                        y[i] += laplacian.getValues()[j] * x[xOffset + laplacian.getColInd()[j]];
                     }
                 }
-                System.arraycopy(y, 0, workd, ipntr[1] - 1, n);
+                System.arraycopy(y, 0, workd, yOffset, n);
+
             }
         }
 
@@ -161,15 +191,53 @@ public final class GraphPartitioner
         double[] d = new double[p];
         double[] Z = new double[n * p];
 
-        intW pWrapper = new intW(p); // Wrap the 'p' parameter in an intW object
-        arpack.dseupd(true, "A", select, d, Z, n, 0.0, bmat, n, which,
-                pWrapper, tol, resid, ncv, V, ldv, iparam, ipntr, workd, workl, lworkl, info);
+        intW pWrapper = new intW(p);
+        arpack.dseupd(true, "A", select, d, Z, n, 0.0, bmat, n, which, pWrapper, tol, resid, ncv, V, ldv, iparam, ipntr, workd, workl, lworkl, info);
 
         if (info.val != 0)
         {
             throw new RuntimeException("ARPACK dseupd error: " + info.val);
         }
 
-        return new double[][]{d, Z};
+        // Normalize eigenvectors
+        for (int i = 0; i < p; i++)
+        {
+            double norm = 0.0;
+            for (int j = 0; j < n; j++)
+            {
+                norm += Z[j * p + i] * Z[j * p + i];
+            }
+            norm = Math.sqrt(norm);
+            if (norm > 0)
+            {
+                for (int j = 0; j < n; j++)
+                {
+                    Z[j * p + i] /= norm;
+                }
+            }
+        }
+
+        return new EigenResult(d, Z, n, p);
+    }
+
+    // Prints each eigenvalue followed by its corresponding eigenvector.
+    public static void printEigenData(GraphPartitioner.EigenResult eigenResult)
+    {
+        final String ANSI_CYAN = "\u001B[36m";
+        final String ANSI_RESET = "\u001B[0m";
+
+        for (int i = 0; i < eigenResult.eigenvalues.length; i++)
+        {
+            System.out.print(ANSI_CYAN + "\tEigenvalue: ");
+            System.out.println(String.format("\t%.3f", eigenResult.eigenvalues[i]) + ANSI_RESET);
+
+            System.out.print(ANSI_CYAN + "\tEigenvector: [");
+            for (int j = 0; j < eigenResult.eigenvectors[i].length; j++)
+            {
+                System.out.print(String.format("\t%.3f", eigenResult.eigenvectors[i][j]));
+                if (j < eigenResult.eigenvectors[i].length - 1) System.out.print(", ");
+            }
+            System.out.println("]" + ANSI_RESET);
+        }
     }
 }

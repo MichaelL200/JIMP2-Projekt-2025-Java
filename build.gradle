@@ -31,8 +31,8 @@ dependencies
     implementation 'com.github.fommil.netlib:core:1.1.2'
     // Platform-specific native acceleration
     implementation 'com.github.fommil.netlib:netlib-native_ref-win-x86_64:1.1'  // Windows
-    // implementation 'com.github.fommil.netlib:netlib-native_ref-linux-x86_64:1.1'  // Linux
-    // implementation 'com.github.fommil.netlib:netlib-native_ref-osx-x86_64:1.1'    // macOS
+    implementation 'com.github.fommil.netlib:netlib-native_ref-linux-x86_64:1.1'  // Linux
+    implementation 'com.github.fommil.netlib:netlib-native_ref-osx-x86_64:1.1'    // macOS
 }
 
 tasks.register('runJar', JavaExec)
