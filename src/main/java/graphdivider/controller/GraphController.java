@@ -41,8 +41,13 @@ public final class GraphController
         try
         {
             GraphModel model = GraphLoader.loadFromFile(file);
+            model.printGraphData();
+
             CSRmatrix matrix = GraphLoader.toCSRmatrix(model);
+            matrix.printAdjacency();
+
             CSRmatrix laplacian = GraphLoader.toLaplacianCSRmatrix(model);
+            laplacian.printLaplacian();
 
             this.loadedGraph = new LoadedGraph(model, matrix, laplacian);
 

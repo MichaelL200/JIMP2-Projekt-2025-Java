@@ -89,8 +89,6 @@ public final class GraphPartitioner
         int[] colInd = colIndList.stream().mapToInt(Integer::intValue).toArray();
         int[] values = valuesList.stream().mapToInt(Integer::intValue).toArray();
 
-        logLaplacianInfo(size, idx, rowPtr, colInd, values);
-
         return new CSRmatrix(rowPtr, colInd, values, size);
     }
 

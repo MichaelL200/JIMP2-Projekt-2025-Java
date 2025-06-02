@@ -30,9 +30,8 @@ public final class GraphLoader
             int[] adjacencyList = parseIntArray(lines[3]);
             int[] adjacencyPointers = parseIntArray(lines[4]);
 
-            logGraphInfo(maxVerticesPerRow, rowPositions, rowStartIndices, adjacencyList, adjacencyPointers);
-
-            return new GraphModel(
+            return new GraphModel
+            (
                 maxVerticesPerRow,
                 rowPositions,
                 rowStartIndices,
@@ -75,8 +74,6 @@ public final class GraphLoader
             }
         }
 
-        logCSRInfo(size, nnz, rowPtr, colInd, values);
-
         return new CSRmatrix(rowPtr, colInd, values, size);
     }
 
@@ -84,28 +81,6 @@ public final class GraphLoader
     public static CSRmatrix toLaplacianCSRmatrix(GraphModel model)
     {
         CSRmatrix laplacian = GraphPartitioner.toLaplacianCSRmatrix(model);
-
-        // Print Laplacian CSR matrix data
-        laplacian.printMatrixData(null);
-
-        // Then print dense Laplacian matrix for small graphs
-        int size = laplacian.size();
-        final String ANSI_MAGENTA = "\u001B[35m";
-        final String ANSI_RESET = "\u001B[0m";
-        if (size <= 10) {
-            for (int i = 0; i < size; i++)
-            {
-                int[] row = new int[size];
-                int[] rowPtr = laplacian.getRowPtr();
-                int[] colInd = laplacian.getColInd();
-                int[] values = laplacian.getValues();
-                for (int j = rowPtr[i]; j < rowPtr[i + 1]; j++)
-                {
-                    row[colInd[j]] = values[j];
-                }
-                System.out.println(ANSI_MAGENTA + "\t" + java.util.Arrays.toString(row) + ANSI_RESET);
-            }
-        }
 
         return laplacian;
     }
@@ -116,30 +91,5 @@ public final class GraphLoader
         return Arrays.stream(line.trim().split(";"))
                 .mapToInt(Integer::parseInt)
                 .toArray();
-    }
-
-    // Log graph info if needed
-    private static void logGraphInfo(int maxVerticesPerRow, int[] rowPositions, int[] rowStartIndices, int[] adjacencyList, int[] adjacencyPointers)
-    {
-        if (LOGGER.isLoggable(Level.FINE))
-        {
-            LOGGER.fine("\tLoaded graph: maxVerticesPerRow=" + maxVerticesPerRow);
-            LOGGER.fine("\tRow positions: " + Arrays.toString(rowPositions));
-            LOGGER.fine("\tRow start indices: " + Arrays.toString(rowStartIndices));
-            LOGGER.fine("\tAdjacency list: " + Arrays.toString(adjacencyList));
-            LOGGER.fine("\tAdjacency pointers: " + Arrays.toString(adjacencyPointers));
-        }
-    }
-
-    // Log CSR info if needed
-    private static void logCSRInfo(int size, int nnz, int[] rowPtr, int[] colInd, int[] values)
-    {
-        if (LOGGER.isLoggable(Level.FINE))
-        {
-            LOGGER.fine("Loaded graph as CSR matrix: " + size + " rows, " + nnz + " non-zero values");
-            LOGGER.fine("Row pointers: " + Arrays.toString(rowPtr));
-            LOGGER.fine("Column indices: " + Arrays.toString(colInd));
-            LOGGER.fine("Values: " + Arrays.toString(values));
-        }
     }
 }
