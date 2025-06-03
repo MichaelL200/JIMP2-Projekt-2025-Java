@@ -51,68 +51,80 @@ public final class GraphClusterization
         return groupIndices;
     }
 
-    // K-means clustering for spectral clustering (fix: transpose eigenvectors for correct shape)
+    // K-means balanced clustering for spectral clustering using the first p eigenvectors.
     private static int[] clusterizeUsingKMeans(GraphEigenvalues.EigenResult eigenResult, int p)
     {
         int n = eigenResult.eigenvectors[0].length; // Number of vertices
         int dimensions = eigenResult.eigenvectors.length; // Number of eigenvectors used (should be p)
         double[][] data = new double[n][dimensions];
         for (int i = 0; i < n; i++)
-        {
             for (int j = 0; j < dimensions; j++)
-            {
                 data[i][j] = eigenResult.eigenvectors[j][i];
-            }
-        }
 
         int maxIterations = 100;
         double[][] centroids = initializeCentroids(data, p);
         int[] clusters = new int[n];
 
+        int minSize = n / p;
+        int extra = n % p; // Some clusters will have one extra
+
         for (int iteration = 0; iteration < maxIterations; iteration++)
         {
-            // Step 1: Assign vertices to the nearest centroid
+            // Step 1: Assign vertices to the nearest centroid with size constraint
+            int[] clusterSizes = new int[p];
+            boolean[] assigned = new boolean[n];
+
+            // For each point, find the closest centroid, but respect size limits
             for (int i = 0; i < n; i++)
             {
-                double minDistance = Double.MAX_VALUE;
-                int closestCentroid = -1;
+                // Compute distances to all centroids
+                double[] distances = new double[p];
                 for (int j = 0; j < p; j++)
                 {
-                    double distance = euclideanDistance(data[i], centroids[j]);
-                    if (distance < minDistance)
+                    distances[j] = euclideanDistance(data[i], centroids[j]);
+                }
+
+                // Try to assign to the closest centroid with available capacity
+                Integer[] order = new Integer[p];
+                for (int j = 0; j < p; j++) order[j] = j;
+                Arrays.sort(order, java.util.Comparator.comparingDouble(j -> distances[j]));
+
+                for (int idx = 0; idx < p; idx++)
+                {
+                    int c = order[idx];
+                    int targetSize = minSize + (c < extra ? 1 : 0);
+                    if (clusterSizes[c] < targetSize)
                     {
-                        minDistance = distance;
-                        closestCentroid = j;
+                        clusters[i] = c + 1; // 1-based
+                        clusterSizes[c]++;
+                        assigned[i] = true;
+                        break;
                     }
                 }
-                clusters[i] = closestCentroid + 1; // Use 1-based cluster indices for consistency
             }
 
             // Step 2: Update centroids
             double[][] newCentroids = new double[p][dimensions];
-            int[] clusterSizes = new int[p];
-
+            int[] newClusterSizes = new int[p];
             for (int i = 0; i < n; i++)
             {
                 int cluster = clusters[i] - 1;
-                clusterSizes[cluster]++;
+                newClusterSizes[cluster]++;
                 for (int j = 0; j < dimensions; j++)
                 {
                     newCentroids[cluster][j] += data[i][j];
                 }
             }
-
             for (int i = 0; i < p; i++)
             {
-                if (clusterSizes[i] > 0)
+                if (newClusterSizes[i] > 0)
                 {
                     for (int j = 0; j < dimensions; j++)
                     {
-                        newCentroids[i][j] /= clusterSizes[i];
+                        newCentroids[i][j] /= newClusterSizes[i];
                     }
                 } else
                 {
-                    // Handle empty clusters by reinitializing the centroid
                     newCentroids[i] = data[new Random().nextInt(n)].clone();
                 }
             }
@@ -127,11 +139,9 @@ public final class GraphClusterization
                     break;
                 }
             }
-
             centroids = newCentroids;
             if (converged) break;
         }
-
         return clusters;
     }
 
