@@ -135,45 +135,39 @@ public final class GraphClusterization
         return clusters;
     }
 
+    // Initialize centroids for k-means clustering based on the data range
     private static double[][] initializeCentroids(double[][] data, int p)
     {
-        int n = data.length; // Number of data points
-        double[][] centroids = new double[p][data[0].length];
-        Random random = new Random();
+        int n = data.length;
+        int dimensions = data[0].length;
+        double[][] centroids = new double[p][dimensions];
 
-        // Step 1: Randomly select the first centroid
-        int firstIndex = random.nextInt(n);
-        centroids[0] = data[firstIndex].clone();
+        // For each dimension, find min and max
+        double[] min = new double[dimensions];
+        double[] max = new double[dimensions];
+        Arrays.fill(min, Double.POSITIVE_INFINITY);
+        Arrays.fill(max, Double.NEGATIVE_INFINITY);
 
-        // Step 2: Select remaining centroids using k-means++ logic
-        for (int i = 1; i < p; i++)
+        for (int i = 0; i < n; i++)
         {
-            double[] distances = new double[n];
-            double totalDistance = 0.0;
-
-            // Calculate the distance to the nearest centroid
-            for (int j = 0; j < n; j++)
+            for (int d = 0; d < dimensions; d++)
             {
-                double minDistance = Double.MAX_VALUE;
-                for (int k = 0; k < i; k++)
-                {
-                    double distance = euclideanDistance(data[j], centroids[k]);
-                    minDistance = Math.min(minDistance, distance);
-                }
-                distances[j] = minDistance * minDistance; // Square the distance
-                totalDistance += distances[j];
+                if (data[i][d] < min[d]) min[d] = data[i][d];
+                if (data[i][d] > max[d]) max[d] = data[i][d];
             }
+        }
 
-            // Select the next centroid with weighted probability
-            double threshold = random.nextDouble() * totalDistance;
-            double cumulativeDistance = 0.0;
-            for (int j = 0; j < n; j++)
+        // Evenly space centroids along each dimension
+        for (int c = 0; c < p; c++)
+        {
+            for (int d = 0; d < dimensions; d++)
             {
-                cumulativeDistance += distances[j];
-                if (cumulativeDistance >= threshold)
+                if (p == 1)
                 {
-                    centroids[i] = data[j].clone();
-                    break;
+                    centroids[c][d] = (min[d] + max[d]) / 2.0;
+                } else
+                {
+                    centroids[c][d] = min[d] + (max[d] - min[d]) * c / (p - 1);
                 }
             }
         }
@@ -238,6 +232,6 @@ public final class GraphClusterization
             if (size < min) min = size;
             if (size > max) max = size;
         }
-        return min > 0 ? ((double)(max - min) / min) * 100.0 : 0.0; // <-- percent
+        return min > 0 ? ((double)(max - min) / min) * 100.0 : 0.0;
     }
 }
