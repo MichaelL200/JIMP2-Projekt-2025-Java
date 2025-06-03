@@ -226,6 +226,7 @@ public final class GraphEigenvalues
         final String ANSI_CYAN = "\u001B[36m";
         final String ANSI_RESET = "\u001B[0m";
 
+        System.out.println(ANSI_CYAN + "\t\tEIGENPAIRS" + ANSI_RESET);
         for (int i = 0; i < eigenResult.eigenvalues.length; i++)
         {
             System.out.print(ANSI_CYAN + "\tEigenvalue: ");

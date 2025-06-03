@@ -29,15 +29,25 @@ public final class GraphClusterization
     private static int[] partitionByFiedlerVector(GraphEigenvalues.EigenResult eigenResult)
     {
         double[] fiedlerVector = eigenResult.eigenvectors[1];
-        int[] groupIndices = new int[fiedlerVector.length];
+        int n = fiedlerVector.length;
+        Integer[] indices = new Integer[n];
+        for (int i = 0; i < n; i++) indices[i] = i;
 
-        System.out.println("Graph partitioning based on the Fiedler vector:");
-        for (int i = 0; i < fiedlerVector.length; i++)
+        // Sort indices by Fiedler vector value
+        java.util.Arrays.sort(indices, java.util.Comparator.comparingDouble(i -> fiedlerVector[i]));
+
+        int[] groupIndices = new int[n];
+        int half = n / 2;
+        for (int i = 0; i < n; i++)
         {
-            groupIndices[i] = fiedlerVector[i] < 0 ? 1 : 2; // Store group index
-            System.out.println("Vertex " + i + ": Cluster " + groupIndices[i]);
+            if (i < half)
+            {
+                groupIndices[indices[i]] = 1;
+            } else
+            {
+                groupIndices[indices[i]] = 2;
+            }
         }
-
         return groupIndices;
     }
 
@@ -185,21 +195,31 @@ public final class GraphClusterization
     // Print the clusters (partitions) indices
     public static void printClusters(int[] clusters)
     {
-        final String COLOR = "\u001B[32m"; // Green
-        final String ANSI_RESET = "\u001B[0m";
+        final String GREEN = "\u001B[32m"; // Green
+        final String RESET = "\u001B[0m";
 
         if (clusters == null || clusters.length == 0)
         {
-            System.out.println("No clusters to display.");
+            System.out.println(GREEN + "No clusters to display." + RESET);
             return;
         }
 
-        System.out.println("Clusters:");
-        for (int i = 0; i < clusters.length; i++)
+        // Group vertices by cluster
+        java.util.Map<Integer, java.util.List<Integer>> clusterMap = new java.util.HashMap<>();
+        for (int vertex = 0; vertex < clusters.length; vertex++)
         {
-            System.out.println(COLOR + "Vertex " + i + ": Cluster " + clusters[i] + ANSI_RESET);
+            int cluster = clusters[vertex];
+            clusterMap.computeIfAbsent(cluster, k -> new java.util.ArrayList<>()).add(vertex);
         }
-    }
+
+        System.out.println(GREEN + "\t\tCLUSTERS (PARTS):");
+        for (var entry : clusterMap.entrySet())
+        {
+            System.out.print(GREEN + "\tCluster " + entry.getKey() + ": ");
+            System.out.print(entry.getValue());
+            System.out.println(RESET);
+        }
+}
 
     // Calculate the margin of the clusters based on their sizes
     public static double calculateMargin(int[] clusters, int numParts)
