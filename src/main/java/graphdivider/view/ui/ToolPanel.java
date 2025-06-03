@@ -38,6 +38,7 @@ public final class ToolPanel extends JPanel
         add(new JLabel("Margin %:"), gbc);
         gbc.gridx = 1;
         marginSpinner = new JSpinner(new SpinnerNumberModel(10, 10, 999, 1));
+        marginSpinner.setEnabled(false);
         add(marginSpinner, gbc);
 
         // Row 2: Divide Graph button (span 2 columns)
@@ -97,5 +98,14 @@ public final class ToolPanel extends JPanel
         model.setMaximum(maxPartitions);
         partitionsSpinner.setToolTipText("Minimum: 2\nMaximum: " + maxPartitions); // Update tooltip
         partitionsSpinner.setEnabled(true);
+    }
+
+    public JSpinner getPartitionsSpinner()
+    {
+        return partitionsSpinner;
+    }
+    public JSpinner getMarginSpinner()
+    {
+        return marginSpinner;
     }
 }

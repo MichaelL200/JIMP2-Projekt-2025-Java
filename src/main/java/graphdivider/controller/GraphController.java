@@ -152,6 +152,11 @@ public final class GraphController
                     throw new IllegalStateException("No graph loaded.");
                 }
 
+                // Disable the tool panel
+                toolPanel.setDivideButtonEnabled(false);
+                toolPanel.getPartitionsSpinner().setEnabled(false);
+                toolPanel.getMarginSpinner().setEnabled(false);
+
                 // Retrieve the number of parts from the tool panel
                 int numParts = toolPanel.getPartitions();
 
@@ -220,15 +225,6 @@ public final class GraphController
             } catch (Exception ex) {
                 ex.printStackTrace();
                 JOptionPane.showMessageDialog(frame, "Error computing eigenpairs: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        graphPanel.addMouseListener(new java.awt.event.MouseAdapter()
-        {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e)
-            {
-                frame.clearGraphPanel();
             }
         });
     }

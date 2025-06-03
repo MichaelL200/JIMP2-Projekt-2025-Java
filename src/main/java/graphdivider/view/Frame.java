@@ -116,14 +116,6 @@ public final class Frame extends JFrame implements PropertyChangeListener
         }
     }
 
-    // Clears the graph panel
-    public void clearGraphPanel()
-    {
-        graphPanel.clearGraph();
-        toolPanel.setDivideButtonEnabled(false);
-        setTitle("Graph Divider");
-    }
-
     // Loads a text-based graph file.
     public void handleLoadTextGraph()
     {
@@ -137,6 +129,11 @@ public final class Frame extends JFrame implements PropertyChangeListener
         {
             java.io.File selectedFile = fileChooser.getSelectedFile();
             System.out.println("[Frame] Selected file: " + selectedFile.getAbsolutePath());
+
+            // Disable partition controls while loading
+            toolPanel.setDivideButtonEnabled(false);
+            toolPanel.getPartitionsSpinner().setEnabled(false);
+            toolPanel.getMarginSpinner().setEnabled(false);
 
             // Load graph in background
             SwingWorker<GraphController.LoadedGraph, Void> loader = new SwingWorker<>()
@@ -166,7 +163,6 @@ public final class Frame extends JFrame implements PropertyChangeListener
                                 protected Void doInBackground()
                                 {
                                     System.out.println("[Frame] Displaying graph on panel...");
-                                    // graphPanel.displayGraph(loaded.model);
                                     controller.displayGraph(loaded.model); // Delegate to controller
                                     return null;
                                 }
@@ -176,7 +172,12 @@ public final class Frame extends JFrame implements PropertyChangeListener
                                 {
                                     System.out.println("[Frame] Graph display complete.");
                                     progressDialog.dispose();
-                                    setWindowTitleForFile(selectedFile); // <-- Universal title update
+                                    setWindowTitleForFile(selectedFile);
+
+                                    // Enable partition controls after display
+                                    toolPanel.getPartitionsSpinner().setEnabled(true);
+                                    toolPanel.getMarginSpinner().setEnabled(true);
+                                    toolPanel.setDivideButtonEnabled(true);
                                 }
                             };
 
