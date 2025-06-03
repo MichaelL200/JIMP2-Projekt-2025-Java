@@ -10,7 +10,7 @@ import java.util.Map;
 public final class GraphColoring
 {
     // Colors vertices based on their cluster indices and removes edges between different clusters.
-    public static void colorVertices(Vertex[] vertices, int[] clusters, java.util.List<Edge> edges)
+    public static int colorVertices(Vertex[] vertices, int[] clusters, java.util.List<Edge> edges)
     {
         if (vertices == null || clusters == null || vertices.length != clusters.length)
         {
@@ -27,18 +27,22 @@ public final class GraphColoring
             vertices[i].setColor(clusterColor);
         }
 
-        // Remove edges between vertices in different clusters
-        edges.removeIf(edge ->
+        // Count and remove edges between vertices in different clusters
+        int cutEdges = 0;
+        java.util.Iterator<Edge> it = edges.iterator();
+        while (it.hasNext())
         {
+            Edge edge = it.next();
             int cluster1 = clusters[edge.getVertex1().getId()];
             int cluster2 = clusters[edge.getVertex2().getId()];
             if (cluster1 != cluster2)
             {
-                edge.dispose(); // Clean up resources
-                return true;    // Remove edge
+                edge.dispose();
+                it.remove();
+                cutEdges++;
             }
-            return false;
-        });
+        }
+        return cutEdges;
     }
 
     // Generates distinct colors for each cluster index.

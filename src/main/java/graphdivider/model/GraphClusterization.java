@@ -200,4 +200,24 @@ public final class GraphClusterization
             System.out.println(COLOR + "Vertex " + i + ": Cluster " + clusters[i] + ANSI_RESET);
         }
     }
+
+    // Calculate the margin of the clusters based on their sizes
+    public static double calculateMargin(int[] clusters, int numParts)
+    {
+        int[] clusterSizes = new int[numParts];
+        for (int cluster : clusters)
+        {
+            if (cluster >= 1 && cluster <= numParts)
+            {
+                clusterSizes[cluster - 1]++;
+            }
+        }
+        int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
+        for (int size : clusterSizes)
+        {
+            if (size < min) min = size;
+            if (size > max) max = size;
+        }
+        return min > 0 ? ((double)(max - min) / min) * 100.0 : 0.0; // <-- percent
+    }
 }

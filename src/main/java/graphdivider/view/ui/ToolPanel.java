@@ -62,7 +62,6 @@ public final class ToolPanel extends JPanel
         divideButton.addActionListener(listener);
     }
 
-
     // Registers an ActionListener for the Divide Graph button.
     public void addDivideButtonListener(ActionListener listener)
     {

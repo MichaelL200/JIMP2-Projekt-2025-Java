@@ -197,8 +197,13 @@ public final class GraphController
                             GraphClusterization.printClusters(clusters);
 
                             // Divide the graph into clusters in the view
-                            GraphColoring.colorVertices(graphView.getVertices(), clusters, graphView.getEdges());
+                            int edgesCut = GraphColoring.colorVertices(graphView.getVertices(), clusters, graphView.getEdges());
+                            double marginKept = GraphClusterization.calculateMargin(clusters, numParts);
                             graphView.repaint();
+
+                            // Partition Panel updates
+                            frame.getPartitionPanel().setEdgesCut(edgesCut);
+                            frame.getPartitionPanel().setMarginKept(marginKept);
                         }
                         catch (Exception ex)
                         {

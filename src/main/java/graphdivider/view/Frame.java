@@ -3,6 +3,7 @@ package graphdivider.view;
 import graphdivider.controller.GraphController;
 import graphdivider.view.ui.*;
 import graphdivider.view.ui.MenuBar;
+import graphdivider.view.ui.PartitionPanel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -17,6 +18,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
     // Graph panel
     private final Graph graphPanel;
     private final ToolPanel toolPanel;
+    private final PartitionPanel partitionPanel;
     private final MenuBar menuBar;
     // Controller
     private final GraphController controller = new GraphController();
@@ -69,9 +71,18 @@ public final class Frame extends JFrame implements PropertyChangeListener
         menuBar = new MenuBar();
         setJMenuBar(menuBar);
 
+        // ToolPanel
         toolPanel = new ToolPanel();
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(toolPanel, BorderLayout.WEST);
+
+        // PartitionPanel
+        partitionPanel = new PartitionPanel();
+        Box leftBox = Box.createVerticalBox();
+        leftBox.add(toolPanel);
+        leftBox.add(Box.createVerticalStrut(10));
+        leftBox.add(partitionPanel);
+        getContentPane().add(leftBox, BorderLayout.WEST);
 
         graphPanel = new Graph(toolPanel);
 
@@ -145,6 +156,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
                         GraphController.LoadedGraph loaded = get();
                         if (loaded != null)
                         {
+                            partitionPanel.clear();
                             System.out.println("[Frame] Graph loaded successfully. Displaying...");
                             // Show progress dialog while displaying
                             ProgressDialog progressDialog = new ProgressDialog(Frame.this, "Displaying Graph", "Displaying graph, please wait...");
@@ -370,6 +382,11 @@ public final class Frame extends JFrame implements PropertyChangeListener
     public ToolPanel getToolPanel()
     {
         return toolPanel;
+    }
+
+    public PartitionPanel getPartitionPanel()
+    {
+        return partitionPanel;
     }
 
     public MenuBar getAppMenuBar()
