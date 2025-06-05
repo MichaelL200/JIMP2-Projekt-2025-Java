@@ -3,19 +3,19 @@ package graphdivider.view.ui.graph;
 import javax.swing.*;
 import java.awt.*;
 
-// Represents a single vertex (node) in a graph visualization.
+// One vertex (node) in the graph view
 public final class Vertex extends JComponent
 {
-    // Default blue color for vertices.
+    // Default color for vertices
     public static final Color DEFAULT_BLUE = new Color(173, 216, 230);
-    // Diameter of the vertex circle (in pixels).
+    // Diameter of the vertex circle
     private final int diameter;
-    // Unique identifier for the vertex (displayed as label).
+    // Vertex id (label)
     private int id;
-    // Fill color of the vertex circle.
+    // Current color
     private Color color;
 
-    // Constructs a vertex with the given id, color, and diameter.
+    // Create vertex with id, color, and size
     public Vertex(int id, Color color, int diameter)
     {
         this.id = id;
@@ -27,7 +27,7 @@ public final class Vertex extends JComponent
         setMaximumSize(size);
     }
 
-    // Paints the vertex as a filled circle with a centered label.
+    // Draw the vertex as a circle with label
     @Override
     protected void paintComponent(Graphics g)
     {
@@ -39,6 +39,7 @@ public final class Vertex extends JComponent
             g2.setColor(color);
             g2.fillOval(0, 0, diameter, diameter);
 
+            // Draw id label in center
             String label = String.valueOf(id);
             FontMetrics fm = g2.getFontMetrics();
             int x = (diameter - fm.stringWidth(label)) / 2;
@@ -51,25 +52,27 @@ public final class Vertex extends JComponent
         }
     }
 
-    // Sets the fill color of the vertex and repaints.
+    // Change color and repaint
     public void setColor(Color color)
     {
         this.color = color;
         repaint();
     }
 
-    // Setter and getter for the vertex id.
+    // Change id and repaint
     public void setId(int id)
     {
         this.id = id;
         repaint();
     }
+
+    // Get id
     public int getId()
     {
         return this.id;
     }
 
-    // Returns the diameter of the vertex.
+    // Get diameter
     public int getDiameter()
     {
         return diameter;

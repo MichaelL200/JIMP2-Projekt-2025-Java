@@ -1,12 +1,13 @@
 package graphdivider.view.ui;
 
+import java.awt.*;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicScrollBarUI;
-import java.awt.*;
 
-// Custom ScrollBar with theme-aware UI
-public class ScrollBar extends JScrollBar
+// Custom ScrollBar with theme support
+public final class ScrollBar extends JScrollBar
 {
+    // Default scrollbar width
     private static final int DEFAULT_WIDTH = 17;
 
     public ScrollBar(int orientation)
@@ -15,48 +16,55 @@ public class ScrollBar extends JScrollBar
         setUI(new ModernScrollBarUI());
         setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_WIDTH));
         setOpaque(false);
+        registerThemeListener();
+    }
 
-        // Listen for theme changes and update UI accordingly
-        Theme.addThemeChangeListener(() ->
-        {
+    // Listen for theme changes and update UI
+    private void registerThemeListener() {
+        Theme.addThemeChangeListener(() -> {
             setUI(new ModernScrollBarUI());
             repaint();
         });
     }
 
-    // Modern, theme-aware ScrollBar UI
+    // Custom ScrollBar UI (rounded, theme-aware)
     private static class ModernScrollBarUI extends BasicScrollBarUI
     {
+        // Arc for rounded corners
         private static final int ARC = 16;
 
-        // Get thumb color based on theme
+        // Thumb color based on theme
         private static Color getThumbColor()
         {
             return Theme.isDarkPreferred()
-                    ? new Color(120, 144, 156, 220) // darker thumb for dark mode
-                    : new Color(120, 144, 156, 200); // blue-grey, semi-transparent
+                    ? new Color(120, 144, 156, 220)
+                    : new Color(120, 144, 156, 200);
         }
 
-        // Get track color based on theme
+        // Track color based on theme
         private static Color getTrackColor()
         {
             return Theme.isDarkPreferred()
-                    ? new Color(60, 63, 65, 180) // dark track for dark mode
-                    : new Color(230, 230, 230, 180); // light grey, semi-transparent
+                    ? new Color(60, 63, 65, 180)
+                    : new Color(230, 230, 230, 180);
         }
 
-        // Override the getPreferredSize method to ensure consistent width
+        // Paint thumb (the draggable part)
         @Override
         protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds)
         {
+            if (thumbBounds.isEmpty() || !c.isEnabled()) return;
             Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setPaint(getThumbColor());
-            g2.fillRoundRect(thumbBounds.x, thumbBounds.y, thumbBounds.width, thumbBounds.height, ARC, ARC);
-            g2.dispose();
+            try {
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setPaint(getThumbColor());
+                g2.fillRoundRect(thumbBounds.x, thumbBounds.y, thumbBounds.width, thumbBounds.height, ARC, ARC);
+            } finally {
+                g2.dispose();
+            }
         }
 
-        // Override the paintTrack method to customize track appearance
+        // Paint track (the background)
         @Override
         protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds)
         {
@@ -67,21 +75,21 @@ public class ScrollBar extends JScrollBar
             g2.dispose();
         }
 
-        // Override the getPreferredSize method to ensure consistent width
+        // Hide decrease button
         @Override
         protected JButton createDecreaseButton(int orientation)
         {
             return createZeroButton();
         }
 
-        // Override the createIncreaseButton method to ensure no buttons are shown
+        // Hide increase button
         @Override
         protected JButton createIncreaseButton(int orientation)
         {
             return createZeroButton();
         }
 
-        // Create a zero-size button to hide the default buttons
+        // Create an invisible button (for arrows)
         private JButton createZeroButton()
         {
             JButton button = new JButton();

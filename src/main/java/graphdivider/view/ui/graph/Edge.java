@@ -6,20 +6,21 @@ import java.awt.*;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-// Represents an edge (connection) between two vertices in the graph visualization.
+// One edge (connection) between two vertices
 public final class Edge
 {
-    // Static list of all edges for global updates
+    // All edges for global color update
     private static final List<Edge> allEdges = new CopyOnWriteArrayList<>();
-    private final Vertex v2;
-    // The two vertices this edge connects
+
+    // Connected vertices
     private final Vertex v1;
-    // Current color of the edge (depends on theme)
+    private final Vertex v2;
+    // Edge color (theme-dependent)
     private Color edgeColor;
-    // Listener to update this edge's color when the theme changes
+    // Listener for theme changes
     private final Runnable themeListener = this::onThemeChanged;
 
-    // Constructs an edge between two vertices and registers for theme updates.
+    // Create edge and register for theme updates
     public Edge(Vertex v1, Vertex v2)
     {
         this.v1 = v1;
@@ -29,7 +30,7 @@ public final class Edge
         allEdges.add(this);
     }
 
-    // Updates the color of all edges in the application.
+    // Update color for all edges
     public static void updateAllEdgesColor()
     {
         for (Edge edge : allEdges)
@@ -38,7 +39,13 @@ public final class Edge
         }
     }
 
-    // Draws the edge as a line between the centers of its two vertices.
+    // Get default edge color (theme-aware)
+    public static Color getDefaultEdgeColor()
+    {
+        return Theme.isDarkPreferred() ? Color.WHITE : Color.BLACK;
+    }
+
+    // Draw edge as a line between vertex centers
     public void draw(Graphics2D g)
     {
         int x1 = v1.getX() + v1.getDiameter() / 2;
@@ -51,32 +58,40 @@ public final class Edge
         g.drawLine(x1, y1, x2, y2);
     }
 
-    // Updates the edge color based on the current theme.
+    // Update edge color for current theme
     public void updateEdgeColor()
     {
-        edgeColor = Theme.isDarkPreferred() ? Color.WHITE : Color.BLACK;
+        edgeColor = getDefaultEdgeColor();
     }
 
-    // Called when the theme changes. Updates the edge color and repaints the connected vertices.
+    // Called on theme change
     private void onThemeChanged()
     {
         updateEdgeColor();
+        repaintVertices();
+    }
+
+    // Repaint both vertices
+    private void repaintVertices()
+    {
         v1.repaint();
         v2.repaint();
     }
 
-    // Cleans up resources when the edge is no longer needed.
+    // Remove edge and unregister listener
     public void dispose()
     {
-        Theme.removeThemeChangeListener(themeListener);
         allEdges.remove(this);
+        Theme.removeThemeChangeListener(themeListener);
     }
 
-    // Getters for the connected vertices
+    // Get first vertex
     public Vertex getVertex1()
     {
         return v1;
     }
+
+    // Get second vertex
     public Vertex getVertex2()
     {
         return v2;

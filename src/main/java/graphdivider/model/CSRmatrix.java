@@ -1,12 +1,12 @@
 package graphdivider.model;
 
-// Represents a sparse matrix in Compressed Sparse Row (CSR) format.
+// Sparse matrix in Compressed Sparse Row (CSR) format
 public record CSRmatrix(int[] rowPtr, int[] colInd, int[] values, int size)
 {
-    // Returns the value at the specified row and column.
+    // Get value at (row, col)
     public int getValue(int row, int col)
     {
-        // Iterate over the non-zero values in the given row
+        // Search non-zero values in row
         for (int idx = rowPtr[row]; idx < rowPtr[row + 1]; idx++)
         {
             if (colInd[idx] == col)
@@ -14,11 +14,11 @@ public record CSRmatrix(int[] rowPtr, int[] colInd, int[] values, int size)
                 return values[idx];
             }
         }
-        // If not found, the value is zero in the sparse representation
+        // Zero if not found
         return 0;
     }
 
-    // Prints the CSR matrix data with tabs and colored output (helper method)
+    // Print CSR matrix info (helper)
     private void printCSRData(String title, boolean includeSize, String color)
     {
         final String ANSI_RESET = "\u001B[0m";
@@ -33,35 +33,35 @@ public record CSRmatrix(int[] rowPtr, int[] colInd, int[] values, int size)
         System.out.println(color + "\tValues: " + GraphModel.arrayToString(values) + ANSI_RESET);
     }
 
-    // Prints the adjacency matrix data
+    // Print adjacency matrix (CSR)
     public void printAdjacency()
     {
-        final String ANSI_BLUE = "\u001B[34m"; // Blue color
+        final String ANSI_BLUE = "\u001B[34m";
         printCSRData("\t\tADJACENCY MATRIX (CSR):", true, ANSI_BLUE);
     }
 
-    // Prints the Laplacian matrix data
+    // Print Laplacian matrix (CSR and optionally dense)
     public void printLaplacian()
     {
-        final String ANSI_PURPLE = "\u001B[35m"; // Purple color
+        final String ANSI_PURPLE = "\u001B[35m";
         printCSRData("\t\tLAPLACIAN MATRIX (CSR):", false, ANSI_PURPLE);
 
-        // Dense matrix - only for small matrices
+        // Print dense matrix for small size
         if (size <= 100)
         {
-            String ANSI_MAGENTA = "\u001B[95m"; // bright Magenta color
+            String ANSI_MAGENTA = "\u001B[95m";
             printDenseMatrix("\t\tLAPLACIAN MATRIX (DENSE):", ANSI_MAGENTA);
         }
     }
 
-    // Prints the dense matrix directly from the CSR format
+    // Print dense matrix from CSR
     public void printDenseMatrix(String title, String color)
     {
         final String ANSI_RESET = "\u001B[0m";
 
         System.out.println(color + title + ANSI_RESET);
 
-        // Determine the maximum width of any value for alignment
+        // Find max width for alignment
         int maxWidth = 0;
         for (int row = 0; row < size; row++)
         {
@@ -76,7 +76,7 @@ public record CSRmatrix(int[] rowPtr, int[] colInd, int[] values, int size)
             System.out.print(color + "\t[");
             for (int col = 0; col < size; col++)
             {
-                // Format each value with consistent spacing
+                // Print value with spacing
                 System.out.printf("%" + maxWidth + "d", getValue(row, col));
                 if (col < size - 1) System.out.print(", ");
             }
@@ -84,8 +84,10 @@ public record CSRmatrix(int[] rowPtr, int[] colInd, int[] values, int size)
         }
     }
 
-    // Accessors for internal arrays
+    // Get row pointers
     public int[] getRowPtr() { return rowPtr; }
+    // Get column indices
     public int[] getColInd() { return colInd; }
+    // Get values
     public int[] getValues() { return values; }
 }

@@ -1,31 +1,31 @@
 package graphdivider.controller;
 
 import graphdivider.model.*;
-import graphdivider.view.ui.Theme;
 import graphdivider.view.ui.ProgressDialog;
+import graphdivider.view.ui.Theme;
 import graphdivider.view.ui.graph.GraphColoring;
 import graphdivider.view.ui.graph.Vertex;
 
 import javax.swing.*;
-import javax.swing.SwingWorker;
 import java.io.File;
 import java.io.IOException;
 
-// Controller for handling graph-related actions and business logic.
+// Controller for graph actions and logic
 public final class GraphController
 {
+    // Reference to graph view
     private graphdivider.view.ui.Graph graphView;
 
-    // Field to store the loaded graph
+    // Loaded graph data
     private LoadedGraph loadedGraph;
 
-    // Set the Graph view for this controller
+    // Set the graph view
     public void setGraphView(graphdivider.view.ui.Graph view)
     {
         this.graphView = view;
     }
 
-    // Display the graph model on the view
+    // Show graph model in the view
     public void displayGraph(graphdivider.model.GraphModel model)
     {
         if (graphView != null)
@@ -34,7 +34,7 @@ public final class GraphController
         }
     }
 
-    // Loads a graph from the given file and returns the model, matrix, and Laplacian matrix.
+    // Load graph from file and return model, matrix, laplacian
     public LoadedGraph loadGraphFromFile(JFrame parent, File file)
     {
         System.out.println("[GraphController] Loading graph from file: " + file.getAbsolutePath());
@@ -51,14 +51,13 @@ public final class GraphController
 
             this.loadedGraph = new LoadedGraph(model, matrix, laplacian);
 
-            // Update the maximum number of partitions in the tool panel
+            // Update tool panel state
             int vertexCount = model.getRowPositions().length;
             int maxPartitions = Math.min(100, vertexCount < 8 ? 2 : vertexCount / 4);
             if (parent instanceof graphdivider.view.Frame)
             {
                 graphdivider.view.Frame frame = (graphdivider.view.Frame) parent;
-                frame.getToolPanel().setMaxPartitions(maxPartitions);
-                frame.getToolPanel().setPartitionsSpinnerValue(2);
+                frame.updateToolPanelPartitions(maxPartitions, 2);
             } else
             {
                 throw new IllegalArgumentException("Parent is not an instance of Frame.");
@@ -74,77 +73,44 @@ public final class GraphController
         }
     }
 
-    // Register all listeners on the view components.
+    // Register listeners on view components
     public void registerViewListeners(graphdivider.view.Frame frame)
     {
         graphdivider.view.ui.MenuBar menuBar = frame.getAppMenuBar();
         graphdivider.view.ui.ToolPanel toolPanel = frame.getToolPanel();
         graphdivider.view.ui.Graph graphPanel = this.graphView;
 
-        menuBar.addLightThemeListener(e ->
-        {
+        menuBar.addLightThemeListener(e -> {
             System.out.println("[MenuBar] Light theme selected.");
-            frame.switchTheme(false); // Use the Frame's switchTheme method
+            frame.switchTheme(false);
         });
 
-        menuBar.addDarkThemeListener(e ->
-        {
+        menuBar.addDarkThemeListener(e -> {
             System.out.println("[MenuBar] Dark theme selected.");
-            frame.switchTheme(true); // Use the Frame's switchTheme method
+            frame.switchTheme(true);
         });
 
-        menuBar.addAutoThemeListener(e ->
-        {
+        menuBar.addAutoThemeListener(e -> {
             System.out.println("[MenuBar] Auto theme selected.");
             Theme.applyAutoTheme(() -> {
                 frame.switchTheme(Theme.isDarkPreferred());
             });
         });
-        menuBar.addLoadTextGraphListener(e ->
-        {
+
+        menuBar.addLoadTextGraphListener(e -> {
             System.out.println("[MenuBar] Load text graph selected.");
             frame.handleLoadTextGraph();
         });
-        menuBar.addLoadPartitionedTextListener(e ->
-        {
+        menuBar.addLoadPartitionedTextListener(e -> {
             System.out.println("[MenuBar] Load partitioned text graph selected.");
             frame.handleLoadPartitionedTextGraph();
         });
-        menuBar.addLoadPartitionedBinaryListener(e ->
-        {
+        menuBar.addLoadPartitionedBinaryListener(e -> {
             System.out.println("[MenuBar] Load partitioned binary graph selected.");
             frame.handleLoadPartitionedBinaryGraph();
         });
-        menuBar.addLightThemeListener(e ->
-        {
-            Theme.applyLightTheme();
-            frame.updateWindowIcon(false);
-            SwingUtilities.updateComponentTreeUI(graphPanel);
-            graphPanel.repaint();
-        });
-        menuBar.addDarkThemeListener(e ->
-        {
-            Theme.applyDarkTheme();
-            frame.updateWindowIcon(true);
-            SwingUtilities.updateComponentTreeUI(graphPanel);
-            graphPanel.repaint();
-        });
-        menuBar.addAutoThemeListener(e ->
-        {
-            Theme.applyAutoTheme(() ->
-            {
-                frame.updateWindowIcon(Theme.isDarkPreferred());
-                SwingUtilities.updateComponentTreeUI(graphPanel);
-                graphPanel.repaint();
-            });
-        });
-        menuBar.addLoadTextGraphListener(e ->
-        {
 
-        });
-
-        toolPanel.addDivideButtonActionListener(e ->
-        {
+        toolPanel.addDivideButtonActionListener(e -> {
             try
             {
                 if (this.loadedGraph == null)
@@ -152,15 +118,11 @@ public final class GraphController
                     throw new IllegalStateException("No graph loaded.");
                 }
 
-                // Disable the tool panel
-                toolPanel.setDivideButtonEnabled(false);
-                toolPanel.getPartitionsSpinner().setEnabled(false);
-                toolPanel.getMarginSpinner().setEnabled(false);
+                // Disable tool panel controls
+                frame.setToolPanelEnabled(false);
 
-                // Retrieve the number of parts from the tool panel
                 int numParts = toolPanel.getPartitions();
 
-                // Show progress dialog
                 ProgressDialog progressDialog = new ProgressDialog(frame, "Partitioning Graph", "Calculating eigenvalues and eigenvectors...");
                 progressDialog.setVisible(true);
 
@@ -181,11 +143,9 @@ public final class GraphController
                             GraphEigenvalues.EigenResult eigenresult = get();
                             GraphEigenvalues.printEigenData(eigenresult);
 
-                            // Perform graph clusterization
                             int numParts = toolPanel.getPartitions();
                             int[] clusters = GraphClusterization.clusterizeGraph(eigenresult, numParts);
 
-                            // Validate clusters and vertices
                             Vertex[] vertices = graphView.getVertices();
                             if (vertices == null || clusters == null)
                             {
@@ -198,22 +158,24 @@ public final class GraphController
                                 throw new IllegalArgumentException("Vertices and clusters must have the same length.");
                             }
 
-                            // Print the clusters
                             GraphClusterization.printClusters(clusters);
 
-                            // Divide the graph into clusters in the view
-                            int edgesCut = GraphColoring.colorVertices(graphView.getVertices(), clusters, graphView.getEdges());
+                            // Calculate edges cut BEFORE updating clusters
+                            int edgesCut = GraphColoring.calculateEdgesCut(vertices, clusters, graphView.getEdges());
                             double marginKept = GraphClusterization.calculateMargin(clusters, numParts);
-                            graphView.repaint();
 
-                            // Partition Panel updates
-                            frame.getPartitionPanel().setEdgesCut(edgesCut);
-                            frame.getPartitionPanel().setMarginKept(marginKept);
+                            graphView.updateClusters(clusters);
+
+                            frame.updatePartitionPanel(edgesCut, marginKept);
+
+                            // Tool panel stays disabled after dividing
                         }
                         catch (Exception ex)
                         {
                             ex.printStackTrace();
                             JOptionPane.showMessageDialog(frame, "Error computing eigenpairs: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                            // Re-enable controls on error
+                            frame.setToolPanelEnabled(true);
                         } finally
                         {
                             progressDialog.dispose();
@@ -225,11 +187,12 @@ public final class GraphController
             } catch (Exception ex) {
                 ex.printStackTrace();
                 JOptionPane.showMessageDialog(frame, "Error computing eigenpairs: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                frame.setToolPanelEnabled(true);
             }
         });
     }
 
-    // Data holder for loaded graph model, matrix, and Laplacian matrix.
+    // Holds loaded graph model, matrix, and Laplacian
     public static class LoadedGraph
     {
         public final GraphModel model;

@@ -1,23 +1,26 @@
 package graphdivider.model;
 
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import com.github.fommil.netlib.ARPACK;
 import org.netlib.util.doubleW;
 import org.netlib.util.intW;
-import java.util.Arrays;
 
-// Utility class for spectral partitioning of graphs.
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+// Spectral partitioning utilities for graphs
 public final class GraphEigenvalues
 {
+    // Logger for debug/info
     private static final Logger LOGGER = Logger.getLogger(GraphEigenvalues.class.getName());
 
+    // Holds eigenvalues and eigenvectors
     public static class EigenResult
     {
         public final double[] eigenvalues;
         public final double[][] eigenvectors;
 
+        // Convert flat vector array to 2D array
         public EigenResult(double[] values, double[] vectors, int n, int p)
         {
             this.eigenvalues = values;
@@ -32,11 +35,10 @@ public final class GraphEigenvalues
         }
     }
 
-    private GraphEigenvalues()
-    {
-    }
+    // Prevent instantiation
+    private GraphEigenvalues() {}
 
-    // Computes the Laplacian matrix (L = D - A) in CSR format for the given graph model.
+    // Build Laplacian matrix (L = D - A) in CSR format
     public static CSRmatrix toLaplacianCSRmatrix(GraphModel model)
     {
         int[] adjacencyList = model.getAdjacencyList();
@@ -92,7 +94,7 @@ public final class GraphEigenvalues
         return new CSRmatrix(rowPtr, colInd, values, size);
     }
 
-    // Logs Laplacian matrix info for debugging.
+    // Log Laplacian matrix info (for debug)
     private static void logLaplacianInfo(int size, int nnz, int[] rowPtr, int[] colInd, int[] values)
     {
         if (LOGGER.isLoggable(Level.FINE))
@@ -113,7 +115,7 @@ public final class GraphEigenvalues
         }
     }
 
-    // Computes the smallest p eigenpairs of the Laplacian matrix using ARPACK.
+    // Compute smallest p eigenpairs using ARPACK
     public static EigenResult computeSmallestEigenpairs(CSRmatrix laplacian, int p) throws Exception
     {
         System.out.println("ARPACK implementation: " + ARPACK.getInstance().getClass().getName());
@@ -129,7 +131,7 @@ public final class GraphEigenvalues
         // ARPACK parameters
         int ncv = Math.min(4 * p, n); // Subspace dimension
         int maxIter = 10000;
-        double tol = 1e-6; // Stricter tolerance for higher precision
+        double tol = 1e-6; // Stricter tolerance
 
         // ARPACK internal variables
         intW ido = new intW(0);
@@ -138,7 +140,7 @@ public final class GraphEigenvalues
         String which = "SM"; // Smallest magnitude
 
         double[] resid = new double[n];
-        Arrays.fill(resid, 0.0); // Ensure deterministic initialization
+        Arrays.fill(resid, 0.0); // Deterministic init
         double[] V = new double[n * ncv];
         int ldv = n;
         int[] iparam = new int[11];
@@ -150,7 +152,7 @@ public final class GraphEigenvalues
         // Setup iparam
         iparam[0] = 1;       // Exact shifts
         iparam[2] = maxIter; // Max iterations
-        iparam[6] = 1;       // Mode 1: standard eigenproblem Ax = lambda x
+        iparam[6] = 1;       // Mode 1: standard eigenproblem
 
         // Reverse communication loop
         while (ido.val != 99)
@@ -165,10 +167,8 @@ public final class GraphEigenvalues
                 int xOffset = ipntr[0] - 1;
                 int yOffset = ipntr[1] - 1;
 
-                // Compute y = L * x
+                // y = L * x
                 for (int i = 0; i < n; i++) y[i] = 0.0;
-
-                // Matrix-vector multiplication for Laplacian
                 for (int i = 0; i < n; i++)
                 {
                     for (int j = laplacian.getRowPtr()[i]; j < laplacian.getRowPtr()[i + 1]; j++)
@@ -177,7 +177,6 @@ public final class GraphEigenvalues
                     }
                 }
                 System.arraycopy(y, 0, workd, yOffset, n);
-
             }
         }
 
@@ -220,7 +219,7 @@ public final class GraphEigenvalues
         return new EigenResult(d, Z, n, p);
     }
 
-    // Prints each eigenvalue followed by its corresponding eigenvector.
+    // Print eigenvalues and eigenvectors
     public static void printEigenData(GraphEigenvalues.EigenResult eigenResult)
     {
         final String ANSI_CYAN = "\u001B[36m";

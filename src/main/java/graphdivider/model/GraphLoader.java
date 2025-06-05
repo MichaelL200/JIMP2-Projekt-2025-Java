@@ -1,14 +1,19 @@
 package graphdivider.model;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.logging.Logger;
 
 // Loads GraphModel from file and converts to CSRmatrix
 public final class GraphLoader
 {
+    // Logger for debug/info
     private static final Logger LOGGER = Logger.getLogger(GraphLoader.class.getName());
 
+    // Prevent instantiation
     private GraphLoader() {}
 
     // Load GraphModel from .csrrg file
@@ -29,6 +34,7 @@ public final class GraphLoader
             int[] adjacencyList = parseIntArray(lines[3]);
             int[] adjacencyPointers = parseIntArray(lines[4]);
 
+            // Build and return model
             return new GraphModel
             (
                 maxVerticesPerRow,
@@ -80,7 +86,6 @@ public final class GraphLoader
     public static CSRmatrix toLaplacianCSRmatrix(GraphModel model)
     {
         CSRmatrix laplacian = GraphEigenvalues.toLaplacianCSRmatrix(model);
-
         return laplacian;
     }
 

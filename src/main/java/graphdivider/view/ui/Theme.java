@@ -13,41 +13,36 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
-// Utility class for managing application themes (light, dark, auto).
+// Theme utility for light/dark/auto modes
 public final class Theme
 {
-    // Thread-safe list of listeners to notify when the theme changes
+    // Listeners for theme changes
     private static final List<Runnable> themeListeners = new CopyOnWriteArrayList<>();
-    // Tracks the current theme mode (auto, light, dark)
+    // Current theme mode
     private static ThemeMode currentTheme = ThemeMode.AUTO;
 
-    // Private constructor to prevent instantiation of utility class
+    // Prevent instantiation
     private Theme() {}
 
-    // Registers a listener to be notified when the theme changes.
+    // Add a theme change listener
     public static void addThemeChangeListener(Runnable listener)
     {
         themeListeners.add(listener);
     }
 
-    // Removes a previously registered theme change listener.
+    // Remove a theme change listener
     public static void removeThemeChangeListener(Runnable listener)
     {
         themeListeners.remove(listener);
     }
 
-    // Notifies all registered listeners that the theme has changed.
+    // Notify all listeners
     private static void notifyThemeChangeListeners()
     {
         for (Runnable r : themeListeners) r.run();
     }
 
-    // Updates the color of all edges in the graph to match the current theme.
-    public static void updateAllEdgesColor() {
-        graphdivider.view.ui.graph.Edge.updateAllEdgesColor();
-    }
-
-    // Applies the auto theme, detecting the system's preferred theme.
+    // Set auto theme (detect system)
     public static void applyAutoTheme(Runnable onThemeChanged)
     {
         currentTheme = ThemeMode.AUTO;
@@ -56,13 +51,13 @@ public final class Theme
         if (onThemeChanged != null) onThemeChanged.run();
     }
 
-    // Applies the auto theme without a callback.
+    // Set auto theme (no callback)
     public static void applyAutoTheme()
     {
         applyAutoTheme(null);
     }
 
-    // Applies the light theme and notifies listeners.
+    // Set light theme
     public static void applyLightTheme()
     {
         currentTheme = ThemeMode.LIGHT;
@@ -71,7 +66,7 @@ public final class Theme
         notifyThemeChangeListeners();
     }
 
-    // Applies the dark theme and notifies listeners.
+    // Set dark theme
     public static void applyDarkTheme()
     {
         currentTheme = ThemeMode.DARK;
@@ -80,9 +75,8 @@ public final class Theme
         notifyThemeChangeListeners();
     }
 
-    // Initializes the theme system and sets the initial theme.
-    // Registers listeners for OS theme changes and KDE config changes.
-    // mode: 0 = auto, 1 = light, 2 = dark
+    // Init theme system and listen for OS changes
+    // mode: 0=auto, 1=light, 2=dark
     public static void initTheme(int mode)
     {
         Toolkit tk = Toolkit.getDefaultToolkit();
@@ -99,8 +93,7 @@ public final class Theme
         }
     }
 
-    // Detects if the system's preferred theme is dark.
-    // Supports Windows, macOS, GNOME, KDE, and WSL environments.
+    // Detect if system prefers dark theme
     private static boolean isSystemDark()
     {
         String os = System.getProperty("os.name").toLowerCase();
@@ -140,7 +133,7 @@ public final class Theme
         return isGnomeDark() || isKdeDark();
     }
 
-    // Returns true if the current theme (manual or auto) is dark.
+    // True if current theme is dark
     public static boolean isDarkPreferred()
     {
         if (currentTheme == ThemeMode.DARK) return true;
@@ -148,7 +141,7 @@ public final class Theme
         return isSystemDark();
     }
 
-    // Refreshes the look and feel of all open windows to match the current theme.
+    // Refresh all windows for new theme
     private static void refreshAllWindows()
     {
         JFrame.setDefaultLookAndFeelDecorated(true);
@@ -162,7 +155,7 @@ public final class Theme
         }
     }
 
-    // Checks if GNOME desktop is using a dark color scheme.
+    // GNOME: check if dark mode is set
     private static boolean isGnomeDark()
     {
         try
@@ -189,7 +182,7 @@ public final class Theme
         }
     }
 
-    // Checks if KDE desktop is using a dark color scheme by reading the kdeglobals config.
+    // KDE: check if dark mode is set in kdeglobals
     private static boolean isKdeDark()
     {
         Path cfg = Paths.get(System.getProperty("user.home"), ".config", "kdeglobals");
@@ -211,8 +204,7 @@ public final class Theme
         return false;
     }
 
-    // Watches the KDE config directory for changes to kdeglobals and applies the auto theme if it changes.
-    // Runs in a background daemon thread.
+    // Watch KDE config for changes and auto-update theme
     private static void watchKdeConfig()
     {
         Path dir = Paths.get(System.getProperty("user.home"), ".config");
@@ -248,8 +240,7 @@ public final class Theme
         catch (IOException ignored) {}
     }
 
-    // Loads an icon that adapts to the current theme (light/dark).
-    // Appends "_dark" or "_light" to the base icon filename as appropriate.
+    // Load icon for current theme (light/dark)
     public static ImageIcon loadSystemAwareIcon(String basePath)
     {
         String themedPath = basePath.replace(".png", isDarkPreferred() ? "_dark.png" : "_light.png");
@@ -262,7 +253,7 @@ public final class Theme
         return new ImageIcon(url);
     }
 
-    // Enum representing the available theme modes.
+    // Theme mode enum
     public enum ThemeMode { AUTO, LIGHT, DARK }
 }
 

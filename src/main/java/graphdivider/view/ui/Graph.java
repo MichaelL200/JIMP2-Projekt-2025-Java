@@ -6,34 +6,31 @@ import graphdivider.view.ui.graph.Vertex;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-// JPanel responsible for displaying the graph visualization.
+// Panel for drawing the graph visualization
 public final class Graph extends JPanel
 {
-    // List of vertices in the graph (each is a component)
+    // All vertices (as components)
     private final List<Vertex> vertices = new ArrayList<>();
-    // List of edges in the graph (drawn manually)
+    // All edges (drawn manually)
     private final List<Edge> edges = new ArrayList<>();
-    // Store mapping for use between setupVertices and setupEdges
+    // Map: vertex index -> Vertex component
     private java.util.Map<Integer, Vertex> vertexIndexToComponent;
-    // Reference to the ToolPanel instance
+    // Reference to tool panel
     private final ToolPanel toolPanel;
-
-    // Cached preferred size for performance
+    // Cached preferred size
     private Dimension cachedPreferredSize = null;
 
-    // Constructs the graph panel. Registers a theme change listener to update edge colors.
+    // Setup panel, listen for theme changes
     public Graph(ToolPanel toolPanel)
     {
         this.toolPanel = toolPanel;
-        setLayout(null);      // Use absolute positioning for vertices
-        setOpaque(false);     // Allow background to show through
+        setLayout(null);      // Absolute positioning
+        setOpaque(false);     // Transparent background
 
-        // Register a listener to update edge colors when the theme changes
+        // Update edge colors on theme change
         Theme.addThemeChangeListener(() ->
         {
             for (Edge edge : edges)
@@ -44,25 +41,77 @@ public final class Graph extends JPanel
         });
     }
 
-    // Displays the graph from the given GraphModel. Clears any previous vertices and edges.
+    // Show graph from model, clear previous
     public void displayGraph(GraphModel model)
     {
         clearGraph();
-
         setupVertices(model);
         setupEdges(model);
-
-        // Set preferred size based on the bounding box of the vertices
         updatePreferredSize();
-
         revalidate();
         repaint();
-
-        // Enable the divide button after the graph is displayed
         toolPanel.setDivideButtonEnabled(true);
     }
 
-    // Updates the preferred size of the panel to fit all vertices.
+    // Remove all vertices and edges
+    public void clearGraph()
+    {
+        for (Vertex v : vertices) remove(v);
+        vertices.clear();
+        for (Edge e : edges) e.dispose();
+        edges.clear();
+        vertexIndexToComponent = null;
+        cachedPreferredSize = null;
+        setPreferredSize(new Dimension(0, 0));
+        revalidate();
+        repaint();
+    }
+
+    // Get all vertices as array
+    public Vertex[] getVertices()
+    {
+        return this.vertices.toArray(new Vertex[0]);
+    }
+
+    // Get all edges as list
+    public java.util.List<Edge> getEdges()
+    {
+        return this.edges;
+    }
+
+    // Update vertex colors/clusters
+    public void updateClusters(int[] clusters)
+    {
+        Vertex[] vertexArray = getVertices();
+        if (vertexArray == null || clusters == null || vertexArray.length != clusters.length)
+            throw new IllegalArgumentException("Vertices and clusters must be non-null and of the same length.");
+        graphdivider.view.ui.graph.GraphColoring.colorVertices(vertexArray, clusters, edges);
+        repaint();
+    }
+
+    // Use cached preferred size
+    @Override
+    public Dimension getPreferredSize()
+    {
+        return cachedPreferredSize != null ? cachedPreferredSize : super.getPreferredSize();
+    }
+
+    // Draw all edges (vertices are drawn by their own components)
+    @Override
+    protected void paintComponent(Graphics g)
+    {
+        super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D) g.create();
+        for (Edge edge : edges)
+        {
+            edge.draw(g2);
+        }
+        g2.dispose();
+    }
+
+    // --- Private helpers ---
+
+    // Update preferred size to fit all vertices
     private void updatePreferredSize()
     {
         if (vertices.isEmpty())
@@ -78,20 +127,13 @@ public final class Graph extends JPanel
             maxX = Math.max(maxX, bounds.x + bounds.width);
             maxY = Math.max(maxY, bounds.y + bounds.height);
         }
-        // Add some margin for aesthetics
+        // Add margin
         int margin = 40;
         cachedPreferredSize = new Dimension(maxX + margin, maxY + margin);
         setPreferredSize(cachedPreferredSize);
     }
 
-    @Override
-    public Dimension getPreferredSize()
-    {
-        // Use cached value for performance
-        return cachedPreferredSize != null ? cachedPreferredSize : super.getPreferredSize();
-    }
-
-    // Helper method to find the row index for a given vertex index.
+    // Find row for a vertex index
     private int findRowForVertex(int vertexIndex, int[] rowStartIndices, int vertexCount)
     {
         for (int r = 0; r < rowStartIndices.length; r++)
@@ -103,10 +145,10 @@ public final class Graph extends JPanel
                 return r;
             }
         }
-        return -1; // Not found
+        return -1;
     }
 
-    // Helper method to build a mapping from actual row indices to visual row indices (skipping empty rows).
+    // Map actual row indices to visual row indices (skip empty)
     private java.util.Map<Integer, Integer> buildRowToVisualRow(java.util.Set<Integer> usedRows, int[] rowStartIndices)
     {
         java.util.Map<Integer, Integer> rowToVisualRow = new java.util.HashMap<>();
@@ -121,7 +163,7 @@ public final class Graph extends JPanel
         return rowToVisualRow;
     }
 
-    // Sets up vertices from the given GraphModel. Clears and adds new Vertex components.
+    // Setup vertices from model
     private void setupVertices(GraphModel model)
     {
         int vertexCount = model.getRowPositions().length;
@@ -135,28 +177,26 @@ public final class Graph extends JPanel
 
         int vertexDiameter = 40;
         int spacing = 20;
-        int margin = 10; // left margin
-        int rowSpacing = 60; // vertical space between rows
+        int margin = 10;
+        int rowSpacing = 60;
 
-        // Determine which rows are actually used (contain at least one vertex)
+        // Find used rows
         java.util.Set<Integer> usedRows = new java.util.HashSet<>();
         for (int i = 0; i < vertexCount; i++)
         {
-            // Find the row this vertex belongs to
             int row = findRowForVertex(i, rowStartIndices, vertexCount);
             usedRows.add(row);
         }
 
-        // Map actual row indices to visual row indices (skip empty rows)
+        // Map row index to visual row index
         java.util.Map<Integer, Integer> rowToVisualRow = buildRowToVisualRow(usedRows, rowStartIndices);
 
-        // Map: vertex index -> Vertex component
+        // Map: vertex index -> Vertex
         java.util.Map<Integer, Vertex> vertexIndexToComponent = new java.util.HashMap<>();
 
-        // For each vertex, determine its row and column, using only non-empty rows
+        // Place each vertex
         for (int i = 0; i < vertexCount; i++)
         {
-            // Find the row this vertex belongs to
             int row = findRowForVertex(i, rowStartIndices, vertexCount);
             int col = rowPositions[i];
             int visualRowIdx = rowToVisualRow.get(row);
@@ -171,11 +211,11 @@ public final class Graph extends JPanel
             vertexIndexToComponent.put(i, vertex);
         }
 
-        // Store the mapping for use in setupEdges
+        // Store mapping for edges
         this.vertexIndexToComponent = vertexIndexToComponent;
     }
 
-    // Sets up edges from the given GraphModel. Uses the mapping from vertex indices to Vertex components.
+    // Setup edges from model
     private void setupEdges(GraphModel model)
     {
         if (this.vertexIndexToComponent == null) return;
@@ -184,7 +224,7 @@ public final class Graph extends JPanel
         int[] adjacencyList = model.getAdjacencyList();
         int[] adjacencyPointers = model.getAdjacencyPointers();
 
-        // To avoid duplicate edges (for undirected graphs), use a set of pairs (min, max)
+        // Avoid duplicate edges (undirected)
         java.util.Set<String> edgeSet = new java.util.HashSet<>();
         for (int i = 0; i < adjacencyPointers.length; i++)
         {
@@ -197,8 +237,9 @@ public final class Graph extends JPanel
                 if (neighborIdx < 0 || neighborIdx >= vertexCount) continue;
                 int v1 = Math.min(vertexIdx, neighborIdx);
                 int v2 = Math.max(vertexIdx, neighborIdx);
+                if (v1 == v2) continue;
                 String key = v1 + "-" + v2;
-                if (!edgeSet.contains(key) && v1 != v2
+                if (!edgeSet.contains(key)
                         && vertexIndexToComponent.containsKey(v1)
                         && vertexIndexToComponent.containsKey(v2))
                 {
@@ -208,51 +249,5 @@ public final class Graph extends JPanel
                 }
             }
         }
-    }
-
-    // Paints the graph edges on the panel. Vertices are painted by their own components.
-    @Override
-    protected void paintComponent(Graphics g)
-    {
-        super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D) g.create();
-        // Draw all edges before the vertices (so edges appear behind)
-        for (Edge edge : edges)
-        {
-            edge.draw(g2);
-        }
-        g2.dispose();
-    }
-
-    // Clears the graph completely (removes all vertices and edges).
-    public void clearGraph()
-    {
-        // Remove all vertices from panel
-        for (Vertex v : vertices) remove(v);
-        vertices.clear();
-
-        // Dispose all edges
-        for (Edge e : edges) e.dispose();
-        edges.clear();
-
-        // Clear mapping
-        vertexIndexToComponent = null;
-
-        // Reset preferred size
-        cachedPreferredSize = null;
-        setPreferredSize(new Dimension(0, 0));
-
-        revalidate();
-        repaint();
-    }
-
-    // Getters for vertices and edges
-    public Vertex[] getVertices()
-    {
-        return this.vertices.toArray(new Vertex[0]);
-    }
-    public java.util.List<Edge> getEdges()
-    {
-        return this.edges;
     }
 }

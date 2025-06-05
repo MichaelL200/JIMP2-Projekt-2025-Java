@@ -1,33 +1,33 @@
 package graphdivider.view.ui.graph;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-// Colors vertices based on their cluster indices in a graph visualization.
-// Deletes edges between vertices in different clusters.
+// Utility for coloring vertices and cutting edges
 public final class GraphColoring
 {
-    // Colors vertices based on their cluster indices and removes edges between different clusters.
-    public static int colorVertices(Vertex[] vertices, int[] clusters, java.util.List<Edge> edges)
+    // Color vertices by cluster and remove inter-cluster edges
+    public static int colorVertices(Vertex[] vertices, int[] clusters, List<Edge> edges)
     {
         if (vertices == null || clusters == null || vertices.length != clusters.length)
         {
             throw new IllegalArgumentException("Vertices and clusters must be non-null and of the same length.");
         }
 
-        // Generate distinct colors for each cluster
+        // Map cluster index to color
         Map<Integer, Color> clusterColors = generateClusterColors(clusters);
 
-        // Assign colors to vertices based on their cluster
+        // Set color for each vertex
         for (int i = 0; i < vertices.length; i++)
         {
             Color clusterColor = clusterColors.get(clusters[i]);
             vertices[i].setColor(clusterColor);
         }
 
-        // Count and remove edges between vertices in different clusters
+        // Remove edges between different clusters, count them
         int cutEdges = 0;
         java.util.Iterator<Edge> it = edges.iterator();
         while (it.hasNext())
@@ -37,25 +37,46 @@ public final class GraphColoring
             int cluster2 = clusters[edge.getVertex2().getId()];
             if (cluster1 != cluster2)
             {
-                edge.dispose();
                 it.remove();
+                edge.dispose();
                 cutEdges++;
             }
         }
         return cutEdges;
     }
 
-    // Generates distinct colors for each cluster index.
+    // Count edges between different clusters (do not remove)
+    public static int calculateEdgesCut(Vertex[] vertices, int[] clusters, List<Edge> edges)
+    {
+        if (vertices == null || clusters == null || vertices.length != clusters.length)
+        {
+            throw new IllegalArgumentException("Vertices and clusters must be non-null and of the same length.");
+        }
+        int cutEdges = 0;
+        for (Edge edge : edges)
+        {
+            int cluster1 = clusters[edge.getVertex1().getId()];
+            int cluster2 = clusters[edge.getVertex2().getId()];
+            if (cluster1 != cluster2)
+            {
+                cutEdges++;
+            }
+        }
+        return cutEdges;
+    }
+
+    // Generate a color for each cluster index
     private static Map<Integer, Color> generateClusterColors(int[] clusters)
     {
         Map<Integer, Color> clusterColors = new HashMap<>();
-        int clusterCount = (int) Arrays.stream(clusters).distinct().count();
+        int[] uniqueClusters = Arrays.stream(clusters).distinct().toArray();
+        int clusterCount = uniqueClusters.length;
 
-        // Generate distinct colors using HSB color model
+        // Use HSB to spread colors
         for (int i = 0; i < clusterCount; i++)
         {
-            float hue = (float) i / clusterCount; // Spread colors evenly
-            clusterColors.put(i + 1, Color.getHSBColor(hue, 0.8f, 0.9f)); // Bright colors
+            float hue = (float) i / clusterCount;
+            clusterColors.put(uniqueClusters[i], Color.getHSBColor(hue, 0.8f, 0.9f));
         }
 
         return clusterColors;

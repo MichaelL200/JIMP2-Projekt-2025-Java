@@ -3,10 +3,10 @@ package graphdivider.model;
 import java.util.Arrays;
 import java.util.Random;
 
-// Clusterization of a graph using the Fiedler vector and k-means clustering
+// Graph clustering using Fiedler vector and k-means
 public final class GraphClusterization
 {
-    // Clusters the graph based on the Fiedler vector and k-means clustering.
+    // Cluster graph using Fiedler vector (2 parts) or k-means (p parts)
     public static int[] clusterizeGraph(GraphEigenvalues.EigenResult eigenResult, int p)
     {
         try
@@ -25,7 +25,7 @@ public final class GraphClusterization
         }
     }
 
-    // Partition vertices into two groups using the Fiedler vector.
+    // Partition into two groups using Fiedler vector
     private static int[] partitionByFiedlerVector(GraphEigenvalues.EigenResult eigenResult)
     {
         double[] fiedlerVector = eigenResult.eigenvectors[1];
@@ -51,11 +51,11 @@ public final class GraphClusterization
         return groupIndices;
     }
 
-    // K-means balanced clustering for spectral clustering using the first p eigenvectors.
+    // K-means balanced clustering using first p eigenvectors
     private static int[] clusterizeUsingKMeans(GraphEigenvalues.EigenResult eigenResult, int p)
     {
         int n = eigenResult.eigenvectors[0].length; // Number of vertices
-        int dimensions = eigenResult.eigenvectors.length; // Number of eigenvectors used (should be p)
+        int dimensions = eigenResult.eigenvectors.length; // Number of eigenvectors used
         double[][] data = new double[n][dimensions];
         for (int i = 0; i < n; i++)
             for (int j = 0; j < dimensions; j++)
@@ -70,11 +70,10 @@ public final class GraphClusterization
 
         for (int iteration = 0; iteration < maxIterations; iteration++)
         {
-            // Step 1: Assign vertices to the nearest centroid with size constraint
+            // Assign vertices to nearest centroid (respect size limits)
             int[] clusterSizes = new int[p];
             boolean[] assigned = new boolean[n];
 
-            // For each point, find the closest centroid, but respect size limits
             for (int i = 0; i < n; i++)
             {
                 // Compute distances to all centroids
@@ -84,7 +83,7 @@ public final class GraphClusterization
                     distances[j] = euclideanDistance(data[i], centroids[j]);
                 }
 
-                // Try to assign to the closest centroid with available capacity
+                // Try to assign to closest centroid with available capacity
                 Integer[] order = new Integer[p];
                 for (int j = 0; j < p; j++) order[j] = j;
                 Arrays.sort(order, java.util.Comparator.comparingDouble(j -> distances[j]));
@@ -103,7 +102,7 @@ public final class GraphClusterization
                 }
             }
 
-            // Step 2: Update centroids
+            // Update centroids
             double[][] newCentroids = new double[p][dimensions];
             int[] newClusterSizes = new int[p];
             for (int i = 0; i < n; i++)
@@ -129,7 +128,7 @@ public final class GraphClusterization
                 }
             }
 
-            // Step 3: Check for convergence
+            // Check for convergence
             boolean converged = true;
             for (int i = 0; i < p; i++)
             {
@@ -145,14 +144,14 @@ public final class GraphClusterization
         return clusters;
     }
 
-    // Initialize centroids for k-means clustering based on the data range
+    // Initialize centroids for k-means
     private static double[][] initializeCentroids(double[][] data, int p)
     {
         int n = data.length;
         int dimensions = data[0].length;
         double[][] centroids = new double[p][dimensions];
 
-        // For each dimension, find min and max
+        // Find min/max for each dimension
         double[] min = new double[dimensions];
         double[] max = new double[dimensions];
         Arrays.fill(min, Double.POSITIVE_INFINITY);
@@ -185,7 +184,7 @@ public final class GraphClusterization
         return centroids;
     }
 
-    // Helper method to calculate Euclidean distance
+    // Euclidean distance between two vectors
     private static double euclideanDistance(double[] vector1, double[] vector2)
     {
         double sum = 0.0;
@@ -196,10 +195,10 @@ public final class GraphClusterization
         return Math.sqrt(sum);
     }
 
-    // Print the clusters (partitions) indices
+    // Print clusters (partitions) indices
     public static void printClusters(int[] clusters)
     {
-        final String GREEN = "\u001B[32m"; // Green
+        final String GREEN = "\u001B[32m";
         final String RESET = "\u001B[0m";
 
         if (clusters == null || clusters.length == 0)
@@ -223,9 +222,9 @@ public final class GraphClusterization
             System.out.print(entry.getValue());
             System.out.println(RESET);
         }
-}
+    }
 
-    // Calculate the margin of the clusters based on their sizes
+    // Calculate margin of clusters (size difference)
     public static double calculateMargin(int[] clusters, int numParts)
     {
         int[] clusterSizes = new int[numParts];
