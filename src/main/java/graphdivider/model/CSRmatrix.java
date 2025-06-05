@@ -84,6 +84,43 @@ public record CSRmatrix(int[] rowPtr, int[] colInd, int[] values, int size)
         }
     }
 
+    // Mask edges that are not cut by clusters
+    public static CSRmatrix maskCutEdges(CSRmatrix original, int[] clusters)
+    {
+        int size = original.size();
+        int[] rowPtr = new int[size + 1];
+        // Use dynamic lists to build new colInd and values
+        java.util.List<Integer> newColInd = new java.util.ArrayList<>();
+        java.util.List<Integer> newValues = new java.util.ArrayList<>();
+
+        int nnz = 0;
+        for (int row = 0; row < size; row++)
+        {
+            rowPtr[row] = nnz;
+            for (int idx = original.rowPtr()[row]; idx < original.rowPtr()[row + 1]; idx++)
+            {
+                int col = original.colInd()[idx];
+                int val = original.values()[idx];
+                // Only keep edge if both vertices are in the same cluster
+                if (clusters[row] == clusters[col])
+                {
+                    newColInd.add(col);
+                    newValues.add(val);
+                    nnz++;
+                }
+            }
+        }
+        rowPtr[size] = nnz;
+
+        // Convert lists to arrays
+        int[] colIndArr = newColInd.stream().mapToInt(i -> i).toArray();
+        int[] valuesArr = newValues.stream().mapToInt(i -> i).toArray();
+
+        CSRmatrix masked = new CSRmatrix(rowPtr, colIndArr, valuesArr, size);
+        masked.printAdjacency();
+        return masked;
+    }
+
     // Get row pointers
     public int[] getRowPtr() { return rowPtr; }
     // Get column indices

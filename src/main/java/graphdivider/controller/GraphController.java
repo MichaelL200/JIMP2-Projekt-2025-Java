@@ -216,6 +216,8 @@ public final class GraphController
                             int numParts = toolPanel.getPartitions();
                             int[] clusters = GraphClusterization.clusterizeGraph(eigenresult, numParts);
 
+                            CSRmatrix adjacency_divided = CSRmatrix.maskCutEdges(loadedGraph.matrix, clusters);
+
                             Vertex[] vertices = graphView.getVertices();
                             if (vertices == null || clusters == null)
                             {
