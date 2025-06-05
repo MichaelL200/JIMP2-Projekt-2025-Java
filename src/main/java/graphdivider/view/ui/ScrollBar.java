@@ -1,8 +1,10 @@
 package graphdivider.view.ui;
 
-import java.awt.*;
+import graphdivider.view.Theme;
+
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicScrollBarUI;
+import java.awt.*;
 
 // Custom ScrollBar with theme support
 public final class ScrollBar extends JScrollBar

@@ -1,8 +1,8 @@
 package graphdivider.controller;
 
 import graphdivider.model.*;
+import graphdivider.view.Theme;
 import graphdivider.view.ui.ProgressDialog;
-import graphdivider.view.ui.Theme;
 import graphdivider.view.ui.graph.GraphColoring;
 import graphdivider.view.ui.graph.Vertex;
 
@@ -82,18 +82,20 @@ public final class GraphController
 
         menuBar.addLightThemeListener(e -> {
             System.out.println("[MenuBar] Light theme selected.");
-            frame.switchTheme(false);
+            Theme.applyLightTheme();
+            frame.updateWindowIcon();
         });
 
         menuBar.addDarkThemeListener(e -> {
             System.out.println("[MenuBar] Dark theme selected.");
-            frame.switchTheme(true);
+            Theme.applyDarkTheme();
+            frame.updateWindowIcon();
         });
 
         menuBar.addAutoThemeListener(e -> {
             System.out.println("[MenuBar] Auto theme selected.");
             Theme.applyAutoTheme(() -> {
-                frame.switchTheme(Theme.isDarkPreferred());
+                frame.updateWindowIcon();
             });
         });
 

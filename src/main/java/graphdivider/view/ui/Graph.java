@@ -1,6 +1,7 @@
 package graphdivider.view.ui;
 
 import graphdivider.model.GraphModel;
+import graphdivider.view.Theme;
 import graphdivider.view.ui.graph.Edge;
 import graphdivider.view.ui.graph.Vertex;
 

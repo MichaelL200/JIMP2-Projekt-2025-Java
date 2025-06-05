@@ -1,4 +1,4 @@
-package graphdivider.view.ui;
+package graphdivider.view;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
@@ -253,7 +253,26 @@ public final class Theme
         return new ImageIcon(url);
     }
 
+    // Load system-aware window icon based on theme
+    public static Image loadSystemAwareWindowIcon()
+    {
+        String resource = isDarkPreferred() ? "/icon/icon_dark.png" : "/icon/icon_light.png";
+        try
+        {
+            java.io.InputStream iconStream = Theme.class.getResourceAsStream(resource);
+            if (iconStream == null)
+            {
+                throw new IllegalArgumentException("Resource not found: " + resource);
+            }
+            return javax.imageio.ImageIO.read(iconStream);
+        }
+        catch (Exception e)
+        {
+            System.err.println("Warning: Unable to load window icon '" + resource + "': " + e.getMessage());
+            return null;
+        }
+    }
+
     // Theme mode enum
     public enum ThemeMode { AUTO, LIGHT, DARK }
 }
-

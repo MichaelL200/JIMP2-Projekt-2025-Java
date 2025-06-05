@@ -1,6 +1,6 @@
 package graphdivider.view.ui.graph;
 
-import graphdivider.view.ui.Theme;
+import graphdivider.view.Theme;
 
 import java.awt.*;
 import java.util.List;

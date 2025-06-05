@@ -85,15 +85,62 @@ public final class GraphLoader
     // Convert GraphModel to Laplacian CSRmatrix
     public static CSRmatrix toLaplacianCSRmatrix(GraphModel model)
     {
-        CSRmatrix laplacian = GraphEigenvalues.toLaplacianCSRmatrix(model);
-        return laplacian;
+        int[] adjacencyList = model.getAdjacencyList();
+        int[] adjacencyPointers = model.getAdjacencyPointers();
+
+        int maxVertex = Arrays.stream(adjacencyList).max().orElse(-1);
+        int size = maxVertex + 1;
+
+        java.util.Map<Integer, java.util.Set<Integer>> neighborsMap = new java.util.HashMap<>();
+        for (int i = 0; i < adjacencyPointers.length; i++)
+        {
+            int start = adjacencyPointers[i];
+            int end = (i + 1 < adjacencyPointers.length) ? adjacencyPointers[i + 1] : adjacencyList.length;
+            int vertex = adjacencyList[start];
+            neighborsMap.putIfAbsent(vertex, new java.util.HashSet<>());
+            for (int j = start + 1; j < end; j++)
+            {
+                int neighbor = adjacencyList[j];
+                if (neighbor != vertex)
+                {
+                    neighborsMap.get(vertex).add(neighbor);
+                    neighborsMap.putIfAbsent(neighbor, new java.util.HashSet<>());
+                    neighborsMap.get(neighbor).add(vertex);
+                }
+            }
+        }
+
+        int[] rowPtr = new int[size + 1];
+        java.util.List<Integer> colIndList = new java.util.ArrayList<>();
+        java.util.List<Integer> valuesList = new java.util.ArrayList<>();
+        int idx = 0;
+
+        for (int i = 0; i < size; i++)
+        {
+            rowPtr[i] = idx;
+            java.util.Set<Integer> neighbors = neighborsMap.getOrDefault(i, java.util.Collections.emptySet());
+            colIndList.add(i);
+            valuesList.add(neighbors.size());
+            idx++;
+            for (int neighbor : neighbors)
+            {
+                if (neighbor == i) continue;
+                colIndList.add(neighbor);
+                valuesList.add(-1);
+                idx++;
+            }
+        }
+        rowPtr[size] = idx;
+
+        int[] colInd = colIndList.stream().mapToInt(Integer::intValue).toArray();
+        int[] values = valuesList.stream().mapToInt(Integer::intValue).toArray();
+
+        return new CSRmatrix(rowPtr, colInd, values, size);
     }
 
     // Parse int array from semicolon-separated string
     private static int[] parseIntArray(String line)
     {
-        return Arrays.stream(line.trim().split(";"))
-                .mapToInt(Integer::parseInt)
-                .toArray();
+        return Arrays.stream(line.trim().split(";")).mapToInt(Integer::parseInt).toArray();
     }
 }

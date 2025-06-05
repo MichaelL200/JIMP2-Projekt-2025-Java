@@ -2,7 +2,7 @@ package graphdivider;
 
 import graphdivider.controller.GraphController;
 import graphdivider.view.Frame;
-import graphdivider.view.ui.Theme;
+import graphdivider.view.Theme;
 
 import javax.swing.*;
 
@@ -25,8 +25,13 @@ public final class Main
             controller.registerViewListeners(frame);
             frame.setController(controller);
 
+            // Set window size and default close operation
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(1200, 800); // or another default size
+            frame.setLocationRelativeTo(null); // center on screen
+            frame.updateWindowIcon(); // set window icon according to theme
+
             frame.setVisible(true);
         });
     }
 }
-

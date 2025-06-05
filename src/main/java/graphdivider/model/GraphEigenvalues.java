@@ -4,7 +4,7 @@ import com.github.fommil.netlib.ARPACK;
 import org.netlib.util.doubleW;
 import org.netlib.util.intW;
 
-import java.util.*;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,62 +37,6 @@ public final class GraphEigenvalues
 
     // Prevent instantiation
     private GraphEigenvalues() {}
-
-    // Build Laplacian matrix (L = D - A) in CSR format
-    public static CSRmatrix toLaplacianCSRmatrix(GraphModel model)
-    {
-        int[] adjacencyList = model.getAdjacencyList();
-        int[] adjacencyPointers = model.getAdjacencyPointers();
-
-        int maxVertex = Arrays.stream(adjacencyList).max().orElse(-1);
-        int size = maxVertex + 1;
-
-        Map<Integer, Set<Integer>> neighborsMap = new HashMap<>();
-        for (int i = 0; i < adjacencyPointers.length; i++)
-        {
-            int start = adjacencyPointers[i];
-            int end = (i + 1 < adjacencyPointers.length) ? adjacencyPointers[i + 1] : adjacencyList.length;
-            int vertex = adjacencyList[start];
-            neighborsMap.putIfAbsent(vertex, new HashSet<>());
-            for (int j = start + 1; j < end; j++)
-            {
-                int neighbor = adjacencyList[j];
-                if (neighbor != vertex)
-                {
-                    neighborsMap.get(vertex).add(neighbor);
-                    neighborsMap.putIfAbsent(neighbor, new HashSet<>());
-                    neighborsMap.get(neighbor).add(vertex);
-                }
-            }
-        }
-
-        int[] rowPtr = new int[size + 1];
-        List<Integer> colIndList = new ArrayList<>();
-        List<Integer> valuesList = new ArrayList<>();
-        int idx = 0;
-
-        for (int i = 0; i < size; i++)
-        {
-            rowPtr[i] = idx;
-            Set<Integer> neighbors = neighborsMap.getOrDefault(i, Collections.emptySet());
-            colIndList.add(i);
-            valuesList.add(neighbors.size());
-            idx++;
-            for (int neighbor : neighbors)
-            {
-                if (neighbor == i) continue;
-                colIndList.add(neighbor);
-                valuesList.add(-1);
-                idx++;
-            }
-        }
-        rowPtr[size] = idx;
-
-        int[] colInd = colIndList.stream().mapToInt(Integer::intValue).toArray();
-        int[] values = valuesList.stream().mapToInt(Integer::intValue).toArray();
-
-        return new CSRmatrix(rowPtr, colInd, values, size);
-    }
 
     // Log Laplacian matrix info (for debug)
     private static void logLaplacianInfo(int size, int nnz, int[] rowPtr, int[] colInd, int[] values)

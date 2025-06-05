@@ -4,15 +4,11 @@ import graphdivider.controller.GraphController;
 import graphdivider.view.ui.*;
 import graphdivider.view.ui.MenuBar;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.IOException;
 
 // Main window for the Graph Divider tool.
-public final class Frame extends JFrame implements PropertyChangeListener
+public final class Frame extends JFrame
 {
     // Panels and UI components
     private final Graph graphPanel;
@@ -21,48 +17,11 @@ public final class Frame extends JFrame implements PropertyChangeListener
     private final MenuBar menuBar;
 
     // Theme and controller state
-    private boolean lastDarkMode;
-    private Theme.ThemeMode lastThemeMode = null;
     private GraphController controller;
 
     public Frame()
     {
         setTitle("Graph Divider");
-        lastDarkMode = Theme.isDarkPreferred();
-        lastThemeMode = getCurrentThemeMode();
-        updateWindowIcon(lastDarkMode);
-
-        // Listen for Windows dark mode changes
-        Toolkit.getDefaultToolkit().addPropertyChangeListener("win.menu.dark", this);
-
-        boolean isWSL = isRunningUnderWSL();
-        if (isWSL)
-        {
-            System.out.println("[Frame] Detected WSL environment. Starting theme polling.");
-            startWSLThemePolling();
-        }
-
-        setInitialWindowSize();
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        maximizeWindow(isWSL);
-
-        // Fix window bounds on maximize
-        this.addWindowStateListener(e ->
-        {
-            if ((e.getNewState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH)
-            {
-                GraphicsConfiguration gc = getGraphicsConfiguration();
-                Rectangle bounds = gc.getBounds();
-                Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(gc);
-                int x = bounds.x + insets.left;
-                int y = bounds.y + insets.top;
-                int width = bounds.width - insets.left - insets.right;
-                int height = bounds.height - insets.top - insets.bottom;
-                setBounds(x, y, width, height);
-                revalidate();
-                repaint();
-            }
-        });
 
         // Setup menu bar
         menuBar = new MenuBar();
@@ -252,134 +211,10 @@ public final class Frame extends JFrame implements PropertyChangeListener
         }
     }
 
-    // Switch between dark and light theme
-    public void switchTheme(boolean dark)
-    {
-        Theme.ThemeMode desired = dark ? Theme.ThemeMode.DARK : Theme.ThemeMode.LIGHT;
-        if (lastThemeMode == desired)
-        {
-            return;
-        }
-        System.out.println("[Frame] Switching theme to " + (dark ? "dark" : "light") + "...");
-        if (dark)
-        {
-            Theme.applyDarkTheme();
-        }
-        else
-        {
-            Theme.applyLightTheme();
-        }
-        lastThemeMode = desired;
-        updateWindowIcon(Theme.isDarkPreferred());
-        SwingUtilities.updateComponentTreeUI(graphPanel);
-        graphPanel.repaint();
-    }
-
-    // Get current theme mode using reflection
-    private Theme.ThemeMode getCurrentThemeMode()
-    {
-        try
-        {
-            java.lang.reflect.Field f = Theme.class.getDeclaredField("currentTheme");
-            f.setAccessible(true);
-            return (Theme.ThemeMode) f.get(null);
-        } catch (Exception e)
-        {
-            return null;
-        }
-    }
-
-    // Detect if running under WSL
-    private boolean isRunningUnderWSL()
-    {
-        String os = System.getProperty("os.name").toLowerCase();
-        return os.contains("linux") && System.getenv("WSL_DISTRO_NAME") != null;
-    }
-
-    // Set initial window size
-    private void setInitialWindowSize()
-    {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        int halfWidth  = screenSize.width / 2;
-        int halfHeight = (int) (screenSize.height / 1.5);
-        setMinimumSize(new Dimension(halfWidth, halfHeight));
-        setSize(halfWidth, halfHeight);
-    }
-
-    // Maximize window (special handling for WSL)
-    private void maximizeWindow(boolean isWSL)
-    {
-        if (isWSL)
-        {
-            SwingUtilities.invokeLater(() ->
-            {
-                if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0)
-                {
-                    Timer timer = new javax.swing.Timer(100, e ->
-                    {
-                        setExtendedState(JFrame.MAXIMIZED_BOTH);
-                        revalidate();
-                        repaint();
-                        ((Timer) e.getSource()).stop();
-                    });
-                    timer.setRepeats(false);
-                    timer.start();
-                }
-            });
-        }
-        else
-        {
-            setExtendedState(JFrame.MAXIMIZED_BOTH);
-        }
-    }
-
-    // Start polling for theme changes in WSL
-    private void startWSLThemePolling()
-    {
-        Timer wslThemeTimer = new Timer(2000, null);
-        wslThemeTimer.addActionListener(e ->
-        {
-            boolean dark = Theme.isDarkPreferred();
-            if (dark != lastDarkMode)
-            {
-                updateWindowIcon(dark);
-                lastDarkMode = dark;
-            }
-        });
-        wslThemeTimer.setRepeats(true);
-        wslThemeTimer.start();
-    }
-
-    // Handle Windows dark mode property change
-    @Override
-    public void propertyChange(PropertyChangeEvent evt)
-    {
-        boolean dark = Theme.isDarkPreferred();
-        if (dark != lastDarkMode)
-        {
-            updateWindowIcon(dark);
-            lastDarkMode = dark;
-        }
-    }
-
     // Update window icon for current theme
-    public void updateWindowIcon(boolean darkMode)
+    public void updateWindowIcon()
     {
-        String resource = darkMode ? "/icon/icon_dark.png" : "/icon/icon_light.png";
-        try
-        {
-            java.io.InputStream iconStream = getClass().getResourceAsStream(resource);
-            if (iconStream == null)
-            {
-                throw new IllegalArgumentException("Resource not found: " + resource);
-            }
-            Image icon = ImageIO.read(iconStream);
-            setIconImage(icon);
-        }
-        catch (IOException | IllegalArgumentException e)
-        {
-            System.err.println("Warning: Unable to load window icon '" + resource + "': " + e.getMessage());
-        }
+        setIconImage(Theme.loadSystemAwareWindowIcon());
     }
 
     // Getters for panels and menu bar
