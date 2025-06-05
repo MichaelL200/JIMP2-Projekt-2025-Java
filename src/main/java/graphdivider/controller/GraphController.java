@@ -168,7 +168,16 @@ public final class GraphController
 
                             frame.updatePartitionPanel(edgesCut, marginKept);
 
-                            // Tool panel stays disabled after dividing
+                            // Re-enable tool panel controls
+                            frame.getAppMenuBar().addSavePartitionedTextListener(e -> {
+                                // Save partitioned graph in .csrrg
+                                System.out.println("[MenuBar] Save partitioned text graph selected.");
+                            });
+                            frame.getAppMenuBar().addSaveBinaryListener(e -> {
+                                // Save partitioned graph in .bin
+                                System.out.println("[MenuBar] Save partitioned binary graph selected.");
+                            });
+                            frame.getAppMenuBar().setSaveButtons(true);
                         }
                         catch (Exception ex)
                         {

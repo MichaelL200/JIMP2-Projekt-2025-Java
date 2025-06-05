@@ -55,6 +55,21 @@ public final class MenuBar extends JMenuBar
         add(themeMenu);
     }
 
+    // Setters for enabling/disabling items
+    public void setSaveButtons(boolean enabled)
+    {
+        savePartitionedTextItem.setEnabled(enabled);
+        saveBinaryItem.setEnabled(enabled);
+    }
+    public void setSavePartitionedTextItemEnabled(boolean enabled)
+    {
+        savePartitionedTextItem.setEnabled(enabled);
+    }
+    public void setSaveBinaryItemEnabled(boolean enabled)
+    {
+        saveBinaryItem.setEnabled(enabled);
+    }
+
     // --- Listener registration ---
     public void addLoadTextGraphListener(ActionListener l) {
         loadTextGraphItem.addActionListener(l);

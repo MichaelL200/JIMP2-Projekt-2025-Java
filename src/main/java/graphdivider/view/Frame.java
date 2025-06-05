@@ -127,6 +127,7 @@ public final class Frame extends JFrame implements PropertyChangeListener
             toolPanel.setDivideButtonEnabled(false);
             toolPanel.getPartitionsSpinner().setEnabled(false);
             toolPanel.getMarginSpinner().setEnabled(false);
+            menuBar.setSaveButtons(false);
 
             // Check controller
             if (controller == null)
