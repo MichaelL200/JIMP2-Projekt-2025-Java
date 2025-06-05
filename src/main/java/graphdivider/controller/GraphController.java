@@ -5,6 +5,7 @@ import graphdivider.view.Theme;
 import graphdivider.view.ui.ProgressDialog;
 import graphdivider.view.ui.graph.GraphColoring;
 import graphdivider.view.ui.graph.Vertex;
+import graphdivider.io.Output;
 
 import javax.swing.*;
 import java.io.File;
@@ -142,8 +143,20 @@ public final class GraphController
             if (result == JFileChooser.APPROVE_OPTION)
             {
                 java.io.File file = fileChooser.getSelectedFile();
-                // savePartitionedGraphAsText(file, ...);
-                System.out.println("[MenuBar] Saving partitioned graph as text to: " + file.getAbsolutePath());
+                try {
+                    // Pass the loaded graph model to Output.writeText
+                    Output.writeText(
+                        file,
+                        lastNumParts,
+                        lastEdgesCut,
+                        frame.getPartitionPanel().getMarginKept(),
+                        this.loadedGraph != null ? this.loadedGraph.model : null
+                    );
+                    System.out.println("[MenuBar] Saving partitioned graph as text to: " + file.getAbsolutePath());
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(frame, "Failed to save file: " + ex.getMessage(), "Save Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
         menuBar.addSaveBinaryListener(e ->

@@ -54,3 +54,6 @@ bin/
 
 # C Documentation
 /docs/dokumentacja_C/
+
+# Output
+/src/main/resources/output/
