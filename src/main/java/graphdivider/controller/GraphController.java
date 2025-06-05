@@ -19,6 +19,11 @@ public final class GraphController
     // Loaded graph data
     private LoadedGraph loadedGraph;
 
+    // Store last partitioning info for default filename
+    private String lastInputFilename = null;
+    private int lastNumParts = 2;
+    private int lastEdgesCut = 0;
+
     // Set the graph view
     public void setGraphView(graphdivider.view.ui.Graph view)
     {
@@ -51,6 +56,9 @@ public final class GraphController
 
             this.loadedGraph = new LoadedGraph(model, matrix, laplacian);
 
+            // Store input filename for default save name
+            this.lastInputFilename = file.getName();
+
             // Update tool panel state
             int vertexCount = model.getRowPositions().length;
             int maxPartitions = Math.min(100, vertexCount < 8 ? 2 : vertexCount / 4);
@@ -80,39 +88,86 @@ public final class GraphController
         graphdivider.view.ui.ToolPanel toolPanel = frame.getToolPanel();
         graphdivider.view.ui.Graph graphPanel = this.graphView;
 
-        menuBar.addLightThemeListener(e -> {
+        menuBar.addLightThemeListener(e ->
+        {
             System.out.println("[MenuBar] Light theme selected.");
             Theme.applyLightTheme();
             frame.updateWindowIcon();
         });
 
-        menuBar.addDarkThemeListener(e -> {
+        menuBar.addDarkThemeListener(e ->
+        {
             System.out.println("[MenuBar] Dark theme selected.");
             Theme.applyDarkTheme();
             frame.updateWindowIcon();
         });
 
-        menuBar.addAutoThemeListener(e -> {
+        menuBar.addAutoThemeListener(e ->
+        {
             System.out.println("[MenuBar] Auto theme selected.");
             Theme.applyAutoTheme(() -> {
                 frame.updateWindowIcon();
             });
         });
 
-        menuBar.addLoadTextGraphListener(e -> {
+        menuBar.addLoadTextGraphListener(e ->
+        {
             System.out.println("[MenuBar] Load text graph selected.");
             frame.handleLoadTextGraph();
         });
-        menuBar.addLoadPartitionedTextListener(e -> {
+        menuBar.addLoadPartitionedTextListener(e ->
+        {
             System.out.println("[MenuBar] Load partitioned text graph selected.");
             frame.handleLoadPartitionedTextGraph();
         });
-        menuBar.addLoadPartitionedBinaryListener(e -> {
+        menuBar.addLoadPartitionedBinaryListener(e ->
+        {
             System.out.println("[MenuBar] Load partitioned binary graph selected.");
             frame.handleLoadPartitionedBinaryGraph();
         });
 
-        toolPanel.addDivideButtonActionListener(e -> {
+        // Register save listeners
+        menuBar.addSavePartitionedTextListener(e ->
+        {
+            // Suggest default filename
+            String baseName = (lastInputFilename != null ? lastInputFilename.replaceAll("\\.[^.]*$", "") : "graph");
+            String defaultName = String.format("%s_parts%d_cut%d.csrrg2", baseName, lastNumParts, lastEdgesCut);
+
+            // Show save dialog for text file
+            JFileChooser fileChooser = new JFileChooser("src/main/resources/output");
+            fileChooser.setDialogTitle("Save Partitioned Graph (Text)");
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSR Partitioned Graph files (*.csrrg2)", "csrrg2"));
+            fileChooser.setSelectedFile(new java.io.File(defaultName));
+            int result = fileChooser.showSaveDialog(frame);
+            if (result == JFileChooser.APPROVE_OPTION)
+            {
+                java.io.File file = fileChooser.getSelectedFile();
+                // savePartitionedGraphAsText(file, ...);
+                System.out.println("[MenuBar] Saving partitioned graph as text to: " + file.getAbsolutePath());
+            }
+        });
+        menuBar.addSaveBinaryListener(e ->
+        {
+            // Suggest default filename
+            String baseName = (lastInputFilename != null ? lastInputFilename.replaceAll("\\.[^.]*$", "") : "graph");
+            String defaultName = String.format("%s_parts%d_cut%d.bin", baseName, lastNumParts, lastEdgesCut);
+
+            // Show save dialog for binary file
+            JFileChooser fileChooser = new JFileChooser("src/main/resources/output");
+            fileChooser.setDialogTitle("Save Partitioned Graph (Binary)");
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSR Partitioned Graph Binary files (*.bin)", "bin"));
+            fileChooser.setSelectedFile(new java.io.File(defaultName));
+            int result = fileChooser.showSaveDialog(frame);
+            if (result == JFileChooser.APPROVE_OPTION)
+            {
+                java.io.File file = fileChooser.getSelectedFile();
+                // savePartitionedGraphAsBinary(file, ...);
+                System.out.println("[MenuBar] Saving partitioned graph as binary to: " + file.getAbsolutePath());
+            }
+        });
+
+        toolPanel.addDivideButtonActionListener(e ->
+        {
             try
             {
                 if (this.loadedGraph == null)
@@ -166,19 +221,15 @@ public final class GraphController
                             int edgesCut = GraphColoring.calculateEdgesCut(vertices, clusters, graphView.getEdges());
                             double marginKept = GraphClusterization.calculateMargin(clusters, numParts);
 
+                            // Store for default filename
+                            lastNumParts = numParts;
+                            lastEdgesCut = edgesCut;
+
                             graphView.updateClusters(clusters);
 
                             frame.updatePartitionPanel(edgesCut, marginKept);
 
-                            // Re-enable tool panel controls
-                            frame.getAppMenuBar().addSavePartitionedTextListener(e -> {
-                                // Save partitioned graph in .csrrg
-                                System.out.println("[MenuBar] Save partitioned text graph selected.");
-                            });
-                            frame.getAppMenuBar().addSaveBinaryListener(e -> {
-                                // Save partitioned graph in .bin
-                                System.out.println("[MenuBar] Save partitioned binary graph selected.");
-                            });
+                            // Enable save buttons after partitioning
                             frame.getAppMenuBar().setSaveButtons(true);
                         }
                         catch (Exception ex)
