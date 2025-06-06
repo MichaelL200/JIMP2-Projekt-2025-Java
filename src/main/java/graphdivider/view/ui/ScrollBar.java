@@ -32,7 +32,7 @@ public final class ScrollBar extends JScrollBar
     // Custom ScrollBar UI (rounded, theme-aware)
     private static class ModernScrollBarUI extends BasicScrollBarUI
     {
-        // Arc for rounded corners
+        // Arc radius for rounded corners
         private static final int ARC = 16;
 
         // Thumb color based on theme
@@ -51,22 +51,19 @@ public final class ScrollBar extends JScrollBar
                     : new Color(230, 230, 230, 180);
         }
 
-        // Paint thumb (the draggable part)
+        // Paint thumb (draggable part)
         @Override
         protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds)
         {
             if (thumbBounds.isEmpty() || !c.isEnabled()) return;
             Graphics2D g2 = (Graphics2D) g.create();
-            try {
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setPaint(getThumbColor());
-                g2.fillRoundRect(thumbBounds.x, thumbBounds.y, thumbBounds.width, thumbBounds.height, ARC, ARC);
-            } finally {
-                g2.dispose();
-            }
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setPaint(getThumbColor());
+            g2.fillRoundRect(thumbBounds.x, thumbBounds.y, thumbBounds.width, thumbBounds.height, ARC, ARC);
+            g2.dispose();
         }
 
-        // Paint track (the background)
+        // Paint track (background)
         @Override
         protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds)
         {
@@ -77,21 +74,21 @@ public final class ScrollBar extends JScrollBar
             g2.dispose();
         }
 
-        // Hide decrease button
+        // Hide decrease button (arrow)
         @Override
         protected JButton createDecreaseButton(int orientation)
         {
             return createZeroButton();
         }
 
-        // Hide increase button
+        // Hide increase button (arrow)
         @Override
         protected JButton createIncreaseButton(int orientation)
         {
             return createZeroButton();
         }
 
-        // Create an invisible button (for arrows)
+        // Create an invisible button for scrollbar arrows
         private JButton createZeroButton()
         {
             JButton button = new JButton();

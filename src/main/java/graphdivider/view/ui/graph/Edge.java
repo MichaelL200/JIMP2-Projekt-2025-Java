@@ -6,7 +6,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-// One edge (connection) between two vertices
+// Represents an edge (connection) between two vertices
 public final class Edge
 {
     // All edges for global color update
@@ -30,7 +30,7 @@ public final class Edge
         allEdges.add(this);
     }
 
-    // Update color for all edges
+    // Update color for all edges (static)
     public static void updateAllEdgesColor()
     {
         for (Edge edge : allEdges)
@@ -71,7 +71,7 @@ public final class Edge
         repaintVertices();
     }
 
-    // Repaint both vertices
+    // Repaint both connected vertices
     private void repaintVertices()
     {
         v1.repaint();

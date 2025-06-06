@@ -9,7 +9,11 @@ import java.util.Map;
 // Utility for coloring vertices and cutting edges
 public final class GraphColoring
 {
+    // Prevent instantiation
+    private GraphColoring() {}
+
     // Color vertices by cluster and remove inter-cluster edges
+    @SuppressWarnings("SuspiciousNameCombination")
     public static int colorVertices(Vertex[] vertices, int[] clusters, List<Edge> edges)
     {
         if (vertices == null || clusters == null || vertices.length != clusters.length)

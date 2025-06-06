@@ -3,7 +3,7 @@ package graphdivider.view.ui.graph;
 import javax.swing.*;
 import java.awt.*;
 
-// One vertex (node) in the graph view
+// Represents a vertex (node) in the graph view
 public final class Vertex extends JComponent
 {
     // Default color for vertices

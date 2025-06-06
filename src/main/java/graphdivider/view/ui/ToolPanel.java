@@ -8,11 +8,11 @@ import java.awt.event.ActionListener;
 // Panel with controls for partitioning a graph
 public final class ToolPanel extends JPanel
 {
-    // Spinner for number of partitions
+    // Spinner: number of partitions
     private final JSpinner partitionsSpinner;
-    // Spinner for margin percentage
+    // Spinner: margin percentage
     private final JSpinner marginSpinner;
-    // Button to divide the graph
+    // Button: divide the graph
     private final JButton divideButton;
 
     public ToolPanel()
@@ -27,16 +27,14 @@ public final class ToolPanel extends JPanel
         gbc.gridx = 0; gbc.gridy = 0;
         add(new JLabel("Number of parts:"), gbc);
         gbc.gridx = 1;
-        partitionsSpinner = new JSpinner(new SpinnerNumberModel(2, 2, 100, 1));
-        partitionsSpinner.setEnabled(false);
+        partitionsSpinner = createSpinner(2, 2, 100, 1, false);
         add(partitionsSpinner, gbc);
 
         // Row 1: Margin %
         gbc.gridx = 0; gbc.gridy = 1;
         add(new JLabel("Margin %:"), gbc);
         gbc.gridx = 1;
-        marginSpinner = new JSpinner(new SpinnerNumberModel(10, 10, 999, 1));
-        marginSpinner.setEnabled(false);
+        marginSpinner = createSpinner(10, 10, 999, 1, false);
         add(marginSpinner, gbc);
 
         // Row 2: Divide Graph button
@@ -48,14 +46,21 @@ public final class ToolPanel extends JPanel
         add(divideButton, gbc);
     }
 
-    // Listen for spinner changes
+    // Helper: create a spinner with given params
+    private JSpinner createSpinner(int value, int min, int max, int step, boolean enabled) {
+        JSpinner spinner = new JSpinner(new SpinnerNumberModel(value, min, max, step));
+        spinner.setEnabled(enabled);
+        return spinner;
+    }
+
+    // Add listener for both spinners
     public void addChangeListener(ChangeListener listener)
     {
         partitionsSpinner.addChangeListener(listener);
         marginSpinner.addChangeListener(listener);
     }
 
-    // Listen for divide button click
+    // Add listener for divide button
     public void addDivideButtonActionListener(ActionListener listener)
     {
         divideButton.addActionListener(listener);
@@ -73,19 +78,19 @@ public final class ToolPanel extends JPanel
         return (Integer) marginSpinner.getValue();
     }
 
-    // Enable/disable divide button
+    // Enable or disable divide button
     public void setDivideButtonEnabled(boolean enabled)
     {
         divideButton.setEnabled(enabled);
     }
 
-    // Set spinner value for partitions
+    // Set value for partitions spinner
     public void setPartitionsSpinnerValue(int value)
     {
         partitionsSpinner.setValue(value);
     }
 
-    // Set max allowed partitions
+    // Set max allowed partitions and update tooltip
     public void setMaxPartitions(int maxPartitions)
     {
         SpinnerNumberModel model = (SpinnerNumberModel) partitionsSpinner.getModel();
@@ -93,13 +98,13 @@ public final class ToolPanel extends JPanel
         partitionsSpinner.setToolTipText("Minimum: 2\nMaximum: " + maxPartitions);
     }
 
-    // Get spinner for partitions
+    // Get spinner for partitions (for external control)
     public JSpinner getPartitionsSpinner()
     {
         return partitionsSpinner;
     }
 
-    // Get spinner for margin
+    // Get spinner for margin (for external control)
     public JSpinner getMarginSpinner()
     {
         return marginSpinner;
