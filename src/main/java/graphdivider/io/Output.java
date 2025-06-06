@@ -6,7 +6,7 @@ import graphdivider.model.GraphModel;
 import java.io.*;
 
 // Utility class for writing graph partition assignments to a text file.
-public class Output
+public final class Output
 {
     // Saves the partitioned graph data in a text format (.txt)
     public static void writeText(File file, int numParts, int edgesCut, double marginKept, GraphModel graphModel, CSRmatrix adjacencyDivided) throws IOException

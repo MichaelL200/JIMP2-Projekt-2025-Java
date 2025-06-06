@@ -42,6 +42,14 @@ public class PartitionPanel extends JPanel
         marginKeptLabel.setText(String.format("Margin kept: %.2f", marginKept));
     }
 
+    // Set labels to unknown state
+    public void setUnknown()
+    {
+        edgesCutLabel.setText("Edges cut: -");
+        marginKeptLabel.setText("Margin kept: -");
+        this.marginKept = 0.0;
+    }
+
     // Get the stored margin kept value
     public double getMarginKept()
     {
