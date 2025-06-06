@@ -38,27 +38,6 @@ public final class GraphEigenvalues
     // Prevent instantiation
     private GraphEigenvalues() {}
 
-    // Log Laplacian matrix info (for debug)
-    private static void logLaplacianInfo(int size, int nnz, int[] rowPtr, int[] colInd, int[] values)
-    {
-        if (LOGGER.isLoggable(Level.FINE))
-        {
-            LOGGER.fine("Laplacian CSR matrix: " + size + "x" + size + ", " + nnz + " non-zero values");
-            // Only print full arrays for small graphs
-            if (size <= 100)
-            {
-                LOGGER.fine("Row pointers: " + Arrays.toString(rowPtr));
-                LOGGER.fine("Column indices: " + Arrays.toString(colInd));
-                LOGGER.fine("Values: " + Arrays.toString(values));
-            } else
-            {
-                LOGGER.fine("Row pointers: [length=" + rowPtr.length + "]");
-                LOGGER.fine("Column indices: [length=" + colInd.length + "]");
-                LOGGER.fine("Values: [length=" + values.length + "]");
-            }
-        }
-    }
-
     // Compute smallest p eigenpairs using ARPACK
     public static EigenResult computeSmallestEigenpairs(CSRmatrix laplacian, int p) throws Exception
     {

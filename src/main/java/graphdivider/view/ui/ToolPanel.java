@@ -98,6 +98,14 @@ public final class ToolPanel extends JPanel
         partitionsSpinner.setToolTipText("Minimum: 2\nMaximum: " + maxPartitions);
     }
 
+    // Set min allowed margin and update tooltip
+    public void setMinMargin(int minMargin)
+    {
+        SpinnerNumberModel model = (SpinnerNumberModel) marginSpinner.getModel();
+        model.setMinimum(minMargin);
+        marginSpinner.setToolTipText("Minimum: " + minMargin + "%");
+    }
+
     // Get spinner for partitions (for external control)
     public JSpinner getPartitionsSpinner()
     {

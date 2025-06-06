@@ -70,6 +70,8 @@ public final class GraphController
             {
                 graphdivider.view.Frame frame = (graphdivider.view.Frame) parent;
                 frame.updateToolPanelPartitions(maxPartitions, 2);
+                // Set partition panel to unknown after loading
+                frame.getPartitionPanel().setUnknown();
             } else
             {
                 throw new IllegalArgumentException("Parent is not an instance of Frame.");
@@ -276,7 +278,7 @@ public final class GraphController
         });
     }
 
-    // New: Handle loading a text graph file (called from Frame)
+    // Handle loading a text graph file (called from Frame)
     public void loadTextGraph(graphdivider.view.Frame frame)
     {
         System.out.println("[Controller] Opening file chooser for text graph...");
@@ -295,6 +297,9 @@ public final class GraphController
             frame.getToolPanel().getPartitionsSpinner().setEnabled(false);
             frame.getToolPanel().getMarginSpinner().setEnabled(false);
             frame.getAppMenuBar().setSaveButtons(false);
+
+            // Set partition panel to unknown at the beginning
+            frame.getPartitionPanel().setUnknown();
 
             // Load graph in background
             SwingWorker<LoadedGraph, Void> loader = new SwingWorker<>()
@@ -367,7 +372,7 @@ public final class GraphController
         }
     }
 
-    // New: Handle loading a partitioned text graph (called from Frame)
+    // Handle loading a partitioned text graph (called from Frame)
     public void loadPartitionedTextGraph(graphdivider.view.Frame frame)
     {
         System.out.println("[Controller] Opening file chooser for partitioned text graph...");
@@ -460,7 +465,7 @@ public final class GraphController
         }
     }
 
-    // New: Handle loading a partitioned binary graph (called from Frame)
+    // Handle loading a partitioned binary graph (called from Frame)
     public void loadPartitionedBinaryGraph(graphdivider.view.Frame frame)
     {
         System.out.println("[Controller] Opening file chooser for partitioned binary graph...");

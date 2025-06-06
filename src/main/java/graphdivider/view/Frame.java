@@ -48,6 +48,9 @@ public final class Frame extends JFrame
         scrollPane.setBorder(null);
         scrollPane.setPreferredSize(new Dimension(1800, 900));
         getContentPane().add(scrollPane, BorderLayout.CENTER);
+
+        // Set partition panel to unknown at startup
+        partitionPanel.setUnknown();
     }
 
     // Set the controller (must be called before using controller)
@@ -110,6 +113,15 @@ public final class Frame extends JFrame
     {
         getToolPanel().setMaxPartitions(maxPartitions);
         getToolPanel().setPartitionsSpinnerValue(spinnerValue);
+
+        // Set minimum margin based on maxPartitions (example formula)
+        int minMargin = Math.max(0, 100 / maxPartitions);
+        getToolPanel().setMinMargin(minMargin);
+        // Set spinner value to minMargin to ensure it's valid
+        getToolPanel().getMarginSpinner().setValue(minMargin);
+
+        // Set partition panel to unknown after choosing a file
+        getPartitionPanel().setUnknown();
     }
 
     // Enable/disable tool panel controls
