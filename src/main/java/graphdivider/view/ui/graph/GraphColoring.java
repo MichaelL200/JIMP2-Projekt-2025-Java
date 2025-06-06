@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.SwingUtilities;
 
 // Utility for coloring vertices and cutting edges
 public final class GraphColoring
@@ -32,21 +33,37 @@ public final class GraphColoring
         }
 
         // Remove edges between different clusters, count them
-        int cutEdges = 0;
-        java.util.Iterator<Edge> it = edges.iterator();
-        while (it.hasNext())
+        final int[] cutEdges = {0};
+        Runnable removeEdgesTask = () ->
         {
-            Edge edge = it.next();
-            int cluster1 = clusters[edge.getVertex1().getId()];
-            int cluster2 = clusters[edge.getVertex2().getId()];
-            if (cluster1 != cluster2)
+            java.util.Iterator<Edge> it = edges.iterator();
+            while (it.hasNext())
             {
-                it.remove();
-                edge.dispose();
-                cutEdges++;
+                Edge edge = it.next();
+                int cluster1 = clusters[edge.getVertex1().getId()];
+                int cluster2 = clusters[edge.getVertex2().getId()];
+                if (cluster1 != cluster2)
+                {
+                    it.remove();
+                    edge.dispose();
+                    cutEdges[0]++;
+                }
+            }
+        };
+        if (SwingUtilities.isEventDispatchThread())
+        {
+            removeEdgesTask.run();
+        } else
+        {
+            try
+            {
+                SwingUtilities.invokeAndWait(removeEdgesTask);
+            } catch (Exception e)
+            {
+                throw new RuntimeException(e);
             }
         }
-        return cutEdges;
+        return cutEdges[0];
     }
 
     // Count edges between different clusters (do not remove)

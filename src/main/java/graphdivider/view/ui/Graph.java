@@ -103,7 +103,9 @@ public final class Graph extends JPanel
     {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g.create();
-        for (Edge edge : edges)
+        // Iterate over a copy to avoid ConcurrentModificationException
+        List<Edge> edgesCopy = new ArrayList<>(edges);
+        for (Edge edge : edgesCopy)
         {
             edge.draw(g2);
         }
