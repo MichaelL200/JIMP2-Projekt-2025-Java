@@ -2,12 +2,8 @@ package graphdivider.io;
 
 import graphdivider.model.CSRmatrix;
 import graphdivider.model.GraphModel;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
+
+import java.io.*;
 
 // Utility class for writing graph partition assignments to a text file.
 public class Output
@@ -112,6 +108,8 @@ public class Output
                 out.writeInt(pointers[i]);
             }
         }
+
+        testReadBinary(file);
     }
 
     // Convert int array to semicolon-separated string
@@ -125,5 +123,60 @@ public class Output
             if (i < arr.length - 1) sb.append(";");
         }
         return sb.toString();
+    }
+
+    // Test method to read and print the content of a text file
+    public static void testReadBinary(File file) throws IOException
+    {
+        final String ANSI_CYAN = "\u001B[36m";
+        final String ANSI_RESET = "\u001B[0m";
+
+        try (DataInputStream in = new DataInputStream(new FileInputStream(file)))
+        {
+            System.out.println(ANSI_CYAN + "\t\tBINARY FILE CONTENT:" + ANSI_RESET);
+            int numParts = in.readInt();
+            int edgesCut = in.readInt();
+            double marginKept = in.readDouble();
+            System.out.println(ANSI_CYAN + "\tnumParts: " + numParts + ANSI_RESET);
+            System.out.println(ANSI_CYAN + "\tedgesCut: " + edgesCut + ANSI_RESET);
+            System.out.println(ANSI_CYAN + "\tmarginKept: " + marginKept + ANSI_RESET);
+
+            int maxVerticesPerRow = in.readInt();
+            System.out.println(ANSI_CYAN + "\tmaxVerticesPerRow: " + maxVerticesPerRow + ANSI_RESET);
+
+            int rowPositionsLen = in.readInt();
+            System.out.print(ANSI_CYAN + "\trowPositions: ");
+            for (int i = 0; i < rowPositionsLen; i++)
+            {
+                System.out.print(in.readInt() + (i < rowPositionsLen - 1 ? "; " : ""));
+            }
+            System.out.println(ANSI_RESET);
+
+            int rowStartIndicesLen = in.readInt();
+            System.out.print(ANSI_CYAN + "\trowStartIndices: ");
+            for (int i = 0; i < rowStartIndicesLen; i++)
+            {
+                System.out.print(in.readInt() + (i < rowStartIndicesLen - 1 ? "; " : ""));
+            }
+            System.out.println(ANSI_RESET);
+
+            int totalAdjacencyElements = in.readInt();
+            System.out.println(ANSI_CYAN + "\ttotalAdjacencyElements: " + totalAdjacencyElements + ANSI_RESET);
+            System.out.print(ANSI_CYAN + "\tAdjacency data: ");
+            for (int i = 0; i < totalAdjacencyElements; i++)
+            {
+                System.out.print(in.readInt() + (i < totalAdjacencyElements - 1 ? "; " : ""));
+            }
+            System.out.println(ANSI_RESET);
+
+            int pointersCount = in.readInt();
+            System.out.println(ANSI_CYAN + "\tpointersCount: " + pointersCount + ANSI_RESET);
+            System.out.print(ANSI_CYAN + "\tPointers: ");
+            for (int i = 0; i < pointersCount; i++)
+            {
+                System.out.print(in.readInt() + (i < pointersCount - 1 ? "; " : ""));
+            }
+            System.out.println(ANSI_RESET);
+        }
     }
 }
