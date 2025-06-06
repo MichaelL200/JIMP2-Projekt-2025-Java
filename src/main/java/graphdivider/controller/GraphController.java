@@ -173,8 +173,16 @@ public final class GraphController
             if (result == JFileChooser.APPROVE_OPTION)
             {
                 java.io.File file = fileChooser.getSelectedFile();
-                // savePartitionedGraphAsBinary(file, ...);
-                System.out.println("[MenuBar] Saving partitioned graph as binary to: " + file.getAbsolutePath());
+                try
+                {
+                    Output.writeBinary(file, lastNumParts, lastEdgesCut, frame.getPartitionPanel().getMarginKept(),
+                            this.loadedGraph != null ? this.loadedGraph.model : null, adjacencyDivided);
+                    System.out.println("[MenuBar] Saving partitioned graph as binary to: " + file.getAbsolutePath());
+                } catch (IOException ex)
+                {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(frame, "Failed to save file: " + ex.getMessage(), "Save Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
