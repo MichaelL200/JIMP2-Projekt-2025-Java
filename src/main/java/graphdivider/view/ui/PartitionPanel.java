@@ -35,13 +35,6 @@ public class PartitionPanel extends JPanel
         edgesCutLabel.setText("Edges cut: " + edgesCut);
     }
 
-    // Set margin kept label
-    public void setMarginKept(double marginKept)
-    {
-        this.marginKept = marginKept;
-        marginKeptLabel.setText(String.format("Margin kept: %.2f", marginKept));
-    }
-
     // Set labels to unknown state
     public void setUnknown()
     {
@@ -54,6 +47,13 @@ public class PartitionPanel extends JPanel
     public double getMarginKept()
     {
         return marginKept;
+    }
+
+    // Set margin kept label
+    public void setMarginKept(double marginKept)
+    {
+        this.marginKept = marginKept;
+        marginKeptLabel.setText(String.format("Margin kept: %.2f", marginKept));
     }
 
     // Clear both labels

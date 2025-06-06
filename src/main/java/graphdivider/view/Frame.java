@@ -190,7 +190,7 @@ public final class Frame extends JFrame
                 return;
             }
             System.out.println("[Frame] Loading base graph: " + baseFile.getAbsolutePath());
-            setWindowTitleForFile(baseFile);
+            setWindowTitleForFile(selectedPartitionedFile);
 
             if (controller == null)
             {
@@ -238,7 +238,6 @@ public final class Frame extends JFrame
                                 protected void done()
                                 {
                                     progressDialog.dispose();
-                                    setWindowTitleForFile(baseFile);
                                     toolPanel.getPartitionsSpinner().setEnabled(false);
                                     toolPanel.getMarginSpinner().setEnabled(false);
                                     toolPanel.setDivideButtonEnabled(false);
@@ -279,10 +278,87 @@ public final class Frame extends JFrame
         int result = fileChooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION)
         {
-            java.io.File selectedFile = fileChooser.getSelectedFile();
-            System.out.println("[Frame] Selected partitioned binary file: " + selectedFile.getAbsolutePath());
-            setWindowTitleForFile(selectedFile);
-            // controller.loadPartitionedBinaryGraphFromFile(this, selectedFile);
+            File selectedPartitionedFile = fileChooser.getSelectedFile();
+            File baseFile;
+            try
+            {
+                baseFile = graphdivider.io.Input.getBaseGraphFileForBin(selectedPartitionedFile);
+            } catch (Exception ex)
+            {
+                JOptionPane.showMessageDialog(this, "Could not determine base graph: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            System.out.println("[Frame] Loading base graph: " + baseFile.getAbsolutePath());
+            setWindowTitleForFile(selectedPartitionedFile);
+
+            if (controller == null)
+            {
+                JOptionPane.showMessageDialog(this, "Controller is not initialized. Please restart the application.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            SwingWorker<GraphController.LoadedGraph, Void> loader = new SwingWorker<>()
+            {
+                @Override
+                protected GraphController.LoadedGraph doInBackground()
+                {
+                    return controller.loadGraphFromFile(Frame.this, baseFile);
+                }
+
+                @Override
+                protected void done()
+                {
+                    try
+                    {
+                        GraphController.LoadedGraph loaded = get();
+                        if (loaded != null)
+                        {
+                            partitionPanel.clear();
+                            partitionPanel.setUnknown();
+                            ProgressDialog progressDialog = new ProgressDialog(Frame.this, "Displaying Graph", "Displaying graph, please wait...");
+                            SwingWorker<Void, Void> displayer = new SwingWorker<>()
+                            {
+                                @Override
+                                protected Void doInBackground()
+                                {
+                                    controller.displayGraph(loaded.model);
+                                    try
+                                    {
+                                        int[] clusters = graphdivider.io.Input.loadClustersForBin(selectedPartitionedFile);
+                                        graphPanel.updateClusters(clusters);
+                                    } catch (Exception ex)
+                                    {
+                                        System.out.println("[Frame] Failed to load clusters: " + ex.getMessage());
+                                    }
+                                    return null;
+                                }
+
+                                @Override
+                                protected void done()
+                                {
+                                    progressDialog.dispose();
+                                    toolPanel.getPartitionsSpinner().setEnabled(false);
+                                    toolPanel.getMarginSpinner().setEnabled(false);
+                                    toolPanel.setDivideButtonEnabled(false);
+                                    menuBar.setSaveButtons(false);
+                                }
+                            };
+                            displayer.execute();
+                            progressDialog.setVisible(true);
+                        } else
+                        {
+                            JOptionPane.showMessageDialog(Frame.this, "Failed to load graph.",
+                                    "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (Exception ex)
+                    {
+                        JOptionPane.showMessageDialog(Frame.this, "Failed to load graph: " + ex.getMessage(),
+                                "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            };
+
+            loader.execute();
         }
         else
         {
