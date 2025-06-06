@@ -127,4 +127,22 @@ public record CSRmatrix(int[] rowPtr, int[] colInd, int[] values, int size)
     public int[] getColInd() { return colInd; }
     // Get values
     public int[] getValues() { return values; }
+    // Get size (number of rows)
+    public int getNumRows()
+    {
+        return size;
+    }
+    // Get number of non-zero values
+    public int[] getAdjacencyForRow(int i)
+    {
+        if (i < 0 || i >= size)
+        {
+            throw new IndexOutOfBoundsException("Row index out of bounds: " + i);
+        }
+        int start = rowPtr[i];
+        int end = rowPtr[i + 1];
+        int[] adjacency = new int[end - start];
+        System.arraycopy(colInd, start, adjacency, 0, end - start);
+        return adjacency;
+    }
 }

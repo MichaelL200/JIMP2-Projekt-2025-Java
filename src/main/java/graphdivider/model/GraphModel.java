@@ -73,4 +73,16 @@ public final class GraphModel
         sb.append("]");
         return sb.toString();
     }
+
+    // Get CSRmatrix representation of the graph
+    public CSRmatrix getCSRmatrix()
+    {
+        return new CSRmatrix
+        (
+            rowStartIndices,
+            adjacencyList,
+            adjacencyPointers,
+            rowPositions.length
+        );
+    }
 }

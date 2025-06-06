@@ -25,6 +25,9 @@ public final class GraphController
     private int lastNumParts = 2;
     private int lastEdgesCut = 0;
 
+    // Adjacency matrix after partitioning
+    private CSRmatrix adjacencyDivided = null;
+
     // Set the graph view
     public void setGraphView(graphdivider.view.ui.Graph view)
     {
@@ -145,13 +148,9 @@ public final class GraphController
                 java.io.File file = fileChooser.getSelectedFile();
                 try {
                     // Pass the loaded graph model to Output.writeText
-                    Output.writeText(
-                        file,
-                        lastNumParts,
-                        lastEdgesCut,
-                        frame.getPartitionPanel().getMarginKept(),
-                        this.loadedGraph != null ? this.loadedGraph.model : null
-                    );
+                    // In savePartitionedTextListener
+                    Output.writeText(file, lastNumParts, lastEdgesCut, frame.getPartitionPanel().getMarginKept(),
+                            this.loadedGraph != null ? this.loadedGraph.model : null, adjacencyDivided);
                     System.out.println("[MenuBar] Saving partitioned graph as text to: " + file.getAbsolutePath());
                 } catch (IOException ex) {
                     ex.printStackTrace();
@@ -216,7 +215,7 @@ public final class GraphController
                             int numParts = toolPanel.getPartitions();
                             int[] clusters = GraphClusterization.clusterizeGraph(eigenresult, numParts);
 
-                            CSRmatrix adjacency_divided = CSRmatrix.maskCutEdges(loadedGraph.matrix, clusters);
+                            adjacencyDivided = CSRmatrix.maskCutEdges(loadedGraph.matrix, clusters);
 
                             Vertex[] vertices = graphView.getVertices();
                             if (vertices == null || clusters == null)
