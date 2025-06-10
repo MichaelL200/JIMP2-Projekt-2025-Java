@@ -111,35 +111,15 @@ public final class MenuBar extends JMenuBar
         polishItem.setText(isPolish ? "Polski" : "Polski");
     }
 
-    // --- Listener registration ---
-    public void addLoadTextGraphListener(ActionListener l) {
-        loadTextGraphItem.addActionListener(l);
-    }
-    public void addLoadPartitionedTextListener(ActionListener l) {
-        loadPartitionedTextItem.addActionListener(l);
-    }
-    public void addLoadPartitionedBinaryListener(ActionListener l) {
-        loadPartitionedBinaryItem.addActionListener(l);
-    }
-    public void addSavePartitionedTextListener(ActionListener l) {
-        savePartitionedTextItem.addActionListener(l);
-    }
-    public void addSaveBinaryListener(ActionListener l) {
-        saveBinaryItem.addActionListener(l);
-    }
-    public void addAutoThemeListener(ActionListener l) {
-        autoThemeItem.addActionListener(l);
-    }
-    public void addLightThemeListener(ActionListener l) {
-        lightThemeItem.addActionListener(l);
-    }
-    public void addDarkThemeListener(ActionListener l) {
-        darkThemeItem.addActionListener(l);
-    }
-    public void addEnglishLanguageListener(ActionListener l) {
-        englishItem.addActionListener(l);
-    }
-    public void addPolishLanguageListener(ActionListener l) {
-        polishItem.addActionListener(l);
-    }
+    // Only expose listeners for controller to attach logic
+    public void addLoadTextGraphListener(ActionListener l) { loadTextGraphItem.addActionListener(l); }
+    public void addLoadPartitionedTextListener(ActionListener l) { loadPartitionedTextItem.addActionListener(l); }
+    public void addLoadPartitionedBinaryListener(ActionListener l) { loadPartitionedBinaryItem.addActionListener(l); }
+    public void addSavePartitionedTextListener(ActionListener l) { savePartitionedTextItem.addActionListener(l); }
+    public void addSaveBinaryListener(ActionListener l) { saveBinaryItem.addActionListener(l); }
+    public void addAutoThemeListener(ActionListener l) { autoThemeItem.addActionListener(l); }
+    public void addLightThemeListener(ActionListener l) { lightThemeItem.addActionListener(l); }
+    public void addDarkThemeListener(ActionListener l) { darkThemeItem.addActionListener(l); }
+    public void addEnglishLanguageListener(ActionListener l) { englishItem.addActionListener(l); }
+    public void addPolishLanguageListener(ActionListener l) { polishItem.addActionListener(l); }
 }

@@ -5,7 +5,7 @@ import graphdivider.model.GraphModel;
 
 import java.io.*;
 
-// Utility class for writing graph partition assignments to a text file.
+// Utility class for writing graph partition assignments to a text or binary file.
 public final class Output
 {
     // Saves the partitioned graph data in a text format (.txt)

@@ -7,6 +7,7 @@ import graphdivider.view.Theme;
 import javax.swing.*;
 
 // Entry point for the Graph Divider application.
+// Only responsible for wiring up MVC.
 public final class Main
 {
     // Main method: starts the application.

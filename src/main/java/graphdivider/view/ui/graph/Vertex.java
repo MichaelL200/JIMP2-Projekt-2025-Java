@@ -7,7 +7,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// Represents a vertex (node) in the graph view
+// Represents a vertex (node) in the graph view.
 public final class Vertex extends JComponent
 {
     // Default color for vertices
@@ -79,34 +79,49 @@ public final class Vertex extends JComponent
         }
     }
 
-    // Add this method to Vertex
+    /**
+     * Set the neighbors of this vertex for tooltip display.
+     * @param neighbors List of neighboring Vertex objects.
+     */
     public void setNeighbors(List<Vertex> neighbors)
     {
         this.neighbors = neighbors;
         updateTooltip();
     }
 
-    // Change color and repaint
+    /**
+     * Change the color of the vertex and repaint.
+     * @param color New color.
+     */
     public void setColor(Color color)
     {
         this.color = color;
         repaint();
     }
 
-    // Change id and repaint
+    /**
+     * Change the id of the vertex and repaint.
+     * @param id New id.
+     */
     public void setId(int id)
     {
         this.id = id;
         repaint();
     }
 
-    // Get id
+    /**
+     * Get the id of the vertex.
+     * @return Vertex id.
+     */
     public int getId()
     {
         return this.id;
     }
 
-    // Get diameter
+    /**
+     * Get the diameter of the vertex (for layout).
+     * @return Diameter in pixels.
+     */
     public int getDiameter()
     {
         return diameter;

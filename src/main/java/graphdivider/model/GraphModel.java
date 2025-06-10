@@ -1,6 +1,6 @@
 package graphdivider.model;
 
-// Graph in memory using CSR format
+// Represents a graph in memory using CSR format.
 public final class GraphModel
 {
     // Max number of vertices in any row
@@ -47,33 +47,6 @@ public final class GraphModel
     // Get adjacency pointers
     public int[] getAdjacencyPointers() { return adjacencyPointers; }
 
-    // Print graph data (for debugging)
-    public void printGraphData()
-    {
-        final String ANSI_CYAN = "\u001B[36m";
-        final String ANSI_RESET = "\u001B[0m";
-
-        System.out.println(ANSI_CYAN + "\t\tGRAPH MODEL:" + ANSI_RESET);
-        System.out.println(ANSI_CYAN + "\tMax Vertices Per Row: " + maxVerticesPerRow + ANSI_RESET);
-        System.out.println(ANSI_CYAN + "\tRow Positions: " + arrayToString(rowPositions) + ANSI_RESET);
-        System.out.println(ANSI_CYAN + "\tRow Start Indices: " + arrayToString(rowStartIndices) + ANSI_RESET);
-        System.out.println(ANSI_CYAN + "\tAdjacency List: " + arrayToString(adjacencyList) + ANSI_RESET);
-        System.out.println(ANSI_CYAN + "\tAdjacency Pointers: " + arrayToString(adjacencyPointers) + ANSI_RESET);
-    }
-
-    // Convert array to string
-    public static String arrayToString(int[] str)
-    {
-        StringBuilder sb = new StringBuilder("[");
-        for (int i = 0; i < str.length; i++)
-        {
-            sb.append(str[i]);
-            if (i < str.length - 1) sb.append(", ");
-        }
-        sb.append("]");
-        return sb.toString();
-    }
-
     // Get CSRmatrix representation of the graph
     public CSRmatrix getCSRmatrix()
     {
@@ -84,5 +57,33 @@ public final class GraphModel
             adjacencyPointers,
             rowPositions.length
         );
+    }
+
+    // Utility: Convert int array to string (for debug/printing)
+    public static String arrayToString(int[] arr)
+    {
+        if (arr == null) return "null";
+        if (arr.length == 0) return "[]";
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < arr.length; i++)
+        {
+            sb.append(arr[i]);
+            if (i < arr.length - 1) sb.append("; ");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    // Print graph data for debugging
+    public void printGraphData()
+    {
+        final String ANSI_CYAN = "\u001B[36m";
+        final String ANSI_RESET = "\u001B[0m";
+        System.out.println(ANSI_RESET + "\t\tGRAPH DATA" + ANSI_RESET);
+        System.out.println(ANSI_CYAN + "\tmaxVerticesPerRow: " + maxVerticesPerRow + ANSI_RESET);
+        System.out.println(ANSI_CYAN + "\trowPositions: " + arrayToString(rowPositions) + ANSI_RESET);
+        System.out.println(ANSI_CYAN + "\trowStartIndices: " + arrayToString(rowStartIndices) + ANSI_RESET);
+        System.out.println(ANSI_CYAN + "\tadjacencyList: " + arrayToString(adjacencyList) + ANSI_RESET);
+        System.out.println(ANSI_CYAN + "\tadjacencyPointers: " + arrayToString(adjacencyPointers) + ANSI_RESET);
     }
 }

@@ -65,27 +65,37 @@ public class PartitionPanel extends JPanel
         setMarginKept(0.0);
     }
 
-    // Aktualizuj teksty panelu na podstawie języka
-    public void updateTexts() {
+    // Update panel texts based on language
+    public void updateTexts()
+    {
         Locale locale = Language.getCurrentLocale();
         boolean isPolish = locale != null && locale.getLanguage().equals("pl");
         ((javax.swing.border.TitledBorder) getBorder()).setTitle(isPolish ? "Informacje o podziale" : "Partition Info");
-        // Zmień teksty etykiet zgodnie z aktualnym językiem i stanem
-        String edgesCutText = isPolish ? "Krawędzie przecięte: " : "Edges cut: ";
-        String marginKeptText = isPolish ? "Zachowany margines: " : "Margin kept: ";
-        String unknown = isPolish ? "-" : "-";
-        // Rozpoznaj aktualny stan etykiet i zaktualizuj je
-        if (edgesCutLabel.getText().matches(".*-.*")) {
-            edgesCutLabel.setText(edgesCutText + unknown);
-        } else if (edgesCutLabel.getText().matches(".*\\d+.*")) {
-            String value = edgesCutLabel.getText().replaceAll("[^0-9]", "");
-            edgesCutLabel.setText(edgesCutText + value);
+
+        String edgesCutPrefix = isPolish ? "Krawędzie przecięte: " : "Edges cut: ";
+        String marginKeptPrefix = isPolish ? "Zachowany margines: " : "Margin kept: ";
+        String unknown = "-";
+
+        // Update edges cut label
+        String edgesCutText = edgesCutLabel.getText();
+        if (edgesCutText.endsWith("-"))
+        {
+            edgesCutLabel.setText(edgesCutPrefix + unknown);
+        } else
+        {
+            String value = edgesCutText.replaceAll(".*?:\\s*", "");
+            edgesCutLabel.setText(edgesCutPrefix + value);
         }
-        if (marginKeptLabel.getText().matches(".*-.*")) {
-            marginKeptLabel.setText(marginKeptText + unknown);
-        } else if (marginKeptLabel.getText().matches(".*\\d.*")) {
-            String value = marginKeptLabel.getText().replaceAll("[^0-9.,]", "");
-            marginKeptLabel.setText(marginKeptText + value);
+
+        // Update margin kept label
+        String marginKeptText = marginKeptLabel.getText();
+        if (marginKeptText.endsWith("-"))
+        {
+            marginKeptLabel.setText(marginKeptPrefix + unknown);
+        } else
+        {
+            String value = marginKeptText.replaceAll(".*?:\\s*", "");
+            marginKeptLabel.setText(marginKeptPrefix + value);
         }
         repaint();
     }

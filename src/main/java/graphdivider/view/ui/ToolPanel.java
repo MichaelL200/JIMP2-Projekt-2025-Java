@@ -24,7 +24,7 @@ public final class ToolPanel extends JPanel
         setBorder(BorderFactory.createTitledBorder("Partition Settings"));
         setLayout(new GridBagLayout());
 
-        // Ustaw stałą szerokość panelu (np. 220px), wysokość automatyczna
+        // Set fixed panel width (e.g. 220px), height is automatic
         int fixedWidth = 220;
         setPreferredSize(new Dimension(fixedWidth, getPreferredSize().height));
         setMinimumSize(new Dimension(fixedWidth, 0));
@@ -136,7 +136,7 @@ public final class ToolPanel extends JPanel
         return marginSpinner;
     }
 
-    // Aktualizuj teksty panelu na podstawie języka
+    // Update panel texts based on language
     public void updateTexts() {
         Locale locale = Language.getCurrentLocale();
         boolean isPolish = locale != null && locale.getLanguage().equals("pl");
