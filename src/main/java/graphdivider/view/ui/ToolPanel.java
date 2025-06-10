@@ -1,5 +1,7 @@
 package graphdivider.view.ui;
 
+import graphdivider.view.Language;
+import java.util.Locale;
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
@@ -14,25 +16,36 @@ public final class ToolPanel extends JPanel
     private final JSpinner marginSpinner;
     // Button: divide the graph
     private final JButton divideButton;
+    private final JLabel partitionsLabel;
+    private final JLabel marginLabel;
 
     public ToolPanel()
     {
         setBorder(BorderFactory.createTitledBorder("Partition Settings"));
         setLayout(new GridBagLayout());
+
+        // Ustaw stałą szerokość panelu (np. 220px), wysokość automatyczna
+        int fixedWidth = 220;
+        setPreferredSize(new Dimension(fixedWidth, getPreferredSize().height));
+        setMinimumSize(new Dimension(fixedWidth, 0));
+        setMaximumSize(new Dimension(fixedWidth, Integer.MAX_VALUE));
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 5, 10, 5);
         gbc.anchor = GridBagConstraints.WEST;
 
         // Row 0: Number of parts
         gbc.gridx = 0; gbc.gridy = 0;
-        add(new JLabel("Number of parts:"), gbc);
+        partitionsLabel = new JLabel("Number of parts:");
+        add(partitionsLabel, gbc);
         gbc.gridx = 1;
         partitionsSpinner = createSpinner(2, 2, 100, 1, false);
         add(partitionsSpinner, gbc);
 
         // Row 1: Margin %
         gbc.gridx = 0; gbc.gridy = 1;
-        add(new JLabel("Margin %:"), gbc);
+        marginLabel = new JLabel("Margin %:");
+        add(marginLabel, gbc);
         gbc.gridx = 1;
         marginSpinner = createSpinner(10, 10, 999, 1, false);
         add(marginSpinner, gbc);
@@ -44,6 +57,11 @@ public final class ToolPanel extends JPanel
         divideButton = new JButton("Divide Graph");
         divideButton.setEnabled(false);
         add(divideButton, gbc);
+    }
+
+    public static Object getInstance()
+    {
+        return new ToolPanel();
     }
 
     // Helper: create a spinner with given params
@@ -116,5 +134,16 @@ public final class ToolPanel extends JPanel
     public JSpinner getMarginSpinner()
     {
         return marginSpinner;
+    }
+
+    // Aktualizuj teksty panelu na podstawie języka
+    public void updateTexts() {
+        Locale locale = Language.getCurrentLocale();
+        boolean isPolish = locale != null && locale.getLanguage().equals("pl");
+        ((javax.swing.border.TitledBorder) getBorder()).setTitle(isPolish ? "Ustawienia podziału" : "Partition Settings");
+        partitionsLabel.setText(isPolish ? "Liczba części:" : "Number of parts:");
+        marginLabel.setText(isPolish ? "Margines %:" : "Margin %:");
+        divideButton.setText(isPolish ? "Podziel graf" : "Divide Graph");
+        repaint();
     }
 }

@@ -1,5 +1,7 @@
 package graphdivider.view.ui;
 
+import graphdivider.view.Language;
+import java.util.Locale;
 import javax.swing.*;
 import java.awt.*;
 
@@ -61,5 +63,30 @@ public class PartitionPanel extends JPanel
     {
         setEdgesCut(0);
         setMarginKept(0.0);
+    }
+
+    // Aktualizuj teksty panelu na podstawie języka
+    public void updateTexts() {
+        Locale locale = Language.getCurrentLocale();
+        boolean isPolish = locale != null && locale.getLanguage().equals("pl");
+        ((javax.swing.border.TitledBorder) getBorder()).setTitle(isPolish ? "Informacje o podziale" : "Partition Info");
+        // Zmień teksty etykiet zgodnie z aktualnym językiem i stanem
+        String edgesCutText = isPolish ? "Krawędzie przecięte: " : "Edges cut: ";
+        String marginKeptText = isPolish ? "Zachowany margines: " : "Margin kept: ";
+        String unknown = isPolish ? "-" : "-";
+        // Rozpoznaj aktualny stan etykiet i zaktualizuj je
+        if (edgesCutLabel.getText().matches(".*-.*")) {
+            edgesCutLabel.setText(edgesCutText + unknown);
+        } else if (edgesCutLabel.getText().matches(".*\\d+.*")) {
+            String value = edgesCutLabel.getText().replaceAll("[^0-9]", "");
+            edgesCutLabel.setText(edgesCutText + value);
+        }
+        if (marginKeptLabel.getText().matches(".*-.*")) {
+            marginKeptLabel.setText(marginKeptText + unknown);
+        } else if (marginKeptLabel.getText().matches(".*\\d.*")) {
+            String value = marginKeptLabel.getText().replaceAll("[^0-9.,]", "");
+            marginKeptLabel.setText(marginKeptText + value);
+        }
+        repaint();
     }
 }

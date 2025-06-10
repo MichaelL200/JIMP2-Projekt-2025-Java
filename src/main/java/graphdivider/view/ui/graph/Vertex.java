@@ -1,5 +1,7 @@
 package graphdivider.view.ui.graph;
 
+import graphdivider.view.Language;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
@@ -59,17 +61,21 @@ public final class Vertex extends JComponent
     // Add tooltip with number of the vertex connections
     public void updateTooltip()
     {
-        this.neighbors = neighbors;
+        // Use current language for tooltip
+        java.util.Locale locale = Language.getCurrentLocale();
+        boolean isPolish = locale != null && locale.getLanguage().equals("pl");
 
         if (neighbors == null || neighbors.isEmpty())
         {
-            setToolTipText("No connections");
+            setToolTipText(isPolish ? "Brak połączeń" : "No connections");
         } else
         {
             String connected = neighbors.stream()
                     .map(v -> String.valueOf(v.getId()))
                     .collect(Collectors.joining(", "));
-            setToolTipText("Connected to " + connected);
+            setToolTipText(
+                (isPolish ? "Połączony z " : "Connected to ") + connected
+            );
         }
     }
 

@@ -2,6 +2,7 @@ package graphdivider.controller;
 
 import graphdivider.model.*;
 import graphdivider.view.Theme;
+import graphdivider.view.Language;
 import graphdivider.view.ui.ProgressDialog;
 import graphdivider.view.ui.graph.GraphColoring;
 import graphdivider.view.ui.graph.Vertex;
@@ -114,6 +115,18 @@ public final class GraphController
             Theme.applyAutoTheme(() -> {
                 frame.updateWindowIcon();
             });
+        });
+
+        menuBar.addEnglishLanguageListener( e ->
+        {
+            System.out.println("[MenuBar] English language selected.");
+            Language.applyEnglishLanguage();
+        });
+
+        menuBar.addPolishLanguageListener(e ->
+        {
+            System.out.println("[MenuBar] Polish language selected.");
+            Language.applyPolishLanguage();
         });
 
         menuBar.addLoadTextGraphListener(e ->

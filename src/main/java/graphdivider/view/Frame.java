@@ -18,6 +18,7 @@ public final class Frame extends JFrame
 
     // Theme and controller state
     private GraphController controller;
+    private java.io.File currentFile = null; // Track current file for title
 
     public Frame()
     {
@@ -50,6 +51,13 @@ public final class Frame extends JFrame
 
         // Set partition panel to unknown at startup
         partitionPanel.setUnknown();
+
+        // Register language change listeners for panels and tooltips
+        graphdivider.view.Language.addLanguageChangeListener(() -> {
+            toolPanel.updateTexts();
+            partitionPanel.updateTexts();
+            graphPanel.updateTooltips(); // <-- update tooltips on language change
+        });
     }
 
     // Set the controller (must be called before using controller)
@@ -61,14 +69,22 @@ public final class Frame extends JFrame
     // Set window title based on file
     public void setWindowTitleForFile(java.io.File file)
     {
+        this.currentFile = file;
         if (file != null)
         {
             System.out.println("[Frame] Setting window title for file: " + file.getName());
             setTitle("Graph Divider - " + file.getName());
+
         } else
         {
             setTitle("Graph Divider");
         }
+    }
+
+    // Add this method to allow updating the window title after language change
+    public void updateWindowTitle()
+    {
+        setWindowTitleForFile(currentFile);
     }
 
     // Delegate: Handle loading a text graph file
@@ -136,5 +152,18 @@ public final class Frame extends JFrame
     {
         getPartitionPanel().setEdgesCut(edgesCut);
         getPartitionPanel().setMarginKept(marginKept);
+    }
+
+    // Update the menu language
+    public void updateMenuLanguage() {
+        // Only refresh the existing menuBar, do not call createMenuBar()
+        if (menuBar != null) {
+            menuBar.updateTexts();
+            setJMenuBar(menuBar);
+            revalidate();
+            repaint();
+        }
+        toolPanel.updateTexts();
+        partitionPanel.updateTexts();
     }
 }

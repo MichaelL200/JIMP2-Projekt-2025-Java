@@ -57,7 +57,8 @@ public final class Graph extends JPanel
         updateTooltips();
     }
 
-    private void updateTooltips()
+    // Make this method public
+    public void updateTooltips()
     {
         // For each vertex, collect its neighbors from the edges
         for (Vertex v : vertices)

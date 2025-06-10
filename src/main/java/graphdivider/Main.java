@@ -31,6 +31,9 @@ public final class Main
             frame.setLocationRelativeTo(null); // center on screen
             frame.updateWindowIcon(); // set window icon according to theme
 
+            // Listen for language changes and update menu
+            graphdivider.view.Language.addLanguageChangeListener(() -> frame.updateMenuLanguage());
+
             frame.setVisible(true);
         });
     }
