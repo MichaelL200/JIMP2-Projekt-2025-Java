@@ -2,6 +2,8 @@ package graphdivider.view.ui.graph;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 // Represents a vertex (node) in the graph view
 public final class Vertex extends JComponent
@@ -14,6 +16,8 @@ public final class Vertex extends JComponent
     private int id;
     // Current color
     private Color color;
+    // Neighbors (connected vertices)
+    private List<Vertex> neighbors;
 
     // Create vertex with id, color, and size
     public Vertex(int id, Color color, int diameter)
@@ -50,6 +54,30 @@ public final class Vertex extends JComponent
         {
             g2.dispose();
         }
+    }
+
+    // Add tooltip with number of the vertex connections
+    public void updateTooltip()
+    {
+        this.neighbors = neighbors;
+
+        if (neighbors == null || neighbors.isEmpty())
+        {
+            setToolTipText("No connections");
+        } else
+        {
+            String connected = neighbors.stream()
+                    .map(v -> String.valueOf(v.getId()))
+                    .collect(Collectors.joining(", "));
+            setToolTipText("Connected to " + connected);
+        }
+    }
+
+    // Add this method to Vertex
+    public void setNeighbors(List<Vertex> neighbors)
+    {
+        this.neighbors = neighbors;
+        updateTooltip();
     }
 
     // Change color and repaint

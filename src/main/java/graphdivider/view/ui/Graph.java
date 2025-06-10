@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 // Panel for drawing the graph visualization
 public final class Graph extends JPanel
@@ -52,6 +53,21 @@ public final class Graph extends JPanel
         revalidate();
         repaint();
         toolPanel.setDivideButtonEnabled(true);
+
+        updateTooltips();
+    }
+
+    private void updateTooltips()
+    {
+        // For each vertex, collect its neighbors from the edges
+        for (Vertex v : vertices)
+        {
+            List<Vertex> neighbors = edges.stream()
+                    .filter(e -> e.getVertex1() == v || e.getVertex2() == v)
+                    .map(e -> e.getVertex1() == v ? e.getVertex2() : e.getVertex1())
+                    .collect(Collectors.toList());
+            v.setNeighbors(neighbors);
+        }
     }
 
     // Remove all vertices and edges
@@ -88,6 +104,8 @@ public final class Graph extends JPanel
             throw new IllegalArgumentException("Vertices and clusters must be non-null and of the same length.");
         graphdivider.view.ui.graph.GraphColoring.colorVertices(vertexArray, clusters, edges);
         repaint();
+
+        updateTooltips();
     }
 
     // Use cached preferred size
