@@ -240,19 +240,6 @@ public final class Theme
         catch (IOException ignored) {}
     }
 
-    // Load icon for current theme (light/dark)
-    public static ImageIcon loadSystemAwareIcon(String basePath)
-    {
-        String themedPath = basePath.replace(".png", isDarkPreferred() ? "_dark.png" : "_light.png");
-        java.net.URL url = Theme.class.getResource(themedPath);
-        if (url == null)
-        {
-            System.err.println("Warning: Icon resource not found: " + themedPath);
-            return null;
-        }
-        return new ImageIcon(url);
-    }
-
     // Load system-aware window icon based on theme
     public static Image loadSystemAwareWindowIcon()
     {

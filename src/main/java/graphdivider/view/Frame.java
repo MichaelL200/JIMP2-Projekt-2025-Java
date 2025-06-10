@@ -6,7 +6,6 @@ import graphdivider.view.ui.MenuBar;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
 
 // Main window for the Graph Divider tool.
 public final class Frame extends JFrame
