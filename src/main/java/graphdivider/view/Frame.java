@@ -141,14 +141,14 @@ public final class Frame extends JFrame
     // Update tool panel's max partitions and spinner value
     public void updateToolPanelPartitions(int maxPartitions, int spinnerValue)
     {
-        getToolPanel().setMaxPartitions(maxPartitions);
-        getToolPanel().setPartitionsSpinnerValue(spinnerValue);
+        getToolPanel().setMaxPartitionCount(maxPartitions);
+        getToolPanel().setPartitionCountSpinnerValue(spinnerValue);
 
         // Set minimum margin based on maxPartitions (example formula)
         int minMargin = Math.max(0, 100 / maxPartitions);
-        getToolPanel().setMinMargin(minMargin);
+        getToolPanel().setMinPartitionMargin(minMargin);
         // Set spinner value to minMargin to ensure it's valid
-        getToolPanel().getMarginSpinner().setValue(minMargin);
+        getToolPanel().getPartitionMarginSpinner().setValue(minMargin);
 
         // Set partition panel to unknown after choosing a file
         getPartitionPanel().setUnknown();
@@ -157,9 +157,9 @@ public final class Frame extends JFrame
     // Enable/disable tool panel controls
     public void setToolPanelEnabled(boolean enabled)
     {
-        getToolPanel().setDivideButtonEnabled(enabled);
-        getToolPanel().getPartitionsSpinner().setEnabled(enabled);
-        getToolPanel().getMarginSpinner().setEnabled(enabled);
+        getToolPanel().setPartitionButtonEnabled(enabled);
+        getToolPanel().getPartitionCountSpinner().setEnabled(enabled);
+        getToolPanel().getPartitionMarginSpinner().setEnabled(enabled);
     }
 
     // Update partition panel with new values
@@ -173,13 +173,15 @@ public final class Frame extends JFrame
     public void updateMenuLanguage()
     {
         // Only refresh the existing menuBar, do not call createMenuBar()
-        if (menuBar != null) {
-            menuBar.updateTexts();
+        if (menuBar != null)
+        {
+            menuBar.updateMenuTexts();
             setJMenuBar(menuBar);
             revalidate();
             repaint();
         }
         toolPanel.updateTexts();
         partitionPanel.updateTexts();
+        graphPanel.updateTooltips();
     }
 }

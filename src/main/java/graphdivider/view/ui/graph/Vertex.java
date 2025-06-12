@@ -80,10 +80,10 @@ public final class Vertex extends JComponent
     }
 
     /**
-     * Set the neighbors of this vertex for tooltip display.
+     * Set the neighbors of this vertex and update tooltip.
      * @param neighbors List of neighboring Vertex objects.
      */
-    public void setNeighbors(List<Vertex> neighbors)
+    public void setNeighborsAndUpdateTooltip(List<Vertex> neighbors)
     {
         this.neighbors = neighbors;
         updateTooltip();

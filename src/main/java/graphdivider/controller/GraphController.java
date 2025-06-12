@@ -95,58 +95,58 @@ public final class GraphController
         graphdivider.view.ui.ToolPanel toolPanel = frame.getToolPanel();
         graphdivider.view.ui.Graph graphPanel = this.graphView;
 
-        menuBar.addLightThemeListener(e ->
+        menuBar.addLightThemeMenuItemListener(e ->
         {
             System.out.println("[MenuBar] Light theme selected.");
-            Theme.applyLightTheme();
+            Theme.setLightTheme();
             frame.updateWindowIcon();
         });
 
-        menuBar.addDarkThemeListener(e ->
+        menuBar.addDarkThemeMenuItemListener(e ->
         {
             System.out.println("[MenuBar] Dark theme selected.");
-            Theme.applyDarkTheme();
+            Theme.setDarkTheme();
             frame.updateWindowIcon();
         });
 
-        menuBar.addAutoThemeListener(e ->
+        menuBar.addSystemThemeMenuItemListener(e ->
         {
             System.out.println("[MenuBar] Auto theme selected.");
-            Theme.applyAutoTheme(() -> {
+            Theme.setAutoTheme(() -> {
                 frame.updateWindowIcon();
             });
         });
 
-        menuBar.addEnglishLanguageListener( e ->
+        menuBar.addEnglishLanguageMenuItemListener(e ->
         {
             System.out.println("[MenuBar] English language selected.");
             Language.applyEnglishLanguage();
         });
 
-        menuBar.addPolishLanguageListener(e ->
+        menuBar.addPolishLanguageMenuItemListener(e ->
         {
             System.out.println("[MenuBar] Polish language selected.");
             Language.applyPolishLanguage();
         });
 
-        menuBar.addLoadTextGraphListener(e ->
+        menuBar.addLoadGraphTextMenuItemListener(e ->
         {
             System.out.println("[MenuBar] Load text graph selected.");
             frame.handleLoadTextGraph();
         });
-        menuBar.addLoadPartitionedTextListener(e ->
+        menuBar.addLoadPartitionedGraphTextMenuItemListener(e ->
         {
             System.out.println("[MenuBar] Load partitioned text graph selected.");
             frame.handleLoadPartitionedTextGraph();
         });
-        menuBar.addLoadPartitionedBinaryListener(e ->
+        menuBar.addLoadPartitionedGraphBinaryMenuItemListener(e ->
         {
             System.out.println("[MenuBar] Load partitioned binary graph selected.");
             frame.handleLoadPartitionedBinaryGraph();
         });
 
         // Register save listeners
-        menuBar.addSavePartitionedTextListener(e ->
+        menuBar.addSavePartitionedGraphTextMenuItemListener(e ->
         {
             // Suggest default filename
             String baseName = (lastInputFilename != null ? lastInputFilename.replaceAll("\\.[^.]*$", "") : "graph");
@@ -173,7 +173,7 @@ public final class GraphController
                 }
             }
         });
-        menuBar.addSaveBinaryListener(e ->
+        menuBar.addSavePartitionedGraphBinaryMenuItemListener(e ->
         {
             // Suggest default filename
             String baseName = (lastInputFilename != null ? lastInputFilename.replaceAll("\\.[^.]*$", "") : "graph");
@@ -201,7 +201,7 @@ public final class GraphController
             }
         });
 
-        toolPanel.addDivideButtonActionListener(e ->
+        toolPanel.addPartitionButtonActionListener(e ->
         {
             try
             {
@@ -213,7 +213,7 @@ public final class GraphController
                 // Disable tool panel controls
                 frame.setToolPanelEnabled(false);
 
-                int numParts = toolPanel.getPartitions();
+                int numParts = toolPanel.getPartitionCount();
 
                 ProgressDialog progressDialog = new ProgressDialog(frame, "Partitioning Graph", "Calculating eigenvalues and eigenvectors...");
                 progressDialog.setVisible(true);
@@ -235,7 +235,7 @@ public final class GraphController
                             GraphEigenvalues.EigenResult eigenresult = get();
                             GraphEigenvalues.printEigenData(eigenresult);
 
-                            int numParts = toolPanel.getPartitions();
+                            int numParts = toolPanel.getPartitionCount();
                             int[] clusters = GraphClusterization.clusterizeGraph(eigenresult, numParts);
 
                             adjacencyDivided = CSRmatrix.maskCutEdges(loadedGraph.matrix, clusters);
@@ -267,7 +267,7 @@ public final class GraphController
                             frame.updatePartitionPanel(edgesCut, marginKept);
 
                             // Enable save buttons after partitioning
-                            frame.getAppMenuBar().setSaveButtons(true);
+                            frame.getAppMenuBar().setSaveMenuItemsEnabled(true);
                         }
                         catch (Exception ex)
                         {
@@ -306,10 +306,10 @@ public final class GraphController
             System.out.println("[Controller] Selected file: " + selectedFile.getAbsolutePath());
 
             // Disable controls while loading
-            frame.getToolPanel().setDivideButtonEnabled(false);
-            frame.getToolPanel().getPartitionsSpinner().setEnabled(false);
-            frame.getToolPanel().getMarginSpinner().setEnabled(false);
-            frame.getAppMenuBar().setSaveButtons(false);
+            frame.getToolPanel().setPartitionButtonEnabled(false);
+            frame.getToolPanel().getPartitionCountSpinner().setEnabled(false);
+            frame.getToolPanel().getPartitionMarginSpinner().setEnabled(false);
+            frame.getAppMenuBar().setSaveMenuItemsEnabled(false);
 
             // Set partition panel to unknown at the beginning
             frame.getPartitionPanel().setUnknown();
@@ -353,9 +353,9 @@ public final class GraphController
                                     frame.setWindowTitleForFile(selectedFile);
 
                                     // Enable controls after loading
-                                    frame.getToolPanel().getPartitionsSpinner().setEnabled(true);
-                                    frame.getToolPanel().getMarginSpinner().setEnabled(true);
-                                    frame.getToolPanel().setDivideButtonEnabled(true);
+                                    frame.getToolPanel().getPartitionCountSpinner().setEnabled(true);
+                                    frame.getToolPanel().getPartitionMarginSpinner().setEnabled(true);
+                                    frame.getToolPanel().setPartitionButtonEnabled(true);
                                 }
                             };
 
@@ -448,10 +448,10 @@ public final class GraphController
                                 protected void done()
                                 {
                                     progressDialog.dispose();
-                                    frame.getToolPanel().getPartitionsSpinner().setEnabled(false);
-                                    frame.getToolPanel().getMarginSpinner().setEnabled(false);
-                                    frame.getToolPanel().setDivideButtonEnabled(false);
-                                    frame.getAppMenuBar().setSaveButtons(false);
+                                    frame.getToolPanel().getPartitionCountSpinner().setEnabled(false);
+                                    frame.getToolPanel().getPartitionMarginSpinner().setEnabled(false);
+                                    frame.getToolPanel().setPartitionButtonEnabled(false);
+                                    frame.getAppMenuBar().setSaveMenuItemsEnabled(false);
                                 }
                             };
                             displayer.execute();
@@ -541,10 +541,10 @@ public final class GraphController
                                 protected void done()
                                 {
                                     progressDialog.dispose();
-                                    frame.getToolPanel().getPartitionsSpinner().setEnabled(false);
-                                    frame.getToolPanel().getMarginSpinner().setEnabled(false);
-                                    frame.getToolPanel().setDivideButtonEnabled(false);
-                                    frame.getAppMenuBar().setSaveButtons(false);
+                                    frame.getToolPanel().getPartitionCountSpinner().setEnabled(false);
+                                    frame.getToolPanel().getPartitionMarginSpinner().setEnabled(false);
+                                    frame.getToolPanel().setPartitionButtonEnabled(false);
+                                    frame.getAppMenuBar().setSaveMenuItemsEnabled(false);
                                 }
                             };
                             displayer.execute();

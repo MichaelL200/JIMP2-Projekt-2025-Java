@@ -33,7 +33,7 @@ public final class Graph extends JPanel
         setOpaque(false);     // Transparent background
 
         // Update edge colors on theme change
-        Theme.addThemeChangeListener(() ->
+        Theme.addThemeListener(() ->
         {
             for (Edge edge : edges)
             {
@@ -52,7 +52,7 @@ public final class Graph extends JPanel
         updatePreferredSize();
         revalidate();
         repaint();
-        toolPanel.setDivideButtonEnabled(true);
+        toolPanel.setPartitionButtonEnabled(true);
 
         updateTooltips();
     }
@@ -67,7 +67,7 @@ public final class Graph extends JPanel
                     .filter(e -> e.getVertex1() == v || e.getVertex2() == v)
                     .map(e -> e.getVertex1() == v ? e.getVertex2() : e.getVertex1())
                     .collect(Collectors.toList());
-            v.setNeighbors(neighbors);
+            v.setNeighborsAndUpdateTooltip(neighbors);
         }
     }
 

@@ -11,13 +11,13 @@ import java.awt.event.ActionListener;
 public final class ToolPanel extends JPanel
 {
     // Spinner: number of partitions
-    private final JSpinner partitionsSpinner;
+    private final JSpinner partitionCountSpinner;
     // Spinner: margin percentage
-    private final JSpinner marginSpinner;
+    private final JSpinner partitionMarginSpinner;
     // Button: divide the graph
-    private final JButton divideButton;
-    private final JLabel partitionsLabel;
-    private final JLabel marginLabel;
+    private final JButton partitionButton;
+    private final JLabel partitionCountLabel;
+    private final JLabel partitionMarginLabel;
 
     public ToolPanel()
     {
@@ -34,29 +34,29 @@ public final class ToolPanel extends JPanel
         gbc.insets = new Insets(10, 5, 10, 5);
         gbc.anchor = GridBagConstraints.WEST;
 
-        // Row 0: Number of parts
+        // Row 0: Number of partitions
         gbc.gridx = 0; gbc.gridy = 0;
-        partitionsLabel = new JLabel("Number of parts:");
-        add(partitionsLabel, gbc);
+        partitionCountLabel = new JLabel("Number of parts:");
+        add(partitionCountLabel, gbc);
         gbc.gridx = 1;
-        partitionsSpinner = createSpinner(2, 2, 100, 1, false);
-        add(partitionsSpinner, gbc);
+        partitionCountSpinner = createSpinner(2, 2, 100, 1, false);
+        add(partitionCountSpinner, gbc);
 
         // Row 1: Margin %
         gbc.gridx = 0; gbc.gridy = 1;
-        marginLabel = new JLabel("Margin %:");
-        add(marginLabel, gbc);
+        partitionMarginLabel = new JLabel("Margin %:");
+        add(partitionMarginLabel, gbc);
         gbc.gridx = 1;
-        marginSpinner = createSpinner(10, 10, 999, 1, false);
-        add(marginSpinner, gbc);
+        partitionMarginSpinner = createSpinner(10, 10, 999, 1, false);
+        add(partitionMarginSpinner, gbc);
 
-        // Row 2: Divide Graph button
+        // Row 2: Partition Graph button
         gbc.gridx = 0; gbc.gridy = 2;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        divideButton = new JButton("Divide Graph");
-        divideButton.setEnabled(false);
-        add(divideButton, gbc);
+        partitionButton = new JButton("Divide Graph");
+        partitionButton.setEnabled(false);
+        add(partitionButton, gbc);
     }
 
     public static Object getInstance()
@@ -73,68 +73,68 @@ public final class ToolPanel extends JPanel
     }
 
     // Add listener for both spinners
-    public void addChangeListener(ChangeListener listener)
+    public void addSpinnerChangeListener(ChangeListener listener)
     {
-        partitionsSpinner.addChangeListener(listener);
-        marginSpinner.addChangeListener(listener);
+        partitionCountSpinner.addChangeListener(listener);
+        partitionMarginSpinner.addChangeListener(listener);
     }
 
-    // Add listener for divide button
-    public void addDivideButtonActionListener(ActionListener listener)
+    // Add listener for partition button
+    public void addPartitionButtonActionListener(ActionListener listener)
     {
-        divideButton.addActionListener(listener);
+        partitionButton.addActionListener(listener);
     }
 
     // Get number of partitions
-    public int getPartitions()
+    public int getPartitionCount()
     {
-        return (Integer) partitionsSpinner.getValue();
+        return (Integer) partitionCountSpinner.getValue();
     }
 
     // Get margin percent
-    public int getMargin()
+    public int getPartitionMargin()
     {
-        return (Integer) marginSpinner.getValue();
+        return (Integer) partitionMarginSpinner.getValue();
     }
 
-    // Enable or disable divide button
-    public void setDivideButtonEnabled(boolean enabled)
+    // Enable or disable partition button
+    public void setPartitionButtonEnabled(boolean enabled)
     {
-        divideButton.setEnabled(enabled);
+        partitionButton.setEnabled(enabled);
     }
 
-    // Set value for partitions spinner
-    public void setPartitionsSpinnerValue(int value)
+    // Set value for partition count spinner
+    public void setPartitionCountSpinnerValue(int value)
     {
-        partitionsSpinner.setValue(value);
+        partitionCountSpinner.setValue(value);
     }
 
     // Set max allowed partitions and update tooltip
-    public void setMaxPartitions(int maxPartitions)
+    public void setMaxPartitionCount(int maxPartitions)
     {
-        SpinnerNumberModel model = (SpinnerNumberModel) partitionsSpinner.getModel();
+        SpinnerNumberModel model = (SpinnerNumberModel) partitionCountSpinner.getModel();
         model.setMaximum(maxPartitions);
-        partitionsSpinner.setToolTipText("Minimum: 2\nMaximum: " + maxPartitions);
+        partitionCountSpinner.setToolTipText("Minimum: 2\nMaximum: " + maxPartitions);
     }
 
     // Set min allowed margin and update tooltip
-    public void setMinMargin(int minMargin)
+    public void setMinPartitionMargin(int minMargin)
     {
-        SpinnerNumberModel model = (SpinnerNumberModel) marginSpinner.getModel();
+        SpinnerNumberModel model = (SpinnerNumberModel) partitionMarginSpinner.getModel();
         model.setMinimum(minMargin);
-        marginSpinner.setToolTipText("Minimum: " + minMargin + "%");
+        partitionMarginSpinner.setToolTipText("Minimum: " + minMargin + "%");
     }
 
-    // Get spinner for partitions (for external control)
-    public JSpinner getPartitionsSpinner()
+    // Get spinner for partition count (for external control)
+    public JSpinner getPartitionCountSpinner()
     {
-        return partitionsSpinner;
+        return partitionCountSpinner;
     }
 
     // Get spinner for margin (for external control)
-    public JSpinner getMarginSpinner()
+    public JSpinner getPartitionMarginSpinner()
     {
-        return marginSpinner;
+        return partitionMarginSpinner;
     }
 
     // Update panel texts based on language
@@ -143,9 +143,9 @@ public final class ToolPanel extends JPanel
         Locale locale = Language.getCurrentLocale();
         boolean isPolish = locale != null && locale.getLanguage().equals("pl");
         ((javax.swing.border.TitledBorder) getBorder()).setTitle(isPolish ? "Ustawienia podziału" : "Partition Settings");
-        partitionsLabel.setText(isPolish ? "Liczba części:" : "Number of parts:");
-        marginLabel.setText(isPolish ? "Margines %:" : "Margin %:");
-        divideButton.setText(isPolish ? "Podziel graf" : "Divide Graph");
+        partitionCountLabel.setText(isPolish ? "Liczba części:" : "Number of parts:");
+        partitionMarginLabel.setText(isPolish ? "Margines %:" : "Margin %:");
+        partitionButton.setText(isPolish ? "Podziel graf" : "Divide Graph");
         repaint();
     }
 }

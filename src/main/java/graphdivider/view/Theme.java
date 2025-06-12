@@ -17,62 +17,62 @@ import java.util.stream.Stream;
 public final class Theme
 {
     // Listeners for theme changes
-    private static final List<Runnable> themeListeners = new CopyOnWriteArrayList<>();
+    private static final List<Runnable> themeChangeListeners = new CopyOnWriteArrayList<>();
     // Current theme mode
-    private static ThemeMode currentTheme = ThemeMode.AUTO;
+    private static ThemeMode currentThemeMode = ThemeMode.AUTO;
 
     // Prevent instantiation
     private Theme() {}
 
     // Add a theme change listener
-    public static void addThemeChangeListener(Runnable listener)
+    public static void addThemeListener(Runnable listener)
     {
-        themeListeners.add(listener);
+        themeChangeListeners.add(listener);
     }
 
     // Remove a theme change listener
-    public static void removeThemeChangeListener(Runnable listener)
+    public static void removeThemeListener(Runnable listener)
     {
-        themeListeners.remove(listener);
+        themeChangeListeners.remove(listener);
     }
 
     // Notify all listeners
-    private static void notifyThemeChangeListeners()
+    private static void notifyThemeListeners()
     {
-        for (Runnable r : themeListeners) r.run();
+        for (Runnable r : themeChangeListeners) r.run();
     }
 
     // Set auto theme (detect system)
-    public static void applyAutoTheme(Runnable onThemeChanged)
+    public static void setAutoTheme(Runnable onThemeChanged)
     {
-        currentTheme = ThemeMode.AUTO;
-        if (isSystemDark()) applyDarkTheme();
-        else applyLightTheme();
+        currentThemeMode = ThemeMode.AUTO;
+        if (isSystemDarkThemePreferred()) setDarkTheme();
+        else setLightTheme();
         if (onThemeChanged != null) onThemeChanged.run();
     }
 
     // Set auto theme (no callback)
-    public static void applyAutoTheme()
+    public static void setAutoTheme()
     {
-        applyAutoTheme(null);
+        setAutoTheme(null);
     }
 
     // Set light theme
-    public static void applyLightTheme()
+    public static void setLightTheme()
     {
-        currentTheme = ThemeMode.LIGHT;
+        currentThemeMode = ThemeMode.LIGHT;
         FlatLightLaf.setup();
-        refreshAllWindows();
-        notifyThemeChangeListeners();
+        refreshAllSwingWindows();
+        notifyThemeListeners();
     }
 
     // Set dark theme
-    public static void applyDarkTheme()
+    public static void setDarkTheme()
     {
-        currentTheme = ThemeMode.DARK;
+        currentThemeMode = ThemeMode.DARK;
         FlatDarkLaf.setup();
-        refreshAllWindows();
-        notifyThemeChangeListeners();
+        refreshAllSwingWindows();
+        notifyThemeListeners();
     }
 
     // Init theme system and listen for OS changes
@@ -80,21 +80,21 @@ public final class Theme
     public static void initTheme(int mode)
     {
         Toolkit tk = Toolkit.getDefaultToolkit();
-        tk.addPropertyChangeListener("win.menu.dark", evt -> applyAutoTheme());
-        tk.addPropertyChangeListener("apple.awt.application.appearance", evt -> applyAutoTheme());
-        Toolkit.getDefaultToolkit().addPropertyChangeListener("org.gnome.desktop.interface.color-scheme", evt -> applyAutoTheme());
+        tk.addPropertyChangeListener("win.menu.dark", evt -> setAutoTheme());
+        tk.addPropertyChangeListener("apple.awt.application.appearance", evt -> setAutoTheme());
+        Toolkit.getDefaultToolkit().addPropertyChangeListener("org.gnome.desktop.interface.color-scheme", evt -> setAutoTheme());
         watchKdeConfig();
 
         switch (mode)
         {
-            case 1 -> applyLightTheme();
-            case 2 -> applyDarkTheme();
-            default -> applyAutoTheme();
+            case 1 -> setLightTheme();
+            case 2 -> setDarkTheme();
+            default -> setAutoTheme();
         }
     }
 
     // Detect if system prefers dark theme
-    private static boolean isSystemDark()
+    private static boolean isSystemDarkThemePreferred()
     {
         String os = System.getProperty("os.name").toLowerCase();
         boolean isWSL = os.contains("linux") && System.getenv("WSL_DISTRO_NAME") != null;
@@ -134,15 +134,15 @@ public final class Theme
     }
 
     // True if current theme is dark
-    public static boolean isDarkPreferred()
+    public static boolean isDarkThemeActive()
     {
-        if (currentTheme == ThemeMode.DARK) return true;
-        if (currentTheme == ThemeMode.LIGHT) return false;
-        return isSystemDark();
+        if (currentThemeMode == ThemeMode.DARK) return true;
+        if (currentThemeMode == ThemeMode.LIGHT) return false;
+        return isSystemDarkThemePreferred();
     }
 
     // Refresh all windows for new theme
-    private static void refreshAllWindows()
+    private static void refreshAllSwingWindows()
     {
         JFrame.setDefaultLookAndFeelDecorated(true);
         JDialog.setDefaultLookAndFeelDecorated(true);
@@ -223,7 +223,7 @@ public final class Theme
                         {
                             if ("kdeglobals".equals(ev.context().toString()))
                             {
-                                applyAutoTheme();
+                                setAutoTheme();
                             }
                         }
                         key.reset();
@@ -243,7 +243,7 @@ public final class Theme
     // Load system-aware window icon based on theme
     public static Image loadSystemAwareWindowIcon()
     {
-        String resource = isDarkPreferred() ? "/icon/icon_dark.png" : "/icon/icon_light.png";
+        String resource = isDarkThemeActive() ? "/icon/icon_dark.png" : "/icon/icon_light.png";
         try
         {
             java.io.InputStream iconStream = Theme.class.getResourceAsStream(resource);

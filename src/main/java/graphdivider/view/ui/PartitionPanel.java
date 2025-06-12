@@ -82,8 +82,9 @@ public class PartitionPanel extends JPanel
         Locale locale = Language.getCurrentLocale();
         boolean isPolish = locale != null && locale.getLanguage().equals("pl");
         // Center the titled border text
-        ((javax.swing.border.TitledBorder) getBorder()).setTitle(isPolish ? "Informacje o podziale" : "Partition Info");
-        ((javax.swing.border.TitledBorder) getBorder()).setTitleJustification(javax.swing.border.TitledBorder.CENTER);
+        javax.swing.border.TitledBorder border = (javax.swing.border.TitledBorder) getBorder();
+        border.setTitle(isPolish ? "Informacje o podziale" : "Partition Info");
+        border.setTitleJustification(javax.swing.border.TitledBorder.CENTER);
 
         String edgesCutPrefix = isPolish ? "Krawędzie przecięte: " : "Edges cut: ";
         String marginKeptPrefix = isPolish ? "Zachowany margines: " : "Margin kept: ";
@@ -91,27 +92,21 @@ public class PartitionPanel extends JPanel
 
         // Update edges cut label
         String edgesCutText = edgesCutLabel.getText();
-        if (edgesCutText.endsWith("-"))
-        {
-            edgesCutLabel.setText(edgesCutPrefix + unknown);
-        } else
-        {
-            String value = edgesCutText.replaceAll(".*?:\\s*", "");
-            edgesCutLabel.setText(edgesCutPrefix + value);
-        }
+        String edgesCutValue = edgesCutText.endsWith("-")
+                ? unknown
+                : edgesCutText.replaceAll(".*?:\\s*", "");
+        edgesCutLabel.setText(edgesCutPrefix + edgesCutValue);
 
         // Update margin kept label
         String marginKeptText = marginKeptLabel.getText();
-        if (marginKeptText.endsWith("-"))
-        {
-            marginKeptLabel.setText(marginKeptPrefix + unknown);
-        } else
-        {
-            String value = marginKeptText.replaceAll(".*?:\\s*", "");
-            // Always add % at the end
-            if (!value.endsWith("%")) value = value + "%";
-            marginKeptLabel.setText(marginKeptPrefix + value);
+        String marginKeptValue = marginKeptText.endsWith("-")
+                ? unknown
+                : marginKeptText.replaceAll(".*?:\\s*", "");
+        if (!marginKeptValue.endsWith("%") && !marginKeptValue.equals(unknown)) {
+            marginKeptValue += "%";
         }
+        marginKeptLabel.setText(marginKeptPrefix + marginKeptValue);
+
         repaint();
     }
 }

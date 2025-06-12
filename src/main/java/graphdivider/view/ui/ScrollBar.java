@@ -23,7 +23,7 @@ public final class ScrollBar extends JScrollBar
 
     // Listen for theme changes and update UI
     private void registerThemeListener() {
-        Theme.addThemeChangeListener(() -> {
+        Theme.addThemeListener(() -> {
             setUI(new ModernScrollBarUI());
             repaint();
         });
@@ -38,7 +38,7 @@ public final class ScrollBar extends JScrollBar
         // Thumb color based on theme
         private static Color getThumbColor()
         {
-            return Theme.isDarkPreferred()
+            return Theme.isDarkThemeActive()
                     ? new Color(120, 144, 156, 220)
                     : new Color(120, 144, 156, 200);
         }
@@ -46,7 +46,7 @@ public final class ScrollBar extends JScrollBar
         // Track color based on theme
         private static Color getTrackColor()
         {
-            return Theme.isDarkPreferred()
+            return Theme.isDarkThemeActive()
                     ? new Color(60, 63, 65, 180)
                     : new Color(230, 230, 230, 180);
         }

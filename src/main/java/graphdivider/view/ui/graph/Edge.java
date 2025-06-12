@@ -26,7 +26,7 @@ public final class Edge
         this.v1 = v1;
         this.v2 = v2;
         updateEdgeColor();
-        Theme.addThemeChangeListener(themeListener);
+        Theme.addThemeListener(themeListener);
         allEdges.add(this);
     }
 
@@ -42,7 +42,7 @@ public final class Edge
     // Get default edge color (theme-aware)
     public static Color getDefaultEdgeColor()
     {
-        return Theme.isDarkPreferred() ? Color.WHITE : Color.BLACK;
+        return Theme.isDarkThemeActive() ? Color.WHITE : Color.BLACK;
     }
 
     // Draw edge as a line between vertex centers
@@ -82,7 +82,7 @@ public final class Edge
     public void dispose()
     {
         allEdges.remove(this);
-        Theme.removeThemeChangeListener(themeListener);
+        Theme.removeThemeListener(themeListener);
     }
 
     // Get first vertex

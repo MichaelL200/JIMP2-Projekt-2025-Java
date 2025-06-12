@@ -16,110 +16,111 @@ public final class MenuBar extends JMenuBar
     private final JMenu languageMenu = new JMenu();
 
     // Menu items
-    private final JMenuItem loadTextGraphItem = new JMenuItem();
-    private final JMenuItem loadPartitionedTextItem = new JMenuItem();
-    private final JMenuItem loadPartitionedBinaryItem = new JMenuItem();
-    private final JMenuItem savePartitionedTextItem = new JMenuItem();
-    private final JMenuItem saveBinaryItem = new JMenuItem();
+    private final JMenuItem loadGraphTextMenuItem = new JMenuItem();
+    private final JMenuItem loadPartitionedGraphTextMenuItem = new JMenuItem();
+    private final JMenuItem loadPartitionedGraphBinaryMenuItem = new JMenuItem();
+    private final JMenuItem savePartitionedGraphTextMenuItem = new JMenuItem();
+    private final JMenuItem savePartitionedGraphBinaryMenuItem = new JMenuItem();
 
     // Theme radio buttons
-    private final JRadioButtonMenuItem autoThemeItem = new JRadioButtonMenuItem();
-    private final JRadioButtonMenuItem lightThemeItem = new JRadioButtonMenuItem();
-    private final JRadioButtonMenuItem darkThemeItem = new JRadioButtonMenuItem();
+    private final JRadioButtonMenuItem systemThemeMenuItem = new JRadioButtonMenuItem();
+    private final JRadioButtonMenuItem lightThemeMenuItem = new JRadioButtonMenuItem();
+    private final JRadioButtonMenuItem darkThemeMenuItem = new JRadioButtonMenuItem();
 
     // Language radio buttons
-    private final JRadioButtonMenuItem englishItem = new JRadioButtonMenuItem("English");
-    private final JRadioButtonMenuItem polishItem = new JRadioButtonMenuItem("Polski");
+    private final JRadioButtonMenuItem englishLanguageMenuItem = new JRadioButtonMenuItem("English");
+    private final JRadioButtonMenuItem polishLanguageMenuItem = new JRadioButtonMenuItem("Polski");
 
     // Setup menus and items
     public MenuBar()
     {
-        updateTexts();
+        updateMenuTexts();
 
         // Load menu
-        loadMenu.add(loadTextGraphItem);
+        loadMenu.add(loadGraphTextMenuItem);
         loadMenu.addSeparator();
-        loadMenu.add(loadPartitionedTextItem);
-        loadMenu.add(loadPartitionedBinaryItem);
+        loadMenu.add(loadPartitionedGraphTextMenuItem);
+        loadMenu.add(loadPartitionedGraphBinaryMenuItem);
         add(loadMenu);
 
         // Save menu
-        saveMenu.add(savePartitionedTextItem);
-        saveMenu.add(saveBinaryItem);
+        saveMenu.add(savePartitionedGraphTextMenuItem);
+        saveMenu.add(savePartitionedGraphBinaryMenuItem);
         add(saveMenu);
 
         // Save options disabled by default
-        savePartitionedTextItem.setEnabled(false);
-        saveBinaryItem.setEnabled(false);
+        savePartitionedGraphTextMenuItem.setEnabled(false);
+        savePartitionedGraphBinaryMenuItem.setEnabled(false);
 
         // Theme menu
         ButtonGroup themeGroup = new ButtonGroup();
-        themeGroup.add(autoThemeItem);
-        themeGroup.add(lightThemeItem);
-        themeGroup.add(darkThemeItem);
-        autoThemeItem.setSelected(true);
-        themeMenu.add(autoThemeItem);
-        themeMenu.add(lightThemeItem);
-        themeMenu.add(darkThemeItem);
+        themeGroup.add(systemThemeMenuItem);
+        themeGroup.add(lightThemeMenuItem);
+        themeGroup.add(darkThemeMenuItem);
+        systemThemeMenuItem.setSelected(true);
+        themeMenu.add(systemThemeMenuItem);
+        themeMenu.add(lightThemeMenuItem);
+        themeMenu.add(darkThemeMenuItem);
         add(themeMenu);
 
         // Language menu
         ButtonGroup languageGroup = new ButtonGroup();
-        languageGroup.add(englishItem);
-        languageGroup.add(polishItem);
-        englishItem.setSelected(true); // Default language
-        languageMenu.add(englishItem);
-        languageMenu.add(polishItem);
+        languageGroup.add(englishLanguageMenuItem);
+        languageGroup.add(polishLanguageMenuItem);
+        englishLanguageMenuItem.setSelected(true); // Default language
+        languageMenu.add(englishLanguageMenuItem);
+        languageMenu.add(polishLanguageMenuItem);
         add(languageMenu);
 
-        Language.addLanguageChangeListener(this::updateTexts);
+        Language.addLanguageChangeListener(() -> {
+            updateMenuTexts();
+            // Update tooltips for all open frames
+            JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            if (topFrame instanceof graphdivider.view.Frame frame) {
+                frame.getGraphPanel().updateTooltips();
+            }
+        });
     }
 
     // Setters for enabling/disabling items
-    public void setSaveButtons(boolean enabled)
+    public void setSaveMenuItemsEnabled(boolean enabled)
     {
-        savePartitionedTextItem.setEnabled(enabled);
-        saveBinaryItem.setEnabled(enabled);
+        savePartitionedGraphTextMenuItem.setEnabled(enabled);
+        savePartitionedGraphBinaryMenuItem.setEnabled(enabled);
     }
 
     // Update menu texts based on current language
-    public void updateTexts()
+    public void updateMenuTexts()
     {
-        // Update menu texts based on current language
         loadMenu.setText(Language.getString("menu.loadFile"));
         saveMenu.setText(Language.getString("menu.saveFile"));
         themeMenu.setText(Language.getString("menu.theme"));
-        // Always show both languages in the menu title
         languageMenu.setText("Language / Język");
 
-        // Update item texts
-        loadTextGraphItem.setText(Language.getString("menu.graphText"));
-        loadPartitionedTextItem.setText(Language.getString("menu.partitionedGraphText"));
-        loadPartitionedBinaryItem.setText(Language.getString("menu.partitionedGraphBinary"));
+        loadGraphTextMenuItem.setText(Language.getString("menu.graphText"));
+        loadPartitionedGraphTextMenuItem.setText(Language.getString("menu.partitionedGraphText"));
+        loadPartitionedGraphBinaryMenuItem.setText(Language.getString("menu.partitionedGraphBinary"));
 
-        // Update save item texts
-        savePartitionedTextItem.setText(Language.getString("menu.partitionedGraphText"));
-        saveBinaryItem.setText(Language.getString("menu.partitionedGraphBinary"));
+        savePartitionedGraphTextMenuItem.setText(Language.getString("menu.partitionedGraphText"));
+        savePartitionedGraphBinaryMenuItem.setText(Language.getString("menu.partitionedGraphBinary"));
 
-        // Update theme radio button texts
-        autoThemeItem.setText(Language.getString("menu.systemTheme"));
-        lightThemeItem.setText(Language.getString("menu.lightTheme"));
-        darkThemeItem.setText(Language.getString("menu.darkTheme"));
+        systemThemeMenuItem.setText(Language.getString("menu.systemTheme"));
+        lightThemeMenuItem.setText(Language.getString("menu.lightTheme"));
+        darkThemeMenuItem.setText(Language.getString("menu.darkTheme"));
 
-        // Always show English/Polski for language radio buttons
-        englishItem.setText("English");
-        polishItem.setText("Polski");
+        englishLanguageMenuItem.setText("English");
+        polishLanguageMenuItem.setText("Polski");
     }
 
     // Only expose listeners for controller to attach logic
-    public void addLoadTextGraphListener(ActionListener l) { loadTextGraphItem.addActionListener(l); }
-    public void addLoadPartitionedTextListener(ActionListener l) { loadPartitionedTextItem.addActionListener(l); }
-    public void addLoadPartitionedBinaryListener(ActionListener l) { loadPartitionedBinaryItem.addActionListener(l); }
-    public void addSavePartitionedTextListener(ActionListener l) { savePartitionedTextItem.addActionListener(l); }
-    public void addSaveBinaryListener(ActionListener l) { saveBinaryItem.addActionListener(l); }
-    public void addAutoThemeListener(ActionListener l) { autoThemeItem.addActionListener(l); }
-    public void addLightThemeListener(ActionListener l) { lightThemeItem.addActionListener(l); }
-    public void addDarkThemeListener(ActionListener l) { darkThemeItem.addActionListener(l); }
-    public void addEnglishLanguageListener(ActionListener l) { englishItem.addActionListener(l); }
-    public void addPolishLanguageListener(ActionListener l) { polishItem.addActionListener(l); }
+    public void addLoadGraphTextMenuItemListener(ActionListener l) { loadGraphTextMenuItem.addActionListener(l); }
+    public void addLoadPartitionedGraphTextMenuItemListener(ActionListener l) { loadPartitionedGraphTextMenuItem.addActionListener(l); }
+    public void addLoadPartitionedGraphBinaryMenuItemListener(ActionListener l) { loadPartitionedGraphBinaryMenuItem.addActionListener(l); }
+    public void addSavePartitionedGraphTextMenuItemListener(ActionListener l) { savePartitionedGraphTextMenuItem.addActionListener(l); }
+    public void addSavePartitionedGraphBinaryMenuItemListener(ActionListener l) { savePartitionedGraphBinaryMenuItem.addActionListener(l); }
+    public void addSystemThemeMenuItemListener(ActionListener l) { systemThemeMenuItem.addActionListener(l); }
+    public void addLightThemeMenuItemListener(ActionListener l) { lightThemeMenuItem.addActionListener(l); }
+    public void addDarkThemeMenuItemListener(ActionListener l) { darkThemeMenuItem.addActionListener(l); }
+    public void addEnglishLanguageMenuItemListener(ActionListener l) { englishLanguageMenuItem.addActionListener(l); }
+    public void addPolishLanguageMenuItemListener(ActionListener l) { polishLanguageMenuItem.addActionListener(l); }
 }
