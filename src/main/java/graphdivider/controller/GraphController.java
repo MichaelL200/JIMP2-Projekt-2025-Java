@@ -332,7 +332,6 @@ public final class GraphController
                         LoadedGraph loaded = get();
                         if (loaded != null)
                         {
-                            frame.getPartitionPanel().clear();
                             System.out.println("[Controller] Graph loaded successfully. Displaying...");
                             ProgressDialog progressDialog = new ProgressDialog(frame, "Displaying Graph", "Displaying graph, please wait...");
                             // Display graph in background

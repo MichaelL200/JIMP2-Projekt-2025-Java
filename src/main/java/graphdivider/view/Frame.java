@@ -24,6 +24,9 @@ public final class Frame extends JFrame
     {
         setTitle("Graph Divider");
 
+        // Set minimum resizable frame size
+        setMinimumSize(new Dimension(900, 600));
+
         // Setup menu bar
         menuBar = new MenuBar();
         setJMenuBar(menuBar);
@@ -31,12 +34,23 @@ public final class Frame extends JFrame
         // Setup tool and partition panels (left side)
         toolPanel = new ToolPanel();
         partitionPanel = new PartitionPanel();
-        Box leftBox = Box.createVerticalBox();
-        leftBox.add(toolPanel);
-        leftBox.add(Box.createVerticalStrut(10));
-        leftBox.add(partitionPanel);
+
+        // Use JSplitPane for dynamic 66/33 split, not resizable by user
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, toolPanel, partitionPanel);
+        splitPane.setResizeWeight(0.66);
+        splitPane.setDividerSize(0); // Hide divider, prevent resizing
+        splitPane.setEnabled(false); // Prevent user interaction
+        splitPane.setContinuousLayout(true);
+        splitPane.setBorder(null);
+
+        // Set minimum/preferred sizes for better resizing
+        toolPanel.setMinimumSize(new Dimension(220, 50));
+        partitionPanel.setMinimumSize(new Dimension(220, 50));
+        toolPanel.setPreferredSize(new Dimension(220, 200));
+        partitionPanel.setPreferredSize(new Dimension(220, 200));
+
         getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(leftBox, BorderLayout.WEST);
+        getContentPane().add(splitPane, BorderLayout.WEST);
 
         // Setup graph panel with scrollbars (center)
         graphPanel = new Graph(toolPanel);
@@ -57,7 +71,7 @@ public final class Frame extends JFrame
         {
             toolPanel.updateTexts();
             partitionPanel.updateTexts();
-            graphPanel.updateTooltips(); // <-- update tooltips on language change
+            graphPanel.updateTooltips();
         });
     }
 

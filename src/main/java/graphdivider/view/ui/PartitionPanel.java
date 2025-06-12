@@ -21,14 +21,25 @@ public class PartitionPanel extends JPanel
     // Setup panel layout and labels
     public PartitionPanel()
     {
-        setLayout(new GridLayout(2, 1, 5, 5));
-        setBorder(BorderFactory.createTitledBorder("Partition Info"));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setBorder(BorderFactory.createCompoundBorder
+        (
+            BorderFactory.createTitledBorder
+            (
+                null, "Partition Info", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.TOP
+            ),
+            BorderFactory.createEmptyBorder(30, 0, 30, 0)
+        ));
 
-        edgesCutLabel = new JLabel("Edges cut: 0");
-        marginKeptLabel = new JLabel("Margin kept: 0.00");
-
+        add(Box.createVerticalGlue());
+        edgesCutLabel = new JLabel("Edges cut: 0", SwingConstants.CENTER);
+        marginKeptLabel = new JLabel("Margin kept: 0.00", SwingConstants.CENTER);
+        edgesCutLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        marginKeptLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(edgesCutLabel);
+        add(Box.createVerticalStrut(10));
         add(marginKeptLabel);
+        add(Box.createVerticalGlue());
     }
 
     // Set edges cut label
@@ -55,7 +66,7 @@ public class PartitionPanel extends JPanel
     public void setMarginKept(double marginKept)
     {
         this.marginKept = marginKept;
-        marginKeptLabel.setText(String.format("Margin kept: %.2f", marginKept));
+        marginKeptLabel.setText(String.format("Margin kept: %.2f%%", marginKept));
     }
 
     // Clear both labels
@@ -70,7 +81,9 @@ public class PartitionPanel extends JPanel
     {
         Locale locale = Language.getCurrentLocale();
         boolean isPolish = locale != null && locale.getLanguage().equals("pl");
+        // Center the titled border text
         ((javax.swing.border.TitledBorder) getBorder()).setTitle(isPolish ? "Informacje o podziale" : "Partition Info");
+        ((javax.swing.border.TitledBorder) getBorder()).setTitleJustification(javax.swing.border.TitledBorder.CENTER);
 
         String edgesCutPrefix = isPolish ? "Krawędzie przecięte: " : "Edges cut: ";
         String marginKeptPrefix = isPolish ? "Zachowany margines: " : "Margin kept: ";
@@ -95,6 +108,8 @@ public class PartitionPanel extends JPanel
         } else
         {
             String value = marginKeptText.replaceAll(".*?:\\s*", "");
+            // Always add % at the end
+            if (!value.endsWith("%")) value = value + "%";
             marginKeptLabel.setText(marginKeptPrefix + value);
         }
         repaint();
