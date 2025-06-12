@@ -9,33 +9,33 @@ import java.util.Locale;
 // Menu bar for file and theme actions
 public final class MenuBar extends JMenuBar
 {
-    // File load menu items
-    private final JMenuItem loadTextGraphItem = new JMenuItem("Graph (Text)…");
-    private final JMenuItem loadPartitionedTextItem = new JMenuItem("Partitioned Graph (Text)…");
-    private final JMenuItem loadPartitionedBinaryItem = new JMenuItem("Partitioned Graph (Binary)…");
+    // Menu items and submenus
+    private final JMenu loadMenu = new JMenu();
+    private final JMenu saveMenu = new JMenu();
+    private final JMenu themeMenu = new JMenu();
+    private final JMenu languageMenu = new JMenu();
 
-    // File save menu items
-    private final JMenuItem savePartitionedTextItem = new JMenuItem("Partitioned Graph (Text)…");
-    private final JMenuItem saveBinaryItem = new JMenuItem("Partitioned Graph (Binary)…");
+    // Menu items
+    private final JMenuItem loadTextGraphItem = new JMenuItem();
+    private final JMenuItem loadPartitionedTextItem = new JMenuItem();
+    private final JMenuItem loadPartitionedBinaryItem = new JMenuItem();
+    private final JMenuItem savePartitionedTextItem = new JMenuItem();
+    private final JMenuItem saveBinaryItem = new JMenuItem();
 
     // Theme radio buttons
-    private final JRadioButtonMenuItem autoThemeItem = new JRadioButtonMenuItem("Auto");
-    private final JRadioButtonMenuItem lightThemeItem = new JRadioButtonMenuItem("Light");
-    private final JRadioButtonMenuItem darkThemeItem = new JRadioButtonMenuItem("Dark");
+    private final JRadioButtonMenuItem autoThemeItem = new JRadioButtonMenuItem();
+    private final JRadioButtonMenuItem lightThemeItem = new JRadioButtonMenuItem();
+    private final JRadioButtonMenuItem darkThemeItem = new JRadioButtonMenuItem();
 
-    // Language buttons
+    // Language radio buttons
     private final JRadioButtonMenuItem englishItem = new JRadioButtonMenuItem("English");
     private final JRadioButtonMenuItem polishItem = new JRadioButtonMenuItem("Polski");
-
-    // Menus (need to be fields for updateTexts)
-    private final JMenu loadMenu = new JMenu("Load File");
-    private final JMenu saveMenu = new JMenu("Save File");
-    private final JMenu themeMenu = new JMenu("Theme");
-    private final JMenu languageMenu = new JMenu("Language");
 
     // Setup menus and items
     public MenuBar()
     {
+        updateTexts();
+
         // Load menu
         loadMenu.add(loadTextGraphItem);
         loadMenu.addSeparator();
@@ -71,6 +71,8 @@ public final class MenuBar extends JMenuBar
         languageMenu.add(englishItem);
         languageMenu.add(polishItem);
         add(languageMenu);
+
+        Language.addLanguageChangeListener(this::updateTexts);
     }
 
     // Setters for enabling/disabling items
@@ -80,35 +82,33 @@ public final class MenuBar extends JMenuBar
         saveBinaryItem.setEnabled(enabled);
     }
 
-    // Call this method to update all menu texts when language changes
+    // Update menu texts based on current language
     public void updateTexts()
     {
-        Locale locale = Language.getCurrentLocale();
-        boolean isPolish = locale != null && locale.getLanguage().equals("pl");
+        // Update menu texts based on current language
+        loadMenu.setText(Language.getString("menu.loadFile"));
+        saveMenu.setText(Language.getString("menu.saveFile"));
+        themeMenu.setText(Language.getString("menu.theme"));
+        // Always show both languages in the menu title
+        languageMenu.setText("Language / Język");
 
-        // Menus
-        loadMenu.setText(isPolish ? "Wczytaj plik" : "Load File");
-        saveMenu.setText(isPolish ? "Zapisz plik" : "Save File");
-        themeMenu.setText(isPolish ? "Motyw" : "Theme");
-        languageMenu.setText(isPolish ? "Język" : "Language");
+        // Update item texts
+        loadTextGraphItem.setText(Language.getString("menu.graphText"));
+        loadPartitionedTextItem.setText(Language.getString("menu.partitionedGraphText"));
+        loadPartitionedBinaryItem.setText(Language.getString("menu.partitionedGraphBinary"));
 
-        // Load menu items
-        loadTextGraphItem.setText(isPolish ? "Graf (tekst)..." : "Graph (Text)…");
-        loadPartitionedTextItem.setText(isPolish ? "Podzielony graf (tekst)..." : "Partitioned Graph (Text)…");
-        loadPartitionedBinaryItem.setText(isPolish ? "Podzielony graf (binarny)..." : "Partitioned Graph (Binary)…");
+        // Update save item texts
+        savePartitionedTextItem.setText(Language.getString("menu.partitionedGraphText"));
+        saveBinaryItem.setText(Language.getString("menu.partitionedGraphBinary"));
 
-        // Save menu items
-        savePartitionedTextItem.setText(isPolish ? "Podzielony graf (tekst)..." : "Partitioned Graph (Text)…");
-        saveBinaryItem.setText(isPolish ? "Podzielony graf (binarny)..." : "Partitioned Graph (Binary)…");
+        // Update theme radio button texts
+        autoThemeItem.setText(Language.getString("menu.systemTheme"));
+        lightThemeItem.setText(Language.getString("menu.lightTheme"));
+        darkThemeItem.setText(Language.getString("menu.darkTheme"));
 
-        // Theme radio buttons
-        autoThemeItem.setText(isPolish ? "Auto" : "Auto");
-        lightThemeItem.setText(isPolish ? "Jasny" : "Light");
-        darkThemeItem.setText(isPolish ? "Ciemny" : "Dark");
-
-        // Language radio buttons
-        englishItem.setText(isPolish ? "Angielski" : "English");
-        polishItem.setText(isPolish ? "Polski" : "Polski");
+        // Always show English/Polski for language radio buttons
+        englishItem.setText("English");
+        polishItem.setText("Polski");
     }
 
     // Only expose listeners for controller to attach logic

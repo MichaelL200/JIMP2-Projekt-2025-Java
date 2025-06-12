@@ -65,7 +65,8 @@ public final class ToolPanel extends JPanel
     }
 
     // Helper: create a spinner with given params
-    private JSpinner createSpinner(int value, int min, int max, int step, boolean enabled) {
+    private JSpinner createSpinner(int value, int min, int max, int step, boolean enabled)
+    {
         JSpinner spinner = new JSpinner(new SpinnerNumberModel(value, min, max, step));
         spinner.setEnabled(enabled);
         return spinner;
@@ -137,7 +138,8 @@ public final class ToolPanel extends JPanel
     }
 
     // Update panel texts based on language
-    public void updateTexts() {
+    public void updateTexts()
+    {
         Locale locale = Language.getCurrentLocale();
         boolean isPolish = locale != null && locale.getLanguage().equals("pl");
         ((javax.swing.border.TitledBorder) getBorder()).setTitle(isPolish ? "Ustawienia podziału" : "Partition Settings");

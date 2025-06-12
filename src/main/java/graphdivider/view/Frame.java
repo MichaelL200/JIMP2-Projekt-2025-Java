@@ -53,7 +53,8 @@ public final class Frame extends JFrame
         partitionPanel.setUnknown();
 
         // Register language change listeners for panels and tooltips
-        graphdivider.view.Language.addLanguageChangeListener(() -> {
+        graphdivider.view.Language.addLanguageChangeListener(() ->
+        {
             toolPanel.updateTexts();
             partitionPanel.updateTexts();
             graphPanel.updateTooltips(); // <-- update tooltips on language change
@@ -155,7 +156,8 @@ public final class Frame extends JFrame
     }
 
     // Update the menu language
-    public void updateMenuLanguage() {
+    public void updateMenuLanguage()
+    {
         // Only refresh the existing menuBar, do not call createMenuBar()
         if (menuBar != null) {
             menuBar.updateTexts();
