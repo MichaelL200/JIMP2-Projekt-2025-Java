@@ -12,13 +12,16 @@ import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 
-// Controller for graph actions and logic
+/**
+ * Controller for graph actions and logic.
+ * Handles loading, displaying, partitioning, and saving graphs.
+ */
 public final class GraphController
 {
-    // Reference to graph view
+    // Reference to graph view panel
     private graphdivider.view.ui.Graph graphView;
 
-    // Loaded graph data
+    // Loaded graph data (model, matrix, laplacian)
     private LoadedGraph loadedGraph;
 
     // Store last partitioning info for default filename
@@ -29,13 +32,21 @@ public final class GraphController
     // Adjacency matrix after partitioning
     private CSRmatrix adjacencyDivided = null;
 
-    // Set the graph view
+    /**
+     * Sets the graph view panel for this controller.
+     * 
+     * @param view The Graph panel to control.
+     */
     public void setGraphView(graphdivider.view.ui.Graph view)
     {
         this.graphView = view;
     }
 
-    // Show graph model in the view
+    /**
+     * Displays the given graph model in the view.
+     * 
+     * @param model The GraphModel to display.
+     */
     public void displayGraph(graphdivider.model.GraphModel model)
     {
         if (graphView != null)
@@ -44,7 +55,14 @@ public final class GraphController
         }
     }
 
-    // Load graph from file and return model, matrix, laplacian
+    /**
+     * Loads a graph from file and returns its model, matrix, and laplacian.
+     * Updates tool panel state and stores loaded graph.
+     * 
+     * @param parent Parent JFrame for dialogs.
+     * @param file File to load.
+     * @return LoadedGraph object with model, matrix, and laplacian, or null on error.
+     */
     public LoadedGraph loadGraphFromFile(JFrame parent, File file)
     {
         System.out.println("[GraphController] Loading graph from file: " + file.getAbsolutePath());
@@ -73,13 +91,15 @@ public final class GraphController
                 frame.updateToolPanelPartitions(maxPartitions, 2);
                 // Set partition panel to unknown after loading
                 frame.getPartitionPanel().setUnknown();
-            } else
+            } 
+            else
             {
                 throw new IllegalArgumentException("Parent is not an instance of Frame.");
             }
 
             return this.loadedGraph;
-        } catch (IOException ex)
+        } 
+        catch (IOException ex)
         {
             System.out.println("[GraphController] Failed to load graph: " + ex.getMessage());
             JOptionPane.showMessageDialog(parent, "Failed to load graph: " + ex.getMessage(),
@@ -88,7 +108,12 @@ public final class GraphController
         }
     }
 
-    // Register listeners on view components
+    /**
+     * Registers listeners on view components for menu and tool panel actions.
+     * Handles theme, language, file loading, saving, and partitioning actions.
+     * 
+     * @param frame The main application frame.
+     */
     public void registerViewListeners(graphdivider.view.Frame frame)
     {
         graphdivider.view.ui.MenuBar menuBar = frame.getAppMenuBar();
@@ -291,7 +316,12 @@ public final class GraphController
         });
     }
 
-    // Handle loading a text graph file (called from Frame)
+    /**
+     * Handles loading a text graph file (called from Frame).
+     * Opens file chooser, loads graph, and displays it.
+     * 
+     * @param frame The main application frame.
+     */
     public void loadTextGraph(graphdivider.view.Frame frame)
     {
         System.out.println("[Controller] Opening file chooser for text graph...");
@@ -384,7 +414,12 @@ public final class GraphController
         }
     }
 
-    // Handle loading a partitioned text graph (called from Frame)
+    /**
+     * Handles loading a partitioned text graph (called from Frame).
+     * Loads the base graph and applies cluster assignments.
+     * 
+     * @param frame The main application frame.
+     */
     public void loadPartitionedTextGraph(graphdivider.view.Frame frame)
     {
         System.out.println("[Controller] Opening file chooser for partitioned text graph...");
@@ -477,7 +512,12 @@ public final class GraphController
         }
     }
 
-    // Handle loading a partitioned binary graph (called from Frame)
+    /**
+     * Handles loading a partitioned binary graph (called from Frame).
+     * Loads the base graph and applies cluster assignments.
+     * 
+     * @param frame The main application frame.
+     */
     public void loadPartitionedBinaryGraph(graphdivider.view.Frame frame)
     {
         System.out.println("[Controller] Opening file chooser for partitioned binary graph...");
@@ -570,13 +610,25 @@ public final class GraphController
         }
     }
 
-    // Holds loaded graph model, matrix, and Laplacian
+    /**
+     * Holds loaded graph model, matrix, and Laplacian.
+     */
     public static class LoadedGraph
     {
+        // Graph model (structure)
         public final GraphModel model;
+        // Adjacency matrix (CSR)
         public final CSRmatrix matrix;
+        // Laplacian matrix (CSR)
         public final CSRmatrix laplacian;
 
+        /**
+         * Constructs a LoadedGraph with model, matrix, and laplacian.
+         * 
+         * @param model GraphModel object.
+         * @param matrix CSRmatrix adjacency matrix.
+         * @param laplacian CSRmatrix Laplacian matrix.
+         */
         public LoadedGraph(GraphModel model, CSRmatrix matrix, CSRmatrix laplacian)
         {
             this.model = model;

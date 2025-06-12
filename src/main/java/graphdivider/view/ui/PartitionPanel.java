@@ -7,18 +7,21 @@ import java.awt.*;
 
 /**
  * Panel for displaying partitioning results (edges cut, margin kept, etc.)
+ * Shows summary information after partitioning a graph.
  */
 public class PartitionPanel extends JPanel
 {
-    // Shows number of edges cut
+    // Label showing number of edges cut
     private final JLabel edgesCutLabel;
-    // Shows margin kept (%)
+    // Label showing margin kept (%)
     private final JLabel marginKeptLabel;
 
-    // Store marginKept value for access
+    // Stores the marginKept value for access
     private double marginKept = 0.0;
 
-    // Setup panel layout and labels
+    /**
+     * Constructs the PartitionPanel and initializes layout and labels.
+     */
     public PartitionPanel()
     {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -42,13 +45,20 @@ public class PartitionPanel extends JPanel
         add(Box.createVerticalGlue());
     }
 
-    // Set edges cut label
+    /**
+     * Sets the label for number of edges cut.
+     * 
+     * @param edgesCut Number of edges cut by the partition.
+     */
     public void setEdgesCut(int edgesCut)
     {
         edgesCutLabel.setText("Edges cut: " + edgesCut);
     }
 
-    // Set labels to unknown state
+    /**
+     * Sets both labels to an unknown state (e.g., before partitioning).
+     * Resets marginKept to 0.0.
+     */
     public void setUnknown()
     {
         edgesCutLabel.setText("Edges cut: -");
@@ -56,27 +66,40 @@ public class PartitionPanel extends JPanel
         this.marginKept = 0.0;
     }
 
-    // Get the stored margin kept value
+    /**
+     * Gets the stored margin kept value.
+     * 
+     * @return Margin kept as a double.
+     */
     public double getMarginKept()
     {
         return marginKept;
     }
 
-    // Set margin kept label
+    /**
+     * Sets the label for margin kept and stores the value.
+     * 
+     * @param marginKept Margin kept as a percentage.
+     */
     public void setMarginKept(double marginKept)
     {
         this.marginKept = marginKept;
         marginKeptLabel.setText(String.format("Margin kept: %.2f%%", marginKept));
     }
 
-    // Clear both labels
+    /**
+     * Clears both labels (sets edges cut to 0 and margin kept to 0.0).
+     */
     public void clear()
     {
         setEdgesCut(0);
         setMarginKept(0.0);
     }
 
-    // Update panel texts based on language
+    /**
+     * Updates panel texts and labels based on the current language.
+     * Adjusts border title and label prefixes for Polish or English.
+     */
     public void updateTexts()
     {
         Locale locale = Language.getCurrentLocale();

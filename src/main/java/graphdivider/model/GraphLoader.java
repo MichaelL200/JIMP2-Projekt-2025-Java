@@ -7,16 +7,26 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-// Loads GraphModel from file and converts to CSRmatrix
+/**
+ * Utility class for loading GraphModel from file and converting to CSRmatrix.
+ * Supports reading from .csrrg files and conversion to Laplacian matrices.
+ */
 public final class GraphLoader
 {
-    // Logger for debug/info
+    // Logger for debug/info messages
     private static final Logger LOGGER = Logger.getLogger(GraphLoader.class.getName());
 
-    // Prevent instantiation
+    // Prevent instantiation of utility class
     private GraphLoader() {}
 
-    // Load GraphModel from .csrrg file
+    /**
+     * Loads a GraphModel from a .csrrg file.
+     * The file must have 5 lines: maxVerticesPerRow, rowPositions, rowStartIndices, adjacencyList, adjacencyPointers.
+     *
+     * @param file File to load from.
+     * @return GraphModel object built from file data.
+     * @throws IOException if file cannot be read or is malformed.
+     */
     public static GraphModel loadFromFile(File file) throws IOException
     {
         try (BufferedReader reader = new BufferedReader(new FileReader(file)))
@@ -46,7 +56,12 @@ public final class GraphLoader
         }
     }
 
-    // Convert GraphModel to CSRmatrix
+    /**
+     * Converts a GraphModel to a CSRmatrix.
+     * 
+     * @param model GraphModel to convert.
+     * @return CSRmatrix representation of the graph.
+     */
     public static CSRmatrix toCSRmatrix(GraphModel model)
     {
         int[] adjacencyList = model.getAdjacencyList();
@@ -82,7 +97,13 @@ public final class GraphLoader
         return new CSRmatrix(rowPtr, colInd, values, size);
     }
 
-    // Convert GraphModel to Laplacian CSRmatrix
+    /**
+     * Converts a GraphModel to a Laplacian CSRmatrix.
+     * The Laplacian matrix is useful for spectral graph algorithms.
+     *
+     * @param model GraphModel to convert.
+     * @return Laplacian CSRmatrix.
+     */
     public static CSRmatrix toLaplacianCSRmatrix(GraphModel model)
     {
         int[] adjacencyList = model.getAdjacencyList();
@@ -91,6 +112,7 @@ public final class GraphLoader
         int maxVertex = Arrays.stream(adjacencyList).max().orElse(-1);
         int size = maxVertex + 1;
 
+        // Build neighbor map for each vertex
         java.util.Map<Integer, java.util.Set<Integer>> neighborsMap = new java.util.HashMap<>();
         for (int i = 0; i < adjacencyPointers.length; i++)
         {
@@ -138,7 +160,12 @@ public final class GraphLoader
         return new CSRmatrix(rowPtr, colInd, values, size);
     }
 
-    // Parse int array from semicolon-separated string
+    /**
+     * Parses an int array from a semicolon-separated string.
+     *
+     * @param line String containing semicolon-separated integers.
+     * @return Parsed int array.
+     */
     private static int[] parseIntArray(String line)
     {
         return Arrays.stream(line.trim().split(";")).mapToInt(Integer::parseInt).toArray();

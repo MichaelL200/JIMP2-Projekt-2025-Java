@@ -6,44 +6,50 @@ import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.util.Locale;
 
-// Menu bar for file and theme actions
+/*
+ * Menu bar for file and theme actions in the Graph Divider application.
+ * Provides access to loading/saving graphs, theme selection, and language switching.
+ */
 public final class MenuBar extends JMenuBar
 {
-    // Menu items and submenus
-    private final JMenu loadMenu = new JMenu();
-    private final JMenu saveMenu = new JMenu();
-    private final JMenu themeMenu = new JMenu();
-    private final JMenu languageMenu = new JMenu();
+    // Menus for different categories
+    private final JMenu loadMenu = new JMenu();      // Load graph menu
+    private final JMenu saveMenu = new JMenu();      // Save graph menu
+    private final JMenu themeMenu = new JMenu();     // Theme selection menu
+    private final JMenu languageMenu = new JMenu();  // Language selection menu
 
-    // Menu items
-    private final JMenuItem loadGraphTextMenuItem = new JMenuItem();
-    private final JMenuItem loadPartitionedGraphTextMenuItem = new JMenuItem();
-    private final JMenuItem loadPartitionedGraphBinaryMenuItem = new JMenuItem();
-    private final JMenuItem savePartitionedGraphTextMenuItem = new JMenuItem();
-    private final JMenuItem savePartitionedGraphBinaryMenuItem = new JMenuItem();
+    // Menu items for loading and saving
+    private final JMenuItem loadGraphTextMenuItem = new JMenuItem();             // Load text graph
+    private final JMenuItem loadPartitionedGraphTextMenuItem = new JMenuItem();  // Load partitioned text graph
+    private final JMenuItem loadPartitionedGraphBinaryMenuItem = new JMenuItem();// Load partitioned binary graph
+    private final JMenuItem savePartitionedGraphTextMenuItem = new JMenuItem();  // Save partitioned text graph
+    private final JMenuItem savePartitionedGraphBinaryMenuItem = new JMenuItem();// Save partitioned binary graph
 
     // Theme radio buttons
-    private final JRadioButtonMenuItem systemThemeMenuItem = new JRadioButtonMenuItem();
-    private final JRadioButtonMenuItem lightThemeMenuItem = new JRadioButtonMenuItem();
-    private final JRadioButtonMenuItem darkThemeMenuItem = new JRadioButtonMenuItem();
+    private final JRadioButtonMenuItem systemThemeMenuItem = new JRadioButtonMenuItem(); // System theme
+    private final JRadioButtonMenuItem lightThemeMenuItem = new JRadioButtonMenuItem();  // Light theme
+    private final JRadioButtonMenuItem darkThemeMenuItem = new JRadioButtonMenuItem();   // Dark theme
 
     // Language radio buttons
-    private final JRadioButtonMenuItem englishLanguageMenuItem = new JRadioButtonMenuItem("English");
-    private final JRadioButtonMenuItem polishLanguageMenuItem = new JRadioButtonMenuItem("Polski");
+    private final JRadioButtonMenuItem englishLanguageMenuItem = new JRadioButtonMenuItem("English"); // English
+    private final JRadioButtonMenuItem polishLanguageMenuItem = new JRadioButtonMenuItem("Polski");   // Polish
 
-    // Setup menus and items
+    /**
+     * Constructs the menu bar, initializes all menus and menu items,
+     * and registers language change listeners for dynamic UI updates.
+     */
     public MenuBar()
     {
         updateMenuTexts();
 
-        // Load menu
+        // Load menu setup
         loadMenu.add(loadGraphTextMenuItem);
         loadMenu.addSeparator();
         loadMenu.add(loadPartitionedGraphTextMenuItem);
         loadMenu.add(loadPartitionedGraphBinaryMenuItem);
         add(loadMenu);
 
-        // Save menu
+        // Save menu setup
         saveMenu.add(savePartitionedGraphTextMenuItem);
         saveMenu.add(savePartitionedGraphBinaryMenuItem);
         add(saveMenu);
@@ -52,7 +58,7 @@ public final class MenuBar extends JMenuBar
         savePartitionedGraphTextMenuItem.setEnabled(false);
         savePartitionedGraphBinaryMenuItem.setEnabled(false);
 
-        // Theme menu
+        // Theme menu setup
         ButtonGroup themeGroup = new ButtonGroup();
         themeGroup.add(systemThemeMenuItem);
         themeGroup.add(lightThemeMenuItem);
@@ -63,7 +69,7 @@ public final class MenuBar extends JMenuBar
         themeMenu.add(darkThemeMenuItem);
         add(themeMenu);
 
-        // Language menu
+        // Language menu setup
         ButtonGroup languageGroup = new ButtonGroup();
         languageGroup.add(englishLanguageMenuItem);
         languageGroup.add(polishLanguageMenuItem);
@@ -72,24 +78,33 @@ public final class MenuBar extends JMenuBar
         languageMenu.add(polishLanguageMenuItem);
         add(languageMenu);
 
-        Language.addLanguageChangeListener(() -> {
+        // Listen for language changes and update menu texts/tooltips
+        Language.addLanguageChangeListener(() ->
+        {
             updateMenuTexts();
             // Update tooltips for all open frames
             JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-            if (topFrame instanceof graphdivider.view.Frame frame) {
+            if (topFrame instanceof graphdivider.view.Frame frame)
+            {
                 frame.getGraphPanel().updateTooltips();
             }
         });
     }
 
-    // Setters for enabling/disabling items
+    /**
+     * Enable or disable save menu items.
+     * @param enabled true to enable, false to disable.
+     */
     public void setSaveMenuItemsEnabled(boolean enabled)
     {
         savePartitionedGraphTextMenuItem.setEnabled(enabled);
         savePartitionedGraphBinaryMenuItem.setEnabled(enabled);
     }
 
-    // Update menu texts based on current language
+    /**
+     * Update menu texts and tooltips based on the current language.
+     * Should be called after a language change.
+     */
     public void updateMenuTexts()
     {
         loadMenu.setText(Language.getString("menu.loadFile"));
@@ -112,15 +127,95 @@ public final class MenuBar extends JMenuBar
         polishLanguageMenuItem.setText("Polski");
     }
 
-    // Only expose listeners for controller to attach logic
-    public void addLoadGraphTextMenuItemListener(ActionListener l) { loadGraphTextMenuItem.addActionListener(l); }
-    public void addLoadPartitionedGraphTextMenuItemListener(ActionListener l) { loadPartitionedGraphTextMenuItem.addActionListener(l); }
-    public void addLoadPartitionedGraphBinaryMenuItemListener(ActionListener l) { loadPartitionedGraphBinaryMenuItem.addActionListener(l); }
-    public void addSavePartitionedGraphTextMenuItemListener(ActionListener l) { savePartitionedGraphTextMenuItem.addActionListener(l); }
-    public void addSavePartitionedGraphBinaryMenuItemListener(ActionListener l) { savePartitionedGraphBinaryMenuItem.addActionListener(l); }
-    public void addSystemThemeMenuItemListener(ActionListener l) { systemThemeMenuItem.addActionListener(l); }
-    public void addLightThemeMenuItemListener(ActionListener l) { lightThemeMenuItem.addActionListener(l); }
-    public void addDarkThemeMenuItemListener(ActionListener l) { darkThemeMenuItem.addActionListener(l); }
-    public void addEnglishLanguageMenuItemListener(ActionListener l) { englishLanguageMenuItem.addActionListener(l); }
-    public void addPolishLanguageMenuItemListener(ActionListener l) { polishLanguageMenuItem.addActionListener(l); }
+    // --- Listener registration methods for controller logic ---
+
+    /**
+     * Register a listener for loading a text graph.
+     * @param l ActionListener to handle the event.
+     */
+    public void addLoadGraphTextMenuItemListener(ActionListener l)
+    {
+        loadGraphTextMenuItem.addActionListener(l);
+    }
+
+    /**
+     * Register a listener for loading a partitioned text graph.
+     * @param l ActionListener to handle the event.
+     */
+    public void addLoadPartitionedGraphTextMenuItemListener(ActionListener l)
+    {
+        loadPartitionedGraphTextMenuItem.addActionListener(l);
+    }
+
+    /**
+     * Register a listener for loading a partitioned binary graph.
+     * @param l ActionListener to handle the event.
+     */
+    public void addLoadPartitionedGraphBinaryMenuItemListener(ActionListener l)
+    {
+        loadPartitionedGraphBinaryMenuItem.addActionListener(l);
+    }
+
+    /**
+     * Register a listener for saving a partitioned text graph.
+     * @param l ActionListener to handle the event.
+     */
+    public void addSavePartitionedGraphTextMenuItemListener(ActionListener l)
+    {
+        savePartitionedGraphTextMenuItem.addActionListener(l);
+    }
+
+    /**
+     * Register a listener for saving a partitioned binary graph.
+     * @param l ActionListener to handle the event.
+     */
+    public void addSavePartitionedGraphBinaryMenuItemListener(ActionListener l)
+    {
+        savePartitionedGraphBinaryMenuItem.addActionListener(l);
+    }
+
+    /**
+     * Register a listener for selecting the system theme.
+     * @param l ActionListener to handle the event.
+     */
+    public void addSystemThemeMenuItemListener(ActionListener l)
+    {
+        systemThemeMenuItem.addActionListener(l);
+    }
+
+    /**
+     * Register a listener for selecting the light theme.
+     * @param l ActionListener to handle the event.
+     */
+    public void addLightThemeMenuItemListener(ActionListener l)
+    {
+        lightThemeMenuItem.addActionListener(l);
+    }
+
+    /**
+     * Register a listener for selecting the dark theme.
+     * @param l ActionListener to handle the event.
+     */
+    public void addDarkThemeMenuItemListener(ActionListener l)
+    {
+        darkThemeMenuItem.addActionListener(l);
+    }
+
+    /**
+     * Register a listener for selecting the English language.
+     * @param l ActionListener to handle the event.
+     */
+    public void addEnglishLanguageMenuItemListener(ActionListener l)
+    {
+        englishLanguageMenuItem.addActionListener(l);
+    }
+
+    /**
+     * Register a listener for selecting the Polish language.
+     * @param l ActionListener to handle the event.
+     */
+    public void addPolishLanguageMenuItemListener(ActionListener l)
+    {
+        polishLanguageMenuItem.addActionListener(l);
+    }
 }

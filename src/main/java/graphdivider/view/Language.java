@@ -6,11 +6,17 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.MissingResourceException;
 
-// Menu for selecting application language
+/**
+ * Utility class for managing application language and localization.
+ * Handles language switching, resource bundle loading, and notifies listeners on changes.
+ */
 public final class Language
 {
+    // Listeners for language change events (thread-safe)
     private static final List<Runnable> languageListeners = new CopyOnWriteArrayList<>();
+    // Current application locale
     private static Locale currentLocale = Locale.getDefault();
+    // Resource bundle for current locale
     private static ResourceBundle resourceBundle = loadResourceBundle(currentLocale);
 
     // Static block to initialize default locale and resource bundle
@@ -20,15 +26,24 @@ public final class Language
         {
             Locale.setDefault(currentLocale);
             resourceBundle = loadResourceBundle(currentLocale);
-        } catch (MissingResourceException e)
+        } 
+        catch (MissingResourceException e)
         {
             System.err.println("Default resource bundle not found. Application cannot start.");
             throw new RuntimeException(e);
         }
     }
 
+    // Prevent instantiation of utility class
     private Language() {}
 
+    /**
+     * Loads the resource bundle for the specified locale.
+     * Falls back to English if the requested locale is not available.
+     *
+     * @param locale The locale to load.
+     * @return The loaded ResourceBundle.
+     */
     private static ResourceBundle loadResourceBundle(Locale locale)
     {
         try
@@ -39,7 +54,8 @@ public final class Language
                 locale,
                 ResourceBundle.Control.getControl(ResourceBundle.Control.FORMAT_DEFAULT)
             );
-        } catch (MissingResourceException e)
+        } 
+        catch (MissingResourceException e)
         {
             // Fallback to English if the requested locale is not available
             return ResourceBundle.getBundle(
@@ -50,7 +66,9 @@ public final class Language
         }
     }
 
-    // Change the application language
+    /**
+     * Switches the application language to English and notifies listeners.
+     */
     public static void applyEnglishLanguage()
     {
         currentLocale = Locale.ENGLISH;
@@ -58,6 +76,10 @@ public final class Language
         resourceBundle = loadResourceBundle(currentLocale);
         notifyLanguageChangeListeners();
     }
+
+    /**
+     * Switches the application language to Polish and notifies listeners.
+     */
     public static void applyPolishLanguage()
     {
         currentLocale = new Locale("pl", "PL");
@@ -66,25 +88,44 @@ public final class Language
         notifyLanguageChangeListeners();
     }
 
-    // Change the application language
+    /**
+     * Registers a listener to be notified when the language changes.
+     *
+     * @param listener Runnable to execute on language change.
+     */
     public static void addLanguageChangeListener(Runnable listener)
     {
         languageListeners.add(listener);
     }
 
-    // Change the application language to the specified locale
+    /**
+     * Notifies all registered language change listeners.
+     */
     private static void notifyLanguageChangeListeners()
     {
-        for (Runnable r : languageListeners) r.run();
+        for (Runnable r : languageListeners)
+        {
+            r.run();
+        }
     }
 
-    // Set the current locale and update the resource bundle
+    /**
+     * Gets the current application locale.
+     *
+     * @return The current Locale.
+     */
     public static Locale getCurrentLocale()
     {
         return currentLocale;
     }
 
-    // Set the current locale and notify listeners
+    /**
+     * Gets a localized string for the given key from the resource bundle.
+     *
+     * @param key The key for the desired string.
+     * @return The localized string.
+     * @throws java.util.MissingResourceException if the key is not found.
+     */
     public static String getString(String key)
     {
         return resourceBundle.getString(key);

@@ -13,51 +13,88 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
-// Theme utility for light/dark/auto modes
+/**
+ * Theme utility for managing light, dark, and auto (system) modes.
+ * Handles theme switching, system detection, and notifies listeners on changes.
+ */
 public final class Theme
 {
-    // Listeners for theme changes
+    // Listeners for theme changes (thread-safe)
     private static final List<Runnable> themeChangeListeners = new CopyOnWriteArrayList<>();
-    // Current theme mode
+    // Current theme mode (AUTO, LIGHT, DARK)
     private static ThemeMode currentThemeMode = ThemeMode.AUTO;
 
-    // Prevent instantiation
+    // Prevent instantiation of utility class
     private Theme() {}
 
-    // Add a theme change listener
+    /**
+     * Adds a theme change listener.
+     * The listener will be notified whenever the theme changes.
+     * 
+     * @param listener Runnable to execute on theme change.
+     */
     public static void addThemeListener(Runnable listener)
     {
         themeChangeListeners.add(listener);
     }
 
-    // Remove a theme change listener
+    /**
+     * Removes a previously added theme change listener.
+     * 
+     * @param listener Runnable to remove from notifications.
+     */
     public static void removeThemeListener(Runnable listener)
     {
         themeChangeListeners.remove(listener);
     }
 
-    // Notify all listeners
+    /**
+     * Notifies all registered theme change listeners.
+     */
     private static void notifyThemeListeners()
     {
-        for (Runnable r : themeChangeListeners) r.run();
+        for (Runnable r : themeChangeListeners)
+        {
+            r.run();
+        }
     }
 
-    // Set auto theme (detect system)
+    /**
+     * Sets the theme to auto mode (detects system preference).
+     * Optionally runs a callback after theme is set.
+     * 
+     * @param onThemeChanged Callback to run after theme is set, or null.
+     */
     public static void setAutoTheme(Runnable onThemeChanged)
     {
         currentThemeMode = ThemeMode.AUTO;
-        if (isSystemDarkThemePreferred()) setDarkTheme();
-        else setLightTheme();
-        if (onThemeChanged != null) onThemeChanged.run();
+        if (isSystemDarkThemePreferred())
+        {
+            setDarkTheme();
+        }
+        else
+        {
+            setLightTheme();
+        }
+        if (onThemeChanged != null)
+        {
+            onThemeChanged.run();
+        }
     }
 
-    // Set auto theme (no callback)
+    /**
+     * Sets the theme to auto mode (detects system preference).
+     * No callback.
+     */
     public static void setAutoTheme()
     {
         setAutoTheme(null);
     }
 
-    // Set light theme
+    /**
+     * Sets the theme to light mode.
+     * Notifies listeners and refreshes all windows.
+     */
     public static void setLightTheme()
     {
         currentThemeMode = ThemeMode.LIGHT;
@@ -66,7 +103,10 @@ public final class Theme
         notifyThemeListeners();
     }
 
-    // Set dark theme
+    /**
+     * Sets the theme to dark mode.
+     * Notifies listeners and refreshes all windows.
+     */
     public static void setDarkTheme()
     {
         currentThemeMode = ThemeMode.DARK;
@@ -75,14 +115,20 @@ public final class Theme
         notifyThemeListeners();
     }
 
-    // Init theme system and listen for OS changes
-    // mode: 0=auto, 1=light, 2=dark
+    /**
+     * Initializes the theme system and sets up OS listeners for theme changes.
+     * 
+     * @param mode 0=auto, 1=light, 2=dark
+     */
     public static void initTheme(int mode)
     {
         Toolkit tk = Toolkit.getDefaultToolkit();
+        // Listen for Windows and macOS theme changes
         tk.addPropertyChangeListener("win.menu.dark", evt -> setAutoTheme());
         tk.addPropertyChangeListener("apple.awt.application.appearance", evt -> setAutoTheme());
+        // Listen for GNOME theme changes
         Toolkit.getDefaultToolkit().addPropertyChangeListener("org.gnome.desktop.interface.color-scheme", evt -> setAutoTheme());
+        // Listen for KDE config changes
         watchKdeConfig();
 
         switch (mode)
@@ -93,13 +139,20 @@ public final class Theme
         }
     }
 
-    // Detect if system prefers dark theme
+    /**
+     * Detects if the system prefers dark theme.
+     * Supports Windows, macOS, GNOME, KDE, and WSL.
+     * 
+     * @return true if dark theme is preferred, false otherwise.
+     */
     private static boolean isSystemDarkThemePreferred()
     {
         String os = System.getProperty("os.name").toLowerCase();
         boolean isWSL = os.contains("linux") && System.getenv("WSL_DISTRO_NAME") != null;
         if (os.contains("mac") || os.contains("darwin"))
+        {
             return System.getProperty("apple.awt.application.appearance", "").contains("dark");
+        }
         if (os.contains("win") || isWSL)
         {
             try
@@ -117,7 +170,8 @@ public final class Theme
                     String line;
                     while ((line = reader.readLine()) != null)
                     {
-                        if (line.contains("AppsUseLightTheme")) {
+                        if (line.contains("AppsUseLightTheme"))
+                        {
                             String[] parts = line.trim().split("\\s+");
                             int value = Integer.decode(parts[parts.length - 1]);
                             return value == 0;
@@ -133,15 +187,27 @@ public final class Theme
         return isGnomeDark() || isKdeDark();
     }
 
-    // True if current theme is dark
+    /**
+     * Checks if the current theme is dark.
+     * 
+     * @return true if dark theme is active, false otherwise.
+     */
     public static boolean isDarkThemeActive()
     {
-        if (currentThemeMode == ThemeMode.DARK) return true;
-        if (currentThemeMode == ThemeMode.LIGHT) return false;
+        if (currentThemeMode == ThemeMode.DARK)
+        {
+            return true;
+        }
+        if (currentThemeMode == ThemeMode.LIGHT)
+        {
+            return false;
+        }
         return isSystemDarkThemePreferred();
     }
 
-    // Refresh all windows for new theme
+    /**
+     * Refreshes all open Swing windows to apply the current theme.
+     */
     private static void refreshAllSwingWindows()
     {
         JFrame.setDefaultLookAndFeelDecorated(true);
@@ -155,7 +221,11 @@ public final class Theme
         }
     }
 
-    // GNOME: check if dark mode is set
+    /**
+     * Checks if GNOME desktop is set to dark mode.
+     * 
+     * @return true if GNOME prefers dark, false otherwise.
+     */
     private static boolean isGnomeDark()
     {
         try
@@ -169,7 +239,7 @@ public final class Theme
             p.waitFor();
             try (BufferedReader r = new BufferedReader
             (
-                     new InputStreamReader(p.getInputStream())
+                new InputStreamReader(p.getInputStream())
             ))
             {
                 String line = r.readLine();
@@ -182,7 +252,11 @@ public final class Theme
         }
     }
 
-    // KDE: check if dark mode is set in kdeglobals
+    /**
+     * Checks if KDE desktop is set to dark mode in kdeglobals.
+     * 
+     * @return true if KDE prefers dark, false otherwise.
+     */
     private static boolean isKdeDark()
     {
         Path cfg = Paths.get(System.getProperty("user.home"), ".config", "kdeglobals");
@@ -194,9 +268,14 @@ public final class Theme
                 for (String line : (Iterable<String>) lines::iterator)
                 {
                     line = line.trim();
-                    if (line.equals("[General]")) inGeneral = true;
+                    if (line.equals("[General]"))
+                    {
+                        inGeneral = true;
+                    }
                     else if (inGeneral && line.startsWith("ColorScheme="))
+                    {
                         return line.substring(line.indexOf('=')+1).toLowerCase().contains("dark");
+                    }
                 }
             }
             catch (IOException ignored) {}
@@ -204,7 +283,9 @@ public final class Theme
         return false;
     }
 
-    // Watch KDE config for changes and auto-update theme
+    /**
+     * Watches KDE config for changes and auto-updates theme if needed.
+     */
     private static void watchKdeConfig()
     {
         Path dir = Paths.get(System.getProperty("user.home"), ".config");
@@ -212,35 +293,41 @@ public final class Theme
         {
             WatchService watcher = FileSystems.getDefault().newWatchService();
             dir.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
-            Thread t = new Thread(() ->
-            {
-                while (!Thread.currentThread().isInterrupted())
+            Thread t = new Thread(
+                () ->
                 {
-                    try
+                    while (!Thread.currentThread().isInterrupted())
                     {
-                        WatchKey key = watcher.take();
-                        for (WatchEvent<?> ev : key.pollEvents())
+                        try
                         {
-                            if ("kdeglobals".equals(ev.context().toString()))
+                            WatchKey key = watcher.take();
+                            for (WatchEvent<?> ev : key.pollEvents())
                             {
-                                setAutoTheme();
+                                if ("kdeglobals".equals(ev.context().toString()))
+                                {
+                                    setAutoTheme();
+                                }
                             }
+                            key.reset();
                         }
-                        key.reset();
-                    }
-                    catch (InterruptedException ignored)
-                    {
-                        Thread.currentThread().interrupt();
+                        catch (InterruptedException ignored)
+                        {
+                            Thread.currentThread().interrupt();
+                        }
                     }
                 }
-            });
+            );
             t.setDaemon(true);
             t.start();
         }
         catch (IOException ignored) {}
     }
 
-    // Load system-aware window icon based on theme
+    /**
+     * Loads the window icon appropriate for the current theme.
+     * 
+     * @return Image object for the window icon, or null if loading fails.
+     */
     public static Image loadSystemAwareWindowIcon()
     {
         String resource = isDarkThemeActive() ? "/icon/icon_dark.png" : "/icon/icon_light.png";
@@ -260,6 +347,11 @@ public final class Theme
         }
     }
 
-    // Theme mode enum
-    public enum ThemeMode { AUTO, LIGHT, DARK }
+    /**
+     * Theme mode enum for tracking current theme state.
+     */
+    public enum ThemeMode 
+    { 
+        AUTO, LIGHT, DARK 
+    }
 }

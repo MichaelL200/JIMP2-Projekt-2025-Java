@@ -7,18 +7,27 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-// Panel with controls for partitioning a graph
+/**
+ * Panel with controls for partitioning a graph.
+ * Provides spinners for partition count and margin, and a button to trigger partitioning.
+ */
 public final class ToolPanel extends JPanel
 {
-    // Spinner: number of partitions
+    // Spinner for selecting number of partitions
     private final JSpinner partitionCountSpinner;
-    // Spinner: margin percentage
+    // Spinner for selecting margin percentage
     private final JSpinner partitionMarginSpinner;
-    // Button: divide the graph
+    // Button to trigger graph partitioning
     private final JButton partitionButton;
+    // Label for partition count spinner
     private final JLabel partitionCountLabel;
+    // Label for margin spinner
     private final JLabel partitionMarginLabel;
 
+    /**
+     * Constructs the ToolPanel and initializes all UI components.
+     * Sets up layout, labels, spinners, and button.
+     */
     public ToolPanel()
     {
         setBorder(BorderFactory.createTitledBorder("Partition Settings"));
@@ -35,7 +44,8 @@ public final class ToolPanel extends JPanel
         gbc.anchor = GridBagConstraints.WEST;
 
         // Row 0: Number of partitions
-        gbc.gridx = 0; gbc.gridy = 0;
+        gbc.gridx = 0; 
+        gbc.gridy = 0;
         partitionCountLabel = new JLabel("Number of parts:");
         add(partitionCountLabel, gbc);
         gbc.gridx = 1;
@@ -43,7 +53,8 @@ public final class ToolPanel extends JPanel
         add(partitionCountSpinner, gbc);
 
         // Row 1: Margin %
-        gbc.gridx = 0; gbc.gridy = 1;
+        gbc.gridx = 0; 
+        gbc.gridy = 1;
         partitionMarginLabel = new JLabel("Margin %:");
         add(partitionMarginLabel, gbc);
         gbc.gridx = 1;
@@ -51,7 +62,8 @@ public final class ToolPanel extends JPanel
         add(partitionMarginSpinner, gbc);
 
         // Row 2: Partition Graph button
-        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridx = 0; 
+        gbc.gridy = 2;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         partitionButton = new JButton("Divide Graph");
@@ -59,12 +71,26 @@ public final class ToolPanel extends JPanel
         add(partitionButton, gbc);
     }
 
+    /**
+     * Returns a new instance of ToolPanel.
+     * 
+     * @return a new ToolPanel object.
+     */
     public static Object getInstance()
     {
         return new ToolPanel();
     }
 
-    // Helper: create a spinner with given params
+    /**
+     * Helper to create a spinner with given parameters.
+     * 
+     * @param value Initial value.
+     * @param min Minimum value.
+     * @param max Maximum value.
+     * @param step Step size.
+     * @param enabled Whether the spinner is enabled.
+     * @return Configured JSpinner.
+     */
     private JSpinner createSpinner(int value, int min, int max, int step, boolean enabled)
     {
         JSpinner spinner = new JSpinner(new SpinnerNumberModel(value, min, max, step));
@@ -72,44 +98,72 @@ public final class ToolPanel extends JPanel
         return spinner;
     }
 
-    // Add listener for both spinners
+    /**
+     * Adds a ChangeListener to both spinners.
+     * 
+     * @param listener Listener to add.
+     */
     public void addSpinnerChangeListener(ChangeListener listener)
     {
         partitionCountSpinner.addChangeListener(listener);
         partitionMarginSpinner.addChangeListener(listener);
     }
 
-    // Add listener for partition button
+    /**
+     * Adds an ActionListener to the partition button.
+     * 
+     * @param listener Listener to add.
+     */
     public void addPartitionButtonActionListener(ActionListener listener)
     {
         partitionButton.addActionListener(listener);
     }
 
-    // Get number of partitions
+    /**
+     * Gets the current number of partitions from the spinner.
+     * 
+     * @return Number of partitions.
+     */
     public int getPartitionCount()
     {
         return (Integer) partitionCountSpinner.getValue();
     }
 
-    // Get margin percent
+    /**
+     * Gets the current margin percent from the spinner.
+     * 
+     * @return Margin percent.
+     */
     public int getPartitionMargin()
     {
         return (Integer) partitionMarginSpinner.getValue();
     }
 
-    // Enable or disable partition button
+    /**
+     * Enables or disables the partition button.
+     * 
+     * @param enabled True to enable, false to disable.
+     */
     public void setPartitionButtonEnabled(boolean enabled)
     {
         partitionButton.setEnabled(enabled);
     }
 
-    // Set value for partition count spinner
+    /**
+     * Sets the value for the partition count spinner.
+     * 
+     * @param value Value to set.
+     */
     public void setPartitionCountSpinnerValue(int value)
     {
         partitionCountSpinner.setValue(value);
     }
 
-    // Set max allowed partitions and update tooltip
+    /**
+     * Sets the maximum allowed partitions and updates tooltip.
+     * 
+     * @param maxPartitions Maximum number of partitions.
+     */
     public void setMaxPartitionCount(int maxPartitions)
     {
         SpinnerNumberModel model = (SpinnerNumberModel) partitionCountSpinner.getModel();
@@ -117,7 +171,11 @@ public final class ToolPanel extends JPanel
         partitionCountSpinner.setToolTipText("Minimum: 2\nMaximum: " + maxPartitions);
     }
 
-    // Set min allowed margin and update tooltip
+    /**
+     * Sets the minimum allowed margin and updates tooltip.
+     * 
+     * @param minMargin Minimum margin percent.
+     */
     public void setMinPartitionMargin(int minMargin)
     {
         SpinnerNumberModel model = (SpinnerNumberModel) partitionMarginSpinner.getModel();
@@ -125,19 +183,30 @@ public final class ToolPanel extends JPanel
         partitionMarginSpinner.setToolTipText("Minimum: " + minMargin + "%");
     }
 
-    // Get spinner for partition count (for external control)
+    /**
+     * Gets the spinner for partition count (for external control).
+     * 
+     * @return JSpinner for partition count.
+     */
     public JSpinner getPartitionCountSpinner()
     {
         return partitionCountSpinner;
     }
 
-    // Get spinner for margin (for external control)
+    /**
+     * Gets the spinner for margin (for external control).
+     * 
+     * @return JSpinner for margin percent.
+     */
     public JSpinner getPartitionMarginSpinner()
     {
         return partitionMarginSpinner;
     }
 
-    // Update panel texts based on language
+    /**
+     * Updates panel texts based on the current language.
+     * Uses Polish if set, otherwise English.
+     */
     public void updateTexts()
     {
         Locale locale = Language.getCurrentLocale();

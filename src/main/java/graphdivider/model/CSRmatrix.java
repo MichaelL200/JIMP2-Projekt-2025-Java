@@ -1,9 +1,24 @@
 package graphdivider.model;
 
-// Sparse matrix in Compressed Sparse Row (CSR) format
+/**
+ * Sparse matrix in Compressed Sparse Row (CSR) format.
+ * Used for efficient storage and operations on sparse graphs.
+ *
+ * @param rowPtr Row pointers array.
+ * @param colInd Column indices array.
+ * @param values Values array.
+ * @param size Number of rows (and columns, for square matrices).
+ */
 public record CSRmatrix(int[] rowPtr, int[] colInd, int[] values, int size)
 {
-    // Get value at (row, col)
+    /**
+     * Gets the value at the specified (row, col) position.
+     *
+     * @param row Row index.
+     * @param col Column index.
+     * @return Value at (row, col), or 0 if not present.
+     * @throws IndexOutOfBoundsException if row or col is out of bounds.
+     */
     public int getValue(int row, int col)
     {
         // Search non-zero values in row
@@ -18,7 +33,13 @@ public record CSRmatrix(int[] rowPtr, int[] colInd, int[] values, int size)
         return 0;
     }
 
-    // Print CSR matrix info (helper)
+    /**
+     * Prints CSR matrix information with a title and optional size.
+     *
+     * @param title Title to print.
+     * @param includeSize Whether to print the size.
+     * @param color ANSI color code for output.
+     */
     private void printCSRData(String title, boolean includeSize, String color)
     {
         final String ANSI_RESET = "\u001B[0m";
@@ -33,14 +54,18 @@ public record CSRmatrix(int[] rowPtr, int[] colInd, int[] values, int size)
         System.out.println(color + "\tValues: " + GraphModel.arrayToString(values) + ANSI_RESET);
     }
 
-    // Print adjacency matrix (CSR)
+    /**
+     * Prints the adjacency matrix in CSR format.
+     */
     public void printAdjacency()
     {
         final String ANSI_BLUE = "\u001B[34m";
         printCSRData("\t\tADJACENCY MATRIX (CSR):", true, ANSI_BLUE);
     }
 
-    // Print Laplacian matrix (CSR and optionally dense)
+    /**
+     * Prints the Laplacian matrix in CSR format and, for small matrices, as a dense matrix.
+     */
     public void printLaplacian()
     {
         final String ANSI_PURPLE = "\u001B[35m";
@@ -54,7 +79,12 @@ public record CSRmatrix(int[] rowPtr, int[] colInd, int[] values, int size)
         }
     }
 
-    // Print dense matrix from CSR
+    /**
+     * Prints the dense matrix representation of this CSR matrix.
+     *
+     * @param title Title to print.
+     * @param color ANSI color code for output.
+     */
     public void printDenseMatrix(String title, String color)
     {
         final String ANSI_RESET = "\u001B[0m";
@@ -84,7 +114,15 @@ public record CSRmatrix(int[] rowPtr, int[] colInd, int[] values, int size)
         }
     }
 
-    // Mask edges that are not cut by clusters
+    /**
+     * Masks edges that are not cut by clusters, keeping only intra-cluster edges.
+     * Returns a new CSRmatrix with only edges where both vertices are in the same cluster.
+     * Also prints the resulting adjacency matrix.
+     *
+     * @param original The original CSRmatrix.
+     * @param clusters Array of cluster indices for each vertex.
+     * @return Masked CSRmatrix with only intra-cluster edges.
+     */
     public static CSRmatrix maskCutEdges(CSRmatrix original, int[] clusters)
     {
         int size = original.size();
@@ -121,18 +159,42 @@ public record CSRmatrix(int[] rowPtr, int[] colInd, int[] values, int size)
         return masked;
     }
 
-    // Get row pointers
+    // --- Getters for matrix data ---
+
+    /**
+     * Gets the row pointers array.
+     * @return Row pointer array.
+     */
     public int[] getRowPtr() { return rowPtr; }
-    // Get column indices
+
+    /**
+     * Gets the column indices array.
+     * @return Column indices array.
+     */
     public int[] getColInd() { return colInd; }
-    // Get values
+
+    /**
+     * Gets the values array.
+     * @return Values array.
+     */
     public int[] getValues() { return values; }
-    // Get size (number of rows)
+
+    /**
+     * Gets the number of rows (and columns).
+     * @return Matrix size.
+     */
     public int getNumRows()
     {
         return size;
     }
-    // Get number of non-zero values
+
+    /**
+     * Gets the adjacency (column indices) for a given row.
+     *
+     * @param i Row index.
+     * @return Array of adjacent column indices for row i.
+     * @throws IndexOutOfBoundsException if i is out of bounds.
+     */
     public int[] getAdjacencyForRow(int i)
     {
         if (i < 0 || i >= size)

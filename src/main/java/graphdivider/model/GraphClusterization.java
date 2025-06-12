@@ -3,10 +3,19 @@ package graphdivider.model;
 import java.util.Arrays;
 import java.util.Random;
 
-// Graph clustering using Fiedler vector and k-means
+/**
+ * Graph clustering utilities using Fiedler vector and k-means.
+ * Supports spectral partitioning and balanced k-means clustering.
+ */
 public final class GraphClusterization
 {
-    // Cluster graph using Fiedler vector (2 parts) or k-means (p parts)
+    /**
+     * Clusters the graph using the Fiedler vector (for 2 parts) or k-means (for p parts).
+     *
+     * @param eigenResult EigenResult containing eigenvectors.
+     * @param p Number of clusters/partitions.
+     * @return Array of cluster indices for each vertex (1-based), or null on error.
+     */
     public static int[] clusterizeGraph(GraphEigenvalues.EigenResult eigenResult, int p)
     {
         try
@@ -14,18 +23,26 @@ public final class GraphClusterization
             if (p == 2)
             {
                 return partitionByFiedlerVector(eigenResult);
-            } else
+            } 
+            else
             {
                 return clusterizeUsingKMeans(eigenResult, p);
             }
-        } catch (Exception e)
+        } 
+        catch (Exception e)
         {
             System.err.println("Error during graph clustering: " + e.getMessage());
             return null;
         }
     }
 
-    // Partition into two groups using Fiedler vector
+    /**
+     * Partitions the graph into two groups using the Fiedler vector.
+     * Assigns half the vertices to each group based on sorted Fiedler values.
+     *
+     * @param eigenResult EigenResult containing eigenvectors.
+     * @return Array of cluster indices (1 or 2) for each vertex.
+     */
     private static int[] partitionByFiedlerVector(GraphEigenvalues.EigenResult eigenResult)
     {
         double[] fiedlerVector = eigenResult.eigenvectors[1];
@@ -43,7 +60,8 @@ public final class GraphClusterization
             if (i < half)
             {
                 groupIndices[indices[i]] = 1;
-            } else
+            } 
+            else
             {
                 groupIndices[indices[i]] = 2;
             }
@@ -51,7 +69,13 @@ public final class GraphClusterization
         return groupIndices;
     }
 
-    // K-means balanced clustering using first p eigenvectors
+    /**
+     * Performs balanced k-means clustering using the first p eigenvectors.
+     *
+     * @param eigenResult EigenResult containing eigenvectors.
+     * @param p Number of clusters.
+     * @return Array of cluster indices (1-based) for each vertex.
+     */
     private static int[] clusterizeUsingKMeans(GraphEigenvalues.EigenResult eigenResult, int p)
     {
         int n = eigenResult.eigenvectors[0].length; // Number of vertices
@@ -122,7 +146,8 @@ public final class GraphClusterization
                     {
                         newCentroids[i][j] /= newClusterSizes[i];
                     }
-                } else
+                } 
+                else
                 {
                     newCentroids[i] = data[new Random().nextInt(n)].clone();
                 }
@@ -144,7 +169,14 @@ public final class GraphClusterization
         return clusters;
     }
 
-    // Initialize centroids for k-means
+    /**
+     * Initializes centroids for k-means clustering.
+     * Evenly spaces centroids along each dimension.
+     *
+     * @param data Data points (vertices) as [vertex][dimension].
+     * @param p Number of clusters.
+     * @return Initialized centroids.
+     */
     private static double[][] initializeCentroids(double[][] data, int p)
     {
         int n = data.length;
@@ -174,7 +206,8 @@ public final class GraphClusterization
                 if (p == 1)
                 {
                     centroids[c][d] = (min[d] + max[d]) / 2.0;
-                } else
+                } 
+                else
                 {
                     centroids[c][d] = min[d] + (max[d] - min[d]) * c / (p - 1);
                 }
@@ -184,7 +217,13 @@ public final class GraphClusterization
         return centroids;
     }
 
-    // Euclidean distance between two vectors
+    /**
+     * Computes the Euclidean distance between two vectors.
+     *
+     * @param vector1 First vector.
+     * @param vector2 Second vector.
+     * @return Euclidean distance.
+     */
     private static double euclideanDistance(double[] vector1, double[] vector2)
     {
         double sum = 0.0;
@@ -195,7 +234,12 @@ public final class GraphClusterization
         return Math.sqrt(sum);
     }
 
-    // Print clusters (partitions) indices
+    /**
+     * Prints clusters (partitions) indices to the console.
+     * Groups vertices by cluster and prints each group.
+     *
+     * @param clusters Array of cluster indices for each vertex.
+     */
     public static void printClusters(int[] clusters)
     {
         final String GREEN = "\u001B[32m";
@@ -224,7 +268,14 @@ public final class GraphClusterization
         }
     }
 
-    // Calculate margin of clusters (size difference)
+    /**
+     * Calculates the margin of clusters (relative size difference).
+     * Margin is defined as (max - min) / min * 100%.
+     *
+     * @param clusters Array of cluster indices for each vertex.
+     * @param numParts Number of clusters/partitions.
+     * @return Margin as a percentage (0 if any cluster is empty).
+     */
     public static double calculateMargin(int[] clusters, int numParts)
     {
         int[] clusterSizes = new int[numParts];

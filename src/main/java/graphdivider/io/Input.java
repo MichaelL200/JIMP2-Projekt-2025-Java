@@ -4,9 +4,20 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Utility class for loading cluster assignments and related files for partitioned graphs.
+ * Supports both text and binary partitioned files.
+ */
 public class Input
 {
-    // Loads cluster assignments for a given partitioned graph file (wynik*.csrrg)
+    /**
+     * Loads cluster assignments for a given partitioned graph file (wynik*.csrrg).
+     * Reads assignments from the corresponding przypisania*.txt file.
+     *
+     * @param partitionedFile The partitioned graph file (.csrrg).
+     * @return Array of cluster indices for each vertex.
+     * @throws IOException If the assignment file cannot be read or is malformed.
+     */
     public static int[] loadClustersForGraph(File partitionedFile) throws IOException
     {
         String name = partitionedFile.getName();
@@ -17,11 +28,13 @@ public class Input
             if (name.equals("wynik.csrrg"))
             {
                 baseNumber = "";
-            } else
+            } 
+            else
             {
                 baseNumber = name.replaceAll("wynik \\((\\d+)\\)\\.csrrg", "$1");
             }
-        } else
+        } 
+        else
         {
             throw new FileNotFoundException("Unrecognized partitioned file: " + name);
         }
@@ -49,7 +62,14 @@ public class Input
         return clusters.stream().mapToInt(i -> i).toArray();
     }
 
-    // Loads cluster assignments for a given partitioned binary file (wynik*.bin)
+    /**
+     * Loads cluster assignments for a given partitioned binary file (wynik*.bin).
+     * Reads assignments from the corresponding przypisania*.txt file.
+     *
+     * @param partitionedBinFile The partitioned binary file (.bin).
+     * @return Array of cluster indices for each vertex.
+     * @throws IOException If the assignment file cannot be read or is malformed.
+     */
     public static int[] loadClustersForBin(File partitionedBinFile) throws IOException
     {
         String name = partitionedBinFile.getName();
@@ -60,11 +80,13 @@ public class Input
             if (name.equals("wynik.bin"))
             {
                 baseNumber = "";
-            } else
+            } 
+            else
             {
                 baseNumber = name.replaceAll("wynik \\((\\d+)\\)\\.bin", "$1");
             }
-        } else
+        } 
+        else
         {
             throw new FileNotFoundException("Unrecognized partitioned binary file: " + name);
         }
@@ -91,7 +113,13 @@ public class Input
         return clusters.stream().mapToInt(i -> i).toArray();
     }
 
-    // Returns the base graph file for a given partitioned file
+    /**
+     * Returns the base graph file for a given partitioned file (.csrrg).
+     *
+     * @param partitionedFile The partitioned graph file.
+     * @return File object for the base graph file.
+     * @throws IllegalArgumentException If the file name is not recognized.
+     */
     public static File getBaseGraphFile(File partitionedFile)
     {
         String name = partitionedFile.getName();
@@ -101,11 +129,13 @@ public class Input
             if (name.equals("wynik.csrrg"))
             {
                 baseNumber = "";
-            } else
+            } 
+            else
             {
                 baseNumber = name.replaceAll("wynik \\((\\d+)\\)\\.csrrg", "$1");
             }
-        } else
+        } 
+        else
         {
             throw new IllegalArgumentException("Unrecognized partitioned file: " + name);
         }
@@ -113,7 +143,13 @@ public class Input
         return new File("src/main/resources/graphs/" + graphFileName);
     }
 
-    // Returns the base graph file for a given partitioned binary file (wynik*.bin)
+    /**
+     * Returns the base graph file for a given partitioned binary file (.bin).
+     *
+     * @param partitionedFile The partitioned binary file.
+     * @return File object for the base graph file.
+     * @throws IllegalArgumentException If the file name is not recognized.
+     */
     public static File getBaseGraphFileForBin(File partitionedFile)
     {
         String name = partitionedFile.getName();
@@ -123,11 +159,13 @@ public class Input
             if (name.equals("wynik.bin"))
             {
                 baseNumber = "";
-            } else
+            } 
+            else
             {
                 baseNumber = name.replaceAll("wynik \\((\\d+)\\)\\.bin", "$1");
             }
-        } else
+        } 
+        else
         {
             throw new IllegalArgumentException("Unrecognized partitioned binary file: " + name);
         }
@@ -135,7 +173,13 @@ public class Input
         return new File("src/main/resources/graphs/" + graphFileName);
     }
 
-    // Returns the assignment file for a given partitioned binary file (wynik*.bin)
+    /**
+     * Returns the assignment file for a given partitioned binary file (.bin).
+     *
+     * @param partitionedFile The partitioned binary file.
+     * @return File object for the assignment file.
+     * @throws IllegalArgumentException If the file name is not recognized.
+     */
     public static File getAssignmentFileForBin(File partitionedFile)
     {
         String name = partitionedFile.getName();
@@ -145,11 +189,13 @@ public class Input
             if (name.equals("wynik.bin"))
             {
                 baseNumber = "";
-            } else
+            } 
+            else
             {
                 baseNumber = name.replaceAll("wynik \\((\\d+)\\)\\.bin", "$1");
             }
-        } else
+        } 
+        else
         {
             throw new IllegalArgumentException("Unrecognized partitioned binary file: " + name);
         }

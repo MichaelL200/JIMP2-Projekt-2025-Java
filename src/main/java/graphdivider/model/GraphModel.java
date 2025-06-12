@@ -1,20 +1,32 @@
 package graphdivider.model;
 
-// Represents a graph in memory using CSR format.
+/**
+ * Represents a graph in memory using CSR (Compressed Sparse Row) format.
+ * Stores all data needed for efficient graph operations and visualization.
+ */
 public final class GraphModel
 {
-    // Max number of vertices in any row
+    // Maximum number of vertices in any row
     private final int maxVerticesPerRow;
-    // Row positions for each vertex
+    // Row positions for each vertex (layout)
     private final int[] rowPositions;
     // Start index of each row in adjacency list
     private final int[] rowStartIndices;
-    // Adjacency list (CSR)
+    // Adjacency list (CSR format)
     private final int[] adjacencyList;
     // Pointers to adjacency list for each vertex
     private final int[] adjacencyPointers;
 
-    // Create graph model from arrays
+    /**
+     * Creates a graph model from the provided arrays.
+     * Arrays are assumed to be safe to use directly (not copied).
+     *
+     * @param maxVerticesPerRow Maximum number of vertices in any row.
+     * @param rowPositions Array of row positions for each vertex.
+     * @param rowStartIndices Array of start indices for each row in adjacency list.
+     * @param adjacencyList Adjacency list in CSR format.
+     * @param adjacencyPointers Pointers to adjacency list for each vertex.
+     */
     public GraphModel
     (
         int maxVerticesPerRow,
@@ -32,22 +44,61 @@ public final class GraphModel
         this.adjacencyPointers = adjacencyPointers;
     }
 
-    // Get max vertices per row
-    public int getMaxVerticesPerRow() { return maxVerticesPerRow; }
+    /**
+     * Gets the maximum number of vertices in any row.
+     *
+     * @return Maximum vertices per row.
+     */
+    public int getMaxVerticesPerRow() 
+    { 
+        return maxVerticesPerRow; 
+    }
 
-    // Get row positions
-    public int[] getRowPositions() { return rowPositions; }
+    /**
+     * Gets the row positions array.
+     *
+     * @return Array of row positions for each vertex.
+     */
+    public int[] getRowPositions() 
+    { 
+        return rowPositions; 
+    }
 
-    // Get row start indices
-    public int[] getRowStartIndices() { return rowStartIndices; }
+    /**
+     * Gets the row start indices array.
+     *
+     * @return Array of start indices for each row in adjacency list.
+     */
+    public int[] getRowStartIndices() 
+    { 
+        return rowStartIndices; 
+    }
 
-    // Get adjacency list
-    public int[] getAdjacencyList() { return adjacencyList; }
+    /**
+     * Gets the adjacency list array (CSR format).
+     *
+     * @return Adjacency list array.
+     */
+    public int[] getAdjacencyList() 
+    { 
+        return adjacencyList; 
+    }
 
-    // Get adjacency pointers
-    public int[] getAdjacencyPointers() { return adjacencyPointers; }
+    /**
+     * Gets the adjacency pointers array.
+     *
+     * @return Array of pointers to adjacency list for each vertex.
+     */
+    public int[] getAdjacencyPointers() 
+    { 
+        return adjacencyPointers; 
+    }
 
-    // Get CSRmatrix representation of the graph
+    /**
+     * Gets the CSRmatrix representation of the graph.
+     *
+     * @return CSRmatrix object representing the graph.
+     */
     public CSRmatrix getCSRmatrix()
     {
         return new CSRmatrix
@@ -59,7 +110,12 @@ public final class GraphModel
         );
     }
 
-    // Utility: Convert int array to string (for debug/printing)
+    /**
+     * Utility: Converts an int array to a string for debugging or printing.
+     *
+     * @param arr Array to convert.
+     * @return String representation of the array.
+     */
     public static String arrayToString(int[] arr)
     {
         if (arr == null) return "null";
@@ -74,7 +130,10 @@ public final class GraphModel
         return sb.toString();
     }
 
-    // Print graph data for debugging
+    /**
+     * Prints the graph data to the console for debugging.
+     * Uses ANSI color codes for better readability.
+     */
     public void printGraphData()
     {
         final String ANSI_CYAN = "\u001B[36m";

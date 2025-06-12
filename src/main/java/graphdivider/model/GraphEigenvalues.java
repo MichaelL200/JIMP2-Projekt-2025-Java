@@ -8,19 +8,33 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-// Spectral partitioning utilities for graphs
+/**
+ * Spectral partitioning utilities for graphs.
+ * Provides methods for computing eigenvalues and eigenvectors using ARPACK.
+ */
 public final class GraphEigenvalues
 {
-    // Logger for debug/info
+    // Logger for debug/info messages
     private static final Logger LOGGER = Logger.getLogger(GraphEigenvalues.class.getName());
 
-    // Holds eigenvalues and eigenvectors
+    /**
+     * Holds eigenvalues and eigenvectors.
+     */
     public static class EigenResult
     {
+        // Array of computed eigenvalues
         public final double[] eigenvalues;
+        // 2D array of eigenvectors (eigenvectors[i][j] = j-th component of i-th eigenvector)
         public final double[][] eigenvectors;
 
-        // Convert flat vector array to 2D array
+        /**
+         * Converts a flat vector array to a 2D array of eigenvectors.
+         *
+         * @param values Array of eigenvalues.
+         * @param vectors Flat array of eigenvectors (column-major).
+         * @param n Number of rows (vector length).
+         * @param p Number of eigenpairs.
+         */
         public EigenResult(double[] values, double[] vectors, int n, int p)
         {
             this.eigenvalues = values;
@@ -35,10 +49,18 @@ public final class GraphEigenvalues
         }
     }
 
-    // Prevent instantiation
+    // Prevent instantiation of utility class
     private GraphEigenvalues() {}
 
-    // Compute smallest p eigenpairs using ARPACK
+    /**
+     * Computes the smallest p eigenpairs of the Laplacian matrix using ARPACK.
+     * Returns eigenvalues and eigenvectors.
+     *
+     * @param laplacian Laplacian matrix in CSR format.
+     * @param p Number of smallest eigenpairs to compute.
+     * @return EigenResult containing eigenvalues and eigenvectors.
+     * @throws Exception if ARPACK fails or input is invalid.
+     */
     public static EigenResult computeSmallestEigenpairs(CSRmatrix laplacian, int p) throws Exception
     {
         System.out.println("ARPACK implementation: " + ARPACK.getInstance().getClass().getName());
@@ -142,7 +164,12 @@ public final class GraphEigenvalues
         return new EigenResult(d, Z, n, p);
     }
 
-    // Print eigenvalues and eigenvectors
+    /**
+     * Prints eigenvalues and eigenvectors to the console.
+     * Uses ANSI color codes for readability.
+     *
+     * @param eigenResult The EigenResult to print.
+     */
     public static void printEigenData(GraphEigenvalues.EigenResult eigenResult)
     {
         final String ANSI_CYAN = "\u001B[36m";

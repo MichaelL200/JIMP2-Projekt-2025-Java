@@ -7,7 +7,10 @@ import java.awt.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// Represents a vertex (node) in the graph view.
+/**
+ * Represents a vertex (node) in the graph view.
+ * Handles drawing, color, label, and tooltip for the vertex.
+ */
 public final class Vertex extends JComponent
 {
     // Default color for vertices
@@ -16,12 +19,18 @@ public final class Vertex extends JComponent
     private final int diameter;
     // Vertex id (label)
     private int id;
-    // Current color
+    // Current color of the vertex
     private Color color;
-    // Neighbors (connected vertices)
+    // List of neighboring vertices (for tooltip)
     private List<Vertex> neighbors;
 
-    // Create vertex with id, color, and size
+    /**
+     * Creates a vertex with the given id, color, and diameter.
+     *
+     * @param id Vertex identifier (label).
+     * @param color Initial color of the vertex.
+     * @param diameter Diameter of the vertex circle in pixels.
+     */
     public Vertex(int id, Color color, int diameter)
     {
         this.id = id;
@@ -33,7 +42,11 @@ public final class Vertex extends JComponent
         setMaximumSize(size);
     }
 
-    // Draw the vertex as a circle with label
+    /**
+     * Draws the vertex as a filled circle with its id label centered.
+     *
+     * @param g Graphics context.
+     */
     @Override
     protected void paintComponent(Graphics g)
     {
@@ -52,13 +65,17 @@ public final class Vertex extends JComponent
             int y = (diameter + fm.getAscent()) / 2 - fm.getDescent();
             g2.setColor(Color.BLACK);
             g2.drawString(label, x, y);
-        } finally
+        } 
+        finally
         {
             g2.dispose();
         }
     }
 
-    // Add tooltip with number of the vertex connections
+    /**
+     * Updates the tooltip to show the number of connections or neighbor ids.
+     * Uses the current language for tooltip text.
+     */
     public void updateTooltip()
     {
         // Use current language for tooltip
@@ -68,7 +85,8 @@ public final class Vertex extends JComponent
         if (neighbors == null || neighbors.isEmpty())
         {
             setToolTipText(isPolish ? "Brak połączeń" : "No connections");
-        } else
+        } 
+        else
         {
             String connected = neighbors.stream()
                     .map(v -> String.valueOf(v.getId()))
@@ -80,7 +98,8 @@ public final class Vertex extends JComponent
     }
 
     /**
-     * Set the neighbors of this vertex and update tooltip.
+     * Sets the neighbors of this vertex and updates the tooltip.
+     *
      * @param neighbors List of neighboring Vertex objects.
      */
     public void setNeighborsAndUpdateTooltip(List<Vertex> neighbors)
@@ -90,8 +109,9 @@ public final class Vertex extends JComponent
     }
 
     /**
-     * Change the color of the vertex and repaint.
-     * @param color New color.
+     * Changes the color of the vertex and repaints it.
+     *
+     * @param color New color to set.
      */
     public void setColor(Color color)
     {
@@ -100,8 +120,9 @@ public final class Vertex extends JComponent
     }
 
     /**
-     * Change the id of the vertex and repaint.
-     * @param id New id.
+     * Changes the id of the vertex and repaints it.
+     *
+     * @param id New id to set.
      */
     public void setId(int id)
     {
@@ -110,7 +131,8 @@ public final class Vertex extends JComponent
     }
 
     /**
-     * Get the id of the vertex.
+     * Gets the id of the vertex.
+     *
      * @return Vertex id.
      */
     public int getId()
@@ -119,7 +141,8 @@ public final class Vertex extends JComponent
     }
 
     /**
-     * Get the diameter of the vertex (for layout).
+     * Gets the diameter of the vertex (for layout).
+     *
      * @return Diameter in pixels.
      */
     public int getDiameter()

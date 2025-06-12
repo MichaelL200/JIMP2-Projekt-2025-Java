@@ -5,18 +5,33 @@ import graphdivider.model.GraphModel;
 
 import java.io.*;
 
-// Utility class for writing graph partition assignments to a text or binary file.
+/**
+ * Utility class for writing graph partition assignments to a text or binary file.
+ * Supports both human-readable and compact binary formats.
+ */
 public final class Output
 {
-    // Saves the partitioned graph data in a text format (.txt)
+    /**
+     * Saves the partitioned graph data in a text format (.txt).
+     * Writes partition info, graph structure, and adjacency data.
+     *
+     * @param file Output file to write to.
+     * @param numParts Number of partitions.
+     * @param edgesCut Number of edges cut by the partition.
+     * @param marginKept Margin kept by the partition.
+     * @param graphModel The original graph model.
+     * @param adjacencyDivided The partitioned adjacency matrix.
+     * @throws IOException If an I/O error occurs.
+     */
     public static void writeText(File file, int numParts, int edgesCut, double marginKept, GraphModel graphModel, CSRmatrix adjacencyDivided) throws IOException
     {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file)))
         {
-            // Result
+            // Write partitioning result summary
             writer.write(numParts + " " + edgesCut + " " + String.format("%.2f", marginKept));
             writer.newLine();
 
+            // Write graph structure
             writer.write(String.valueOf(graphModel.getMaxVerticesPerRow()));
             writer.newLine();
 
@@ -26,6 +41,7 @@ public final class Output
             writer.write(arrayToSemicolonString(graphModel.getRowStartIndices()));
             writer.newLine();
 
+            // Write adjacency data and pointers
             int n = adjacencyDivided.getNumRows();
             int pointer = 0;
             int pointers_count = 0;
@@ -42,7 +58,6 @@ public final class Output
                 }
             }
 
-
             writer.newLine();
 
             // Write pointers
@@ -53,7 +68,18 @@ public final class Output
         }
     }
 
-    // Saves the partitioned graph data in a binary format (.bin)
+    /**
+     * Saves the partitioned graph data in a binary format (.bin).
+     * Writes partition info, graph structure, and adjacency data in binary.
+     *
+     * @param file Output file to write to.
+     * @param numParts Number of partitions.
+     * @param edgesCut Number of edges cut by the partition.
+     * @param marginKept Margin kept by the partition.
+     * @param graphModel The original graph model.
+     * @param adjacencyDivided The partitioned adjacency matrix.
+     * @throws IOException If an I/O error occurs.
+     */
     public static void writeBinary(File file, int numParts, int edgesCut, double marginKept, GraphModel graphModel, CSRmatrix adjacencyDivided) throws IOException
     {
         try (DataOutputStream out = new DataOutputStream(new FileOutputStream(file)))
@@ -112,7 +138,12 @@ public final class Output
         testReadBinary(file);
     }
 
-    // Convert int array to semicolon-separated string
+    /**
+     * Converts an int array to a semicolon-separated string.
+     *
+     * @param arr Array to convert.
+     * @return Semicolon-separated string of array values.
+     */
     private static String arrayToSemicolonString(int[] arr)
     {
         if (arr == null || arr.length == 0) return "";
@@ -125,7 +156,13 @@ public final class Output
         return sb.toString();
     }
 
-    // Test method to read and print the content of a text file
+    /**
+     * Test method to read and print the content of a binary file.
+     * Prints all fields to the console for verification.
+     *
+     * @param file File to read from.
+     * @throws IOException If an I/O error occurs.
+     */
     public static void testReadBinary(File file) throws IOException
     {
         final String ANSI_CYAN = "\u001B[36m";

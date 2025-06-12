@@ -6,12 +6,21 @@ import javax.swing.*;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
 
-// Custom ScrollBar with theme support
+/**
+ * Custom ScrollBar with theme support.
+ * Uses a modern, rounded UI and adapts to light/dark themes.
+ */
 public final class ScrollBar extends JScrollBar
 {
-    // Default scrollbar width
+    // Default scrollbar width in pixels
     private static final int DEFAULT_WIDTH = 17;
 
+    /**
+     * Constructs a ScrollBar with the specified orientation.
+     * Applies a custom UI and registers for theme changes.
+     *
+     * @param orientation JScrollBar orientation (VERTICAL or HORIZONTAL)
+     */
     public ScrollBar(int orientation)
     {
         super(orientation);
@@ -21,21 +30,33 @@ public final class ScrollBar extends JScrollBar
         registerThemeListener();
     }
 
-    // Listen for theme changes and update UI
-    private void registerThemeListener() {
-        Theme.addThemeListener(() -> {
-            setUI(new ModernScrollBarUI());
-            repaint();
-        });
+    /**
+     * Registers a listener to update the scrollbar UI when the theme changes.
+     */
+    private void registerThemeListener() 
+    {
+        Theme.addThemeListener(
+            () ->
+            {
+                setUI(new ModernScrollBarUI());
+                repaint();
+            }
+        );
     }
 
-    // Custom ScrollBar UI (rounded, theme-aware)
+    /**
+     * Custom ScrollBar UI with rounded corners and theme-aware colors.
+     */
     private static class ModernScrollBarUI extends BasicScrollBarUI
     {
         // Arc radius for rounded corners
         private static final int ARC = 16;
 
-        // Thumb color based on theme
+        /**
+         * Gets the thumb (draggable part) color based on the current theme.
+         *
+         * @return Color for the thumb.
+         */
         private static Color getThumbColor()
         {
             return Theme.isDarkThemeActive()
@@ -43,7 +64,11 @@ public final class ScrollBar extends JScrollBar
                     : new Color(120, 144, 156, 200);
         }
 
-        // Track color based on theme
+        /**
+         * Gets the track (background) color based on the current theme.
+         *
+         * @return Color for the track.
+         */
         private static Color getTrackColor()
         {
             return Theme.isDarkThemeActive()
@@ -51,7 +76,13 @@ public final class ScrollBar extends JScrollBar
                     : new Color(230, 230, 230, 180);
         }
 
-        // Paint thumb (draggable part)
+        /**
+         * Paints the thumb (draggable part) of the scrollbar.
+         *
+         * @param g Graphics context.
+         * @param c Component.
+         * @param thumbBounds Bounds of the thumb.
+         */
         @Override
         protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds)
         {
@@ -63,7 +94,13 @@ public final class ScrollBar extends JScrollBar
             g2.dispose();
         }
 
-        // Paint track (background)
+        /**
+         * Paints the track (background) of the scrollbar.
+         *
+         * @param g Graphics context.
+         * @param c Component.
+         * @param trackBounds Bounds of the track.
+         */
         @Override
         protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds)
         {
@@ -74,21 +111,35 @@ public final class ScrollBar extends JScrollBar
             g2.dispose();
         }
 
-        // Hide decrease button (arrow)
+        /**
+         * Creates an invisible button for the decrease arrow.
+         *
+         * @param orientation Button orientation.
+         * @return Invisible JButton.
+         */
         @Override
         protected JButton createDecreaseButton(int orientation)
         {
             return createZeroButton();
         }
 
-        // Hide increase button (arrow)
+        /**
+         * Creates an invisible button for the increase arrow.
+         *
+         * @param orientation Button orientation.
+         * @return Invisible JButton.
+         */
         @Override
         protected JButton createIncreaseButton(int orientation)
         {
             return createZeroButton();
         }
 
-        // Create an invisible button for scrollbar arrows
+        /**
+         * Creates an invisible button for scrollbar arrows.
+         *
+         * @return JButton with zero size and no border.
+         */
         private JButton createZeroButton()
         {
             JButton button = new JButton();

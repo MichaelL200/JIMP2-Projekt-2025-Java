@@ -7,13 +7,26 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.SwingUtilities;
 
-// Utility for coloring vertices and cutting edges
+/**
+ * Utility for coloring vertices by cluster and handling edge cutting.
+ * Provides methods for coloring, edge removal, and edge cut calculation.
+ */
 public final class GraphColoring
 {
-    // Prevent instantiation
+    // Prevent instantiation of utility class
     private GraphColoring() {}
 
-    // Color vertices by cluster and remove inter-cluster edges
+    /**
+     * Colors vertices by cluster and removes edges between different clusters.
+     * Vertices in the same cluster get the same color.
+     * Edges connecting different clusters are removed and counted.
+     * 
+     * @param vertices Array of Vertex objects to color.
+     * @param clusters Array of cluster indices for each vertex.
+     * @param edges List of edges to update (edges between clusters will be removed).
+     * @return Number of edges cut (removed).
+     * @throws IllegalArgumentException if input arrays are null or of different lengths.
+     */
     @SuppressWarnings("SuspiciousNameCombination")
     public static int colorVertices(Vertex[] vertices, int[] clusters, List<Edge> edges)
     {
@@ -50,15 +63,18 @@ public final class GraphColoring
                 }
             }
         };
+        // Ensure edge removal runs on the EDT for thread safety
         if (SwingUtilities.isEventDispatchThread())
         {
             removeEdgesTask.run();
-        } else
+        } 
+        else
         {
             try
             {
                 SwingUtilities.invokeAndWait(removeEdgesTask);
-            } catch (Exception e)
+            } 
+            catch (Exception e)
             {
                 throw new RuntimeException(e);
             }
@@ -66,7 +82,15 @@ public final class GraphColoring
         return cutEdges[0];
     }
 
-    // Count edges between different clusters (do not remove)
+    /**
+     * Counts the number of edges between different clusters (does not remove them).
+     * 
+     * @param vertices Array of Vertex objects.
+     * @param clusters Array of cluster indices for each vertex.
+     * @param edges List of edges to check.
+     * @return Number of edges that connect different clusters.
+     * @throws IllegalArgumentException if input arrays are null or of different lengths.
+     */
     public static int calculateEdgesCut(Vertex[] vertices, int[] clusters, List<Edge> edges)
     {
         if (vertices == null || clusters == null || vertices.length != clusters.length)
@@ -86,7 +110,13 @@ public final class GraphColoring
         return cutEdges;
     }
 
-    // Generate a color for each cluster index
+    /**
+     * Generates a color for each unique cluster index.
+     * Colors are spread using HSB for visual distinction.
+     * 
+     * @param clusters Array of cluster indices.
+     * @return Map from cluster index to Color.
+     */
     private static Map<Integer, Color> generateClusterColors(int[] clusters)
     {
         Map<Integer, Color> clusterColors = new HashMap<>();
